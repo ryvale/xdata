@@ -1,0 +1,260 @@
+package com.exa.data.sql;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.sql.DataSource;
+
+import com.exa.data.DataException;
+import com.exa.data.Field;
+import com.exa.data.StandardDataReaderBase;
+import com.exa.expression.XPOperand;
+import com.exa.utils.ManagedException;
+import com.exa.utils.values.ArrayValue;
+import com.exa.utils.values.BooleanValue;
+import com.exa.utils.values.ObjectValue;
+import com.exa.utils.values.StringValue;
+import com.exa.utils.values.Value;
+
+public class SQLDataReader extends StandardDataReaderBase<Field> implements SQLDataMan {
+	
+	static class FieldManagerFactory {
+		static FieldManager DEFAULT_FIELD_MANAGER = new FieldManager();
+		
+		FieldManager create(ObjectValue<XPOperand<?>> fieldManagerConfig) throws DataException {
+			return DEFAULT_FIELD_MANAGER;
+		}
+	}
+	
+	static class XAFieldManagerFactory extends FieldManagerFactory {
+
+		@Override
+		FieldManager create(ObjectValue<XPOperand<?>> fieldManagerConfig) throws DataException {
+			String prefix;
+			if(fieldManagerConfig == null) throw new DataException(String.format("No field manager provided while expected on in xa field manager factory."));
+			try {
+				prefix = fieldManagerConfig.getAttributAsString("prefix");
+			} catch (ManagedException e) {
+				throw new DataException(e);
+			}
+			if(prefix == null) throw new DataException(String.format("The property prefix is not defined for XA Field Manager"));
+			
+			return new XAFieldManager(prefix);
+		}
+		
+	}
+	
+	protected String from = null;
+	protected String criteria = null;
+	protected String orderBy = null;
+	protected String groupBy = null;
+	
+	protected Map<String, FieldManagerFactory> fieldsManagerFactories = new HashMap<>();
+	
+	private FieldManager fieldManager = null;
+	
+	private DataSource dataSource;
+	private Connection connection = null;
+	private ResultSet rs;
+	private Boolean dataRead = null;
+	private ObjectValue<XPOperand<?>> config;
+	
+	public SQLDataReader(DataSource dataSource, ObjectValue<XPOperand<?>> config) throws DataException {
+		this.dataSource = dataSource;
+		this.config = config;
+		
+		fieldsManagerFactories.put("default", new FieldManagerFactory());
+		fieldsManagerFactories.put("exa", new XAFieldManagerFactory());
+	}
+	
+	@Override
+	public boolean next() throws DataException {
+		try {
+			dataRead = rs.next();
+			
+			return dataRead;
+			
+		} catch (SQLException e) {
+			throw new DataException(e);
+		}
+		
+	}
+
+	@Override
+	public String getSQL() throws DataException {
+		StringBuilder sql  = new StringBuilder();
+		
+		for(Field field :  fields.values()) {
+			sql.append(", ").append(field.getExp() + " as " + field.getName());
+		}
+		
+		if(sql.length() > 0) sql.delete(0, 2);
+		
+		sql.insert(0, "SELECT ");
+		
+		if(from != null) sql.append(" FROM ").append(from);
+		
+		if(criteria != null) sql.append(" WHERE ").append(criteria);
+		
+		if(groupBy != null) sql.append(" GROUP BY ").append(groupBy);
+		
+		if(orderBy != null) sql.append(" ORDER BY ").append(orderBy);
+		
+		return sql.toString();
+	}
+
+	@Override
+	public String getString(String fieldName) throws DataException {
+		/*Field field = fields.get(fieldName);
+		if(field == null) throw new DataException(String.format("No field named %s in sql data reader", fieldName));*/
+		try {
+			
+			return rs.getString(fieldName);
+		} catch (SQLException e) {
+			throw new DataException(e);
+		}
+	}
+
+	@Override
+	public boolean open() throws DataException {
+		//ConfigObjectHelper coh = new ConfigObjectHelper(config);
+		//ObjectValue entity = coh.getEntity();
+		
+		try {
+			from = config.getRequiredAttributAsString("from");
+			
+			ObjectValue<XPOperand<?>> fm = config.getAttributAsObjectValue("fields");
+			
+			String man;
+			ObjectValue<XPOperand<?>> ovManager = fm.getAttributAsObjectValue("manager");
+			if(ovManager == null) man = "default";
+			else man = ovManager.getAttributAsString("_name", "default");
+			
+			FieldManagerFactory fmf = fieldsManagerFactories.get(man);
+			if(fmf == null) throw new DataException(String.format("The field manager %s is unknown.", man));
+			fieldManager = fmf.create(ovManager);
+			
+		 	Value<?, XPOperand<?>> vlFields = fm.getRequiredAttribut("items");
+			
+		 	ArrayValue<XPOperand<?>> avFields = vlFields.asArrayValue();
+		 	if(avFields == null) {
+		 		ObjectValue<XPOperand<?>> ovFields = fm.getRequiredAttributAsObjectValue("items");
+				Map<String, Value<?,XPOperand<?>>> mpFields = ovFields.getValue();
+				
+				for(String fname : mpFields.keySet()) {
+					Value<?, XPOperand<?>> vlField = mpFields.get(fname);
+					
+					String exp, type;
+					BooleanValue<?> blField = vlField.asBooleanValue();
+					if(blField == null) {
+						StringValue<XPOperand<?>> sv = vlField.asStringValue();
+						if(sv == null) {
+							ObjectValue<XPOperand<?>> ov = vlField.asRequiredObjectValue();
+							
+							exp = ov.getAttributAsString("exp");
+							type = ov.getAttributAsString("type", "string");
+						}
+						else {
+							exp = sv.getValue();
+							type = "string";
+						}
+					}
+					else {
+						exp = null;
+						type = "string";
+					}
+					
+					Field field = new Field(fname, type);
+					field.setExp(exp == null ? fieldManager.toSQL(fname) : exp);
+					
+					fields.put(fname, field);
+				}
+		 	}
+		 	else {
+		 		for(Value<?,XPOperand<?>> av : avFields.getValue()) {
+					ObjectValue<XPOperand<?>> ov = av.asObjectValue();
+					if(ov == null) throw new DataException(String.format("The array property fields item should object value."));
+					
+					String fname = ov.getRequiredAttributAsString("_name");
+					
+					String exp = ov.getAttributAsString("exp");
+					
+					String type = ov.getAttributAsString("type", "string");
+					
+					Field field = new Field(fname, type);
+					field.setExp(exp == null ? fieldManager.toSQL(fname) : exp);
+					
+					fields.put(fname, field);
+				}
+		 	}
+			
+			criteria  = config.getAttributAsString("criteria");
+			orderBy  = config.getAttributAsString("orderBy");
+			groupBy  = config.getAttributAsString("groupBy");
+			
+			connection = dataSource.getConnection();
+			System.out.println("connexion open for Data reader" + this.hashCode());
+			String sql = getSQL();
+			
+			System.out.println(sql);
+			
+			Statement stmt = connection.createStatement();
+			rs = stmt.executeQuery(sql);
+			
+			
+			return true;
+		}
+		catch (ManagedException|SQLException e) {
+			throw new DataException(e);
+		}
+	}
+
+	@Override
+	public void close() throws DataException {
+		try {
+			connection.close();
+			System.out.println("connexion closed for Data reader" + this.hashCode());
+		} catch (SQLException e) {
+			throw new  DataException(e);
+		}
+		
+	}
+
+	@Override
+	public boolean isOpen() {
+		return rs != null;
+	}
+
+	@Override
+	public Date getDate(String fieldName) throws DataException {
+		
+		try {
+			return rs.getDate(fieldName);
+		} catch (SQLException e) {
+			throw new DataException(e);
+		}
+	}
+
+	@Override
+	public Double getDouble(String fieldName) throws DataException {
+		try {
+			return rs.getDouble(fieldName);
+		} catch (SQLException e) {
+			throw new DataException(e);
+		}
+	}
+
+	@Override
+	public SQLDataReader cloneDR() throws DataException {
+		SQLDataReader res = new SQLDataReader(dataSource, config);
+		if(isOpen()) res.open();
+		return res;
+		
+	}
+
+}
