@@ -1,11 +1,30 @@
 package com.exa.data;
 
 import java.util.Date;
+
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class SmartDataReader extends StandardDataReaderBase<Field> {
+import javax.sql.DataSource;
+
+import com.exa.data.config.DataManFactory;
+
+import com.exa.expression.XPOperand;
+
+import com.exa.expression.eval.XPEvaluator;
+import com.exa.lang.parsing.Computing;
+import com.exa.utils.ManagedException;
+import com.exa.utils.io.FilesRepositories;
+import com.exa.utils.values.ObjectValue;
+import com.exa.utils.values.Value;
+
+public class SmartDataReader extends StandardDRWithDSBase<Field> {
+	
+	protected static final String FLW_MAIN = "main";
+	
+	protected static final String FLW_AFTER_MAIN = "after-main-next";
+
 	protected Map<String, DataReader<?>> mainReaders = new LinkedHashMap<>();
 	protected Map<String, DataMan> afterMainActions = new LinkedHashMap<>();
 	protected Map<String, DataMan> oneTimeActions = new LinkedHashMap<>();
@@ -17,9 +36,15 @@ public class SmartDataReader extends StandardDataReaderBase<Field> {
 	protected DataReader<?> currentMainReader = null;
 	protected boolean dataRead = false;
 
+	private Iterator<DataReader<?>> drIndex = null;
 	
-	private Iterator<DataReader<?>> drIndex = null; 
+	protected Integer _lineVisited = 0;
+		
 	
+	public SmartDataReader(String name, ObjectValue<XPOperand<?>> config, XPEvaluator evaluator, FilesRepositories filesRepos, Map<String, DataSource> dataSources, String defaultDataSource) {
+		super(name, config, evaluator, filesRepos, dataSources, defaultDataSource);
+		
+	}
 	
 	public void addMainDataReader(String name, DataReader<?> dataReader) throws DataException {
 		mainReaders.put(name, dataReader);
@@ -46,6 +71,7 @@ public class SmartDataReader extends StandardDataReaderBase<Field> {
 		}
 		
 		dataRead = true;
+		++_lineVisited;
 		
 		for(DataMan dm : afterMainActions.values()) dm.execute();
 		
@@ -65,14 +91,64 @@ public class SmartDataReader extends StandardDataReaderBase<Field> {
 
 	@Override
 	public boolean open() throws DataException {
+		Map<String, Value<?, XPOperand<?>>> mpConfig = config.getValue();
+		
+		try {
+			for(String drName :  mpConfig.keySet()) {
+				if("type".equals(drName) || drName.startsWith("_")) continue;
+				
+				ObjectValue<XPOperand<?>> ovDRConfig = Computing.object(config, drName, evaluator);
+				String flow  = ovDRConfig.getAttributAsString("flow");
+				if(flow == null) flow = FLW_MAIN;
+				
+				DataReader<?> dr = getDataReader(ovDRConfig, drName);
+				
+				//vc.addVariable(drName, DataReader.class, dr);
+				
+				if(FLW_MAIN.equals(flow)) {
+					
+					mainReaders.put(drName, dr);
+					continue;
+				}
+				
+				if(FLW_AFTER_MAIN.equals(flow)) {
+					afterMainActions.put(drName, dr);
+					continue;
+				}
+				
+			}
+		} catch (ManagedException e) {
+			throw new DataException(e);
+		}
+		
 		drIndex = mainReaders.values().iterator();
 		
 		if(!drIndex.hasNext()) return dataRead = false;
-		currentMainReader.open();
 		currentMainReader = drIndex.next();
+		currentMainReader.open();
+		
+		for(DataMan dm : afterMainActions.values()) {
+			DataReader<?> dr = dm.asDataReader();
+			if(dr == null) continue;
+			
+			dr.open();
+		}
 		
 		return dataRead = true;
 		
+	}
+	
+	private DataReader<?> getDataReader(ObjectValue<XPOperand<?>> ovDRConfig, String drName) throws ManagedException {
+		String type = ovDRConfig.getRequiredAttributAsString("type");
+		
+		DataManFactory dmf = dmFactories.get(type);
+		
+		if(dmf == null) throw new ManagedException(String.format("the type %s is unknown", type));
+		
+		DataReader<?> res = dmf.getDataReader(drName, ovDRConfig, evaluator);
+		
+		//res.setEvaluator(evaluator);
+		return res;
 	}
 
 	@Override
@@ -88,12 +164,21 @@ public class SmartDataReader extends StandardDataReaderBase<Field> {
 	@Override
 	public Date getDate(String fieldName) throws DataException {
 		if(currentMainReader.containsField(fieldName)) return currentMainReader.getDate(fieldName);
+		
 		return null;
 	}
 
 	@Override
 	public Double getDouble(String fieldName) throws DataException {
 		if(currentMainReader.containsField(fieldName)) return currentMainReader.getDouble(fieldName);
+		for(DataMan dm : afterMainActions.values()) {
+			DataReader<?> dr = dm.asDataReader();
+			if(dr == null) continue;
+			
+			if(dr.containsField(fieldName)) 
+				return dr.getDouble(fieldName);
+			
+		}
 		return null;
 	}
 
@@ -104,10 +189,34 @@ public class SmartDataReader extends StandardDataReaderBase<Field> {
 	}
 
 	@Override
-	public Double getObject(String fieldName) throws DataException {
-		// TODO Auto-generated method stub
+	public Object getObject(String fieldName) throws DataException {
+		if(currentMainReader.containsField(fieldName)) return currentMainReader.getObject(fieldName);
+		for(DataMan dm : afterMainActions.values()) {
+			DataReader<?> dr = dm.asDataReader();
+			if(dr == null) continue;
+			
+			if(dr.containsField(fieldName))
+				return dr.getObject(fieldName);
+		}
 		return null;
 	}
-	 
 
+	@Override
+	public int lineVisited() {
+		return _lineVisited;
+	}
+
+	@Override
+	public Integer getInteger(String fieldName) throws DataException {
+		if(currentMainReader.containsField(fieldName)) return currentMainReader.getInteger(fieldName);
+		for(DataMan dm : afterMainActions.values()) {
+			DataReader<?> dr = dm.asDataReader();
+			if(dr == null) continue;
+			
+			if(dr.containsField(fieldName))
+				return dr.getInteger(fieldName);
+		}
+		return null;
+	}
+	
 }

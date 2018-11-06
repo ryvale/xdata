@@ -11,9 +11,12 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import com.exa.data.DataException;
+import com.exa.data.DataReader;
 import com.exa.data.Field;
 import com.exa.data.StandardDataReaderBase;
+import com.exa.data.config.DataManFactory;
 import com.exa.expression.XPOperand;
+import com.exa.expression.eval.XPEvaluator;
 import com.exa.utils.ManagedException;
 import com.exa.utils.values.ArrayValue;
 import com.exa.utils.values.BooleanValue;
@@ -64,7 +67,10 @@ public class SQLDataReader extends StandardDataReaderBase<Field> implements SQLD
 	private Boolean dataRead = null;
 	private ObjectValue<XPOperand<?>> config;
 	
-	public SQLDataReader(DataSource dataSource, ObjectValue<XPOperand<?>> config) throws DataException {
+	protected int _lineVisited = 0;
+	
+	public SQLDataReader(String name, DataSource dataSource, XPEvaluator evaluator, ObjectValue<XPOperand<?>> config) throws DataException {
+		super(name, evaluator);
 		this.dataSource = dataSource;
 		this.config = config;
 		
@@ -76,8 +82,9 @@ public class SQLDataReader extends StandardDataReaderBase<Field> implements SQLD
 	public boolean next() throws DataException {
 		try {
 			dataRead = rs.next();
-			
-			return dataRead;
+			if(!dataRead) return false;
+			++_lineVisited;
+			return true;
 			
 		} catch (SQLException e) {
 			throw new DataException(e);
@@ -110,8 +117,6 @@ public class SQLDataReader extends StandardDataReaderBase<Field> implements SQLD
 
 	@Override
 	public String getString(String fieldName) throws DataException {
-		/*Field field = fields.get(fieldName);
-		if(field == null) throw new DataException(String.format("No field named %s in sql data reader", fieldName));*/
 		try {
 			
 			return rs.getString(fieldName);
@@ -122,10 +127,11 @@ public class SQLDataReader extends StandardDataReaderBase<Field> implements SQLD
 
 	@Override
 	public boolean open() throws DataException {
-		//ConfigObjectHelper coh = new ConfigObjectHelper(config);
-		//ObjectValue entity = coh.getEntity();
 		
 		try {
+			String drVariableName = DataManFactory.getDRVariableName(name);
+			evaluator.getCurrentVariableContext().addVariable(drVariableName, DataReader.class, this);
+			
 			from = config.getRequiredAttributAsString("from");
 			
 			ObjectValue<XPOperand<?>> fm = config.getAttributAsObjectValue("fields");
@@ -251,10 +257,24 @@ public class SQLDataReader extends StandardDataReaderBase<Field> implements SQLD
 
 	@Override
 	public SQLDataReader cloneDR() throws DataException {
-		SQLDataReader res = new SQLDataReader(dataSource, config);
+		SQLDataReader res = new SQLDataReader(name, dataSource, evaluator, config);
 		if(isOpen()) res.open();
 		return res;
 		
+	}
+
+	@Override
+	public int lineVisited() {
+		return _lineVisited;
+	}
+
+	@Override
+	public Integer getInteger(String fieldName) throws DataException {
+		try {
+			return rs.getInt(fieldName);
+		} catch (SQLException e) {
+			throw new DataException(e);
+		}
 	}
 
 }

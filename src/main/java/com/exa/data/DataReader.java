@@ -11,6 +11,8 @@ public interface DataReader<_FIELD extends Field> extends DataMan {
 	
 	String getString(String fieldName) throws DataException;
 	
+	Integer getInteger(String fieldName) throws DataException;
+	
 	Date getDate(String fieldName) throws DataException;
 	
 	Double getDouble(String fieldName) throws DataException;
@@ -27,5 +29,13 @@ public interface DataReader<_FIELD extends Field> extends DataMan {
 	DataReader<_FIELD> cloneDR() throws DataException;
 	
 	DataReader<?> getSubDataReader(String name);
+	
+	int lineVisited();
+	
+	
+	DataReader<?> getParent();
+	
+	void setParent(DataReader<?> parent);
+	
 
 }

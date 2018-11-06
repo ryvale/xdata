@@ -5,7 +5,7 @@
 
 	<groupId>com.exa.entity</groupId>
 	<artifactId>xadata</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>xadata</name>
@@ -41,10 +41,18 @@
 			<artifactId>xautils</artifactId>
 			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
+		
 		<dependency>
-			<groupId>com.exa.eva</groupId>
-			<artifactId>eva</artifactId>
+			<groupId>com.exa.lang</groupId>
+			<artifactId>xalight</artifactId>
 			<version>0.0.2-SNAPSHOT</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>com.microsoft.sqlserver</groupId>
+		    <artifactId>mssql-jdbc</artifactId>
+		    <version>6.2.2.jre8</version>
+		    <scope>test</scope>
 		</dependency>
 	</dependencies>
 

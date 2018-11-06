@@ -6,6 +6,7 @@ import com.exa.data.DataMan;
 import com.exa.data.DataReader;
 import com.exa.eva.OperatorManager.OMOperandType;
 import com.exa.expression.OMMethod;
+import com.exa.expression.Type;
 import com.exa.expression.types.TObjectClass;
 
 public class TDataReader extends TObjectClass<DataReader<?>, DataMan> {
@@ -27,6 +28,15 @@ public class TDataReader extends TObjectClass<DataReader<?>, DataMan> {
 		OMMethod<Double> omDbl = new OMMethod<>("getDouble", 2, OMOperandType.POST_OPERAND);
 		omDbl.addOperator(new MethodGetDouble());
 		methods.put("getDouble", new Method<>("getDouble", Double.class, omDbl));
+		
+		properties.put("lineVisited", new Property<>("lineVisited", Integer.class, object -> object.lineVisited()));
 	}
+
+	@Override
+	public Type<DataReader<?>> specificType() {
+		return this;
+	}
+	
+	
 	
 }

@@ -1,0 +1,16 @@
+:smart,
+
+references {
+},
+
+entities {
+	entity1 {
+			
+		main {
+			type "libre",
+			
+			eof => drMain.lineVisited == 1
+		}
+		
+	}
+}

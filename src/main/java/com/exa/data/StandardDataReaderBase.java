@@ -3,8 +3,27 @@ package com.exa.data;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.exa.expression.eval.XPEvaluator;
+
 public abstract class StandardDataReaderBase<_FIELD extends Field> implements DataReader<_FIELD> {
 	protected Map<String, _FIELD> fields = new LinkedHashMap<>();
+	
+	protected XPEvaluator evaluator = null;
+	
+	protected DataReader<?> parent;
+	
+	protected String name;
+	
+	public StandardDataReaderBase(String name, XPEvaluator evaluator) {
+		super();
+		this.name = name;
+		
+		this.evaluator = evaluator;
+	}
+	
+	public StandardDataReaderBase(String name) {
+		this(name, null);
+	}
 
 	@Override
 	public boolean execute() throws DataException {
@@ -49,6 +68,35 @@ public abstract class StandardDataReaderBase<_FIELD extends Field> implements Da
 		return getString(fieldName);
 	}
 	
+	/*@Override
+	public int lineVisited() {
+		return _lineVisited;
+	}*/
+
+	@Override
+	public XPEvaluator getEvaluator() {
+		return evaluator;
+	}
+
+	@Override
+	public void setEvaluator(XPEvaluator evaluator) {
+		this.evaluator = evaluator;
+	}
+
+	@Override
+	public DataReader<?> getParent() {
+		return parent;
+	}
+
+	@Override
+	public void setParent(DataReader<?> parent) {
+		this.parent = parent;
+	}
+
+	@Override
+	public DataReader<?> asDataReader() {
+		return this;
+	}
 	
 	
 }
