@@ -21,6 +21,7 @@ public class DMFSmart extends DataManFactory {
 	public DMFSmart(FilesRepositories filesRepos, Map<String, DataSource> dataSources, String defaultDataSource) {
 		
 		super(filesRepos, (id, context) -> {
+			if("ovRoot".equals(id)) return "ObjectValue";
 			String p[] = context.split("[.]");
 			if(p.length>=3 && getDRVariableName(p[2]).equals(id)) return "DataReader";
 			if(p.length>=3 && "drSource".equals(id)) return "DataReader";

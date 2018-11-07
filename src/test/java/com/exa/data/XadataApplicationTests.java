@@ -86,6 +86,8 @@ public class XadataApplicationTests extends TestCase {
         
         System.out.println(dr.getInteger("nb1"));
         
+        System.out.println(dr.getString("nb2"));
+        
         assertFalse(new Boolean(dr.next()));
         
 		

@@ -7,7 +7,7 @@ import com.exa.data.config.DataManFactory;
 import com.exa.expression.XPOperand;
 
 import com.exa.expression.eval.XPEvaluator;
-import com.exa.lang.parsing.XALCalculabeValue;
+import com.exa.lang.expression.XALCalculabeValue;
 import com.exa.utils.ManagedException;
 import com.exa.utils.values.ObjectValue;
 import com.exa.utils.values.Value;

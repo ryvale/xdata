@@ -31,6 +31,7 @@ public abstract class DataManFactory {
 	
 	public DataManFactory(FilesRepositories filesRepos) {
 		this(filesRepos, (id, context) -> {
+			if("ovRoot".equals(id)) return "ObjectValue";
 			String p[] = context.split("[.]");
 			if(p.length<3 || !getDRVariableName(p[2]).equals(id)) return null;
 			
@@ -60,6 +61,7 @@ public abstract class DataManFactory {
 		}
 		
 		XPEvaluator eval = new XPEvaluator();
+		eval.addVariable("ovRoot", ObjectValue.class, rootOV);
 		evSetup.setup(eval);
 		
 		eval.pushVariableContext(new MapVariableContext());

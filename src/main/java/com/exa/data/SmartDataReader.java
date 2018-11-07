@@ -86,6 +86,14 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 	@Override
 	public String getString(String fieldName) throws DataException {
 		if(currentMainReader.containsField(fieldName)) return currentMainReader.getString(fieldName);
+		
+		for(DataMan dm : afterMainActions.values()) {
+			DataReader<?> dr = dm.asDataReader();
+			if(dr == null) continue;
+			
+			if(dr.containsField(fieldName))
+				return dr.getString(fieldName);
+		}
 		return null;
 	}
 
@@ -94,6 +102,9 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		Map<String, Value<?, XPOperand<?>>> mpConfig = config.getValue();
 		
 		try {
+			String drVariableName = DataManFactory.getDRVariableName(name);
+			evaluator.getCurrentVariableContext().addVariable(drVariableName, DataReader.class, this);
+			
 			for(String drName :  mpConfig.keySet()) {
 				if("type".equals(drName) || drName.startsWith("_")) continue;
 				
@@ -102,8 +113,6 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 				if(flow == null) flow = FLW_MAIN;
 				
 				DataReader<?> dr = getDataReader(ovDRConfig, drName);
-				
-				//vc.addVariable(drName, DataReader.class, dr);
 				
 				if(FLW_MAIN.equals(flow)) {
 					
@@ -165,6 +174,13 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 	public Date getDate(String fieldName) throws DataException {
 		if(currentMainReader.containsField(fieldName)) return currentMainReader.getDate(fieldName);
 		
+		for(DataMan dm : afterMainActions.values()) {
+			DataReader<?> dr = dm.asDataReader();
+			if(dr == null) continue;
+			
+			if(dr.containsField(fieldName))
+				return dr.getDate(fieldName);
+		}
 		return null;
 	}
 

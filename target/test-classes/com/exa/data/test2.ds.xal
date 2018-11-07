@@ -76,6 +76,10 @@ entities {
 						type "int",
 						
 						if => drSource.getString("equipe") == "COMMUN-TAV"
+					},
+					
+					nb2 {
+						value => ovRoot.getString('entities.entity1.main.type')
 					}
 				}
 			}
