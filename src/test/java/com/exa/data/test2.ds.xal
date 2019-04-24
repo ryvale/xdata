@@ -47,7 +47,7 @@ entities {
 		main {
 			type "libre",
 			
-			eof => drMain.lineVisited == 1
+			eof => this.lineVisited == 1
 		}
 		
 	},
@@ -58,7 +58,7 @@ entities {
 		main {
 			type "libre",
 			
-			eof => drMain.lineVisited == 1
+			eof => this.lineVisited == 1
 		},
 		
 		nb {
@@ -69,17 +69,41 @@ entities {
 			source @nbItSql("m.evt_created", start, end),
 			
 			fields {
-				value => drSource.getDouble("nb"),
+				value => sourceDr.getDouble("nb"),
 				
 				items {
 					nb1 {
 						type "int",
 						
-						if => drSource.getString("equipe") == "COMMUN-TAV"
+						if => sourceDr.getString("equipe") == "COMMUN-TAV"
 					},
 					
 					nb2 {
-						value => ovRoot.getString('entities.entity1.main.type')
+						value => rootOv.getString('entities.entity1.main.type')
+					}
+				}
+			}
+		},
+		
+		nb2 {
+			type "row-to-field",
+				
+			flow "after-main-next",
+			
+			source @nbItSql("m.evt_created", start, end),
+			
+			fields {
+				value => sourceDr.getDouble("nb"),
+				
+				items {
+					nb3 {
+						type "int",
+						
+						if => sourceDr.getString("equipe") == "COMMUN-TAV"
+					},
+					
+					nb4 {
+						value => rootOv.getString('entities.entity1.main.type')
 					}
 				}
 			}

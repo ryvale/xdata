@@ -3,7 +3,7 @@ Implementation-Title: xadata
 Implementation-Version: 0.0.2-SNAPSHOT
 Built-By: leader
 Implementation-Vendor-Id: com.exa.entity
-Build-Jdk: 1.8.0_144
+Build-Jdk: 1.8.0_201
 Implementation-URL: http://projects.spring.io/spring-boot/xadata/
 Created-By: Maven Integration for Eclipse
 Implementation-Vendor: Pivotal Software, Inc.

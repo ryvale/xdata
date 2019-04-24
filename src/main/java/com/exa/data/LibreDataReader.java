@@ -2,8 +2,7 @@ package com.exa.data;
 
 import java.util.Date;
 
-import com.exa.data.config.DataManFactory;
-
+import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 
 import com.exa.expression.eval.XPEvaluator;
@@ -20,8 +19,8 @@ public class LibreDataReader extends StandardDataReaderBase<Field> {
 	private Value<?, ?> vlEOF;
 	
 	
-	public LibreDataReader(String name, ObjectValue<XPOperand<?>> config, XPEvaluator evaluator) {
-		super(name, evaluator);
+	public LibreDataReader(String name, ObjectValue<XPOperand<?>> config, XPEvaluator evaluator, VariableContext variableContext) {
+		super(name, evaluator, variableContext);
 		this.config = config;
 	}
 
@@ -63,8 +62,8 @@ public class LibreDataReader extends StandardDataReaderBase<Field> {
 	@Override
 	public boolean open() throws DataException {
 		try {
-			String drVariableName = DataManFactory.getDRVariableName(name);
-			evaluator.getCurrentVariableContext().addVariable(drVariableName, DataReader.class, this);
+			//String drVariableName = DataManFactory.getDRVariableName(name);
+			//evaluator.getCurrentVariableContext().addVariable(drVariableName, DataReader.class, this);
 			vlEOF = config.getRequiredAttribut("eof");
 			if(vlEOF instanceof XALCalculabeValue) {
 				XALCalculabeValue<?> cl = (XALCalculabeValue<?>) vlEOF;

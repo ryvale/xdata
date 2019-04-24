@@ -29,6 +29,10 @@ public class TDataReader extends TObjectClass<DataReader<?>, DataMan> {
 		omDbl.addOperator(new MethodGetDouble());
 		methods.put("getDouble", new Method<>("getDouble", Double.class, omDbl));
 		
+		OMMethod<Integer> omInt = new OMMethod<>("getInteger", 2, OMOperandType.POST_OPERAND);
+		omInt.addOperator(new MethodGetInteger());
+		methods.put("getInteger", new Method<>("getInteger", Integer.class, omInt));
+		
 		properties.put("lineVisited", new Property<>("lineVisited", Integer.class, object -> object.lineVisited()));
 	}
 

@@ -15,6 +15,7 @@ import com.exa.data.DataReader;
 import com.exa.data.Field;
 import com.exa.data.StandardDataReaderBase;
 import com.exa.data.config.DataManFactory;
+import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.XPEvaluator;
 import com.exa.utils.ManagedException;
@@ -69,8 +70,8 @@ public class SQLDataReader extends StandardDataReaderBase<Field> implements SQLD
 	
 	protected int _lineVisited = 0;
 	
-	public SQLDataReader(String name, DataSource dataSource, XPEvaluator evaluator, ObjectValue<XPOperand<?>> config) throws DataException {
-		super(name, evaluator);
+	public SQLDataReader(String name, DataSource dataSource, XPEvaluator evaluator, VariableContext variableContext, ObjectValue<XPOperand<?>> config) throws DataException {
+		super(name, evaluator, variableContext);
 		this.dataSource = dataSource;
 		this.config = config;
 		
@@ -129,8 +130,8 @@ public class SQLDataReader extends StandardDataReaderBase<Field> implements SQLD
 	public boolean open() throws DataException {
 		
 		try {
-			String drVariableName = DataManFactory.getDRVariableName(name);
-			evaluator.getCurrentVariableContext().addVariable(drVariableName, DataReader.class, this);
+			//String drVariableName = DataManFactory.getDRVariableName(name);
+			//evaluator.getCurrentVariableContext().addVariable(drVariableName, DataReader.class, this);
 			
 			from = config.getRequiredAttributAsString("from");
 			
@@ -257,7 +258,7 @@ public class SQLDataReader extends StandardDataReaderBase<Field> implements SQLD
 
 	@Override
 	public SQLDataReader cloneDR() throws DataException {
-		SQLDataReader res = new SQLDataReader(name, dataSource, evaluator, config);
+		SQLDataReader res = new SQLDataReader(name, dataSource, evaluator, variableContext, config);
 		if(isOpen()) res.open();
 		return res;
 		

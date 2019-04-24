@@ -7,7 +7,7 @@ import javax.sql.DataSource;
 
 import com.exa.data.config.DMFSmart;
 import com.exa.data.config.DataManFactory;
-import com.exa.data.expression.RMEvaluatorSetup;
+import com.exa.data.expression.DCEvaluatorSetup;
 import com.exa.utils.ManagedException;
 import com.exa.utils.io.FilesRepositories;
 import com.exa.utils.io.OSFileRepoPart;
@@ -41,7 +41,7 @@ public class XadataApplicationTests extends TestCase {
         
         DataManFactory dmf = new DMFSmart(filesRepo, dataSources, "default");
         
-        RMEvaluatorSetup evSetup = new RMEvaluatorSetup();
+        DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
         
         DataReader<?> dr = dmf.getDataReader("default:/test1", evSetup);
         
@@ -51,8 +51,6 @@ public class XadataApplicationTests extends TestCase {
         
         assertFalse(new Boolean(dr.next()));
         
-        
-		
 	}
 	
 	public void testSmart2() throws ManagedException {
@@ -64,7 +62,7 @@ public class XadataApplicationTests extends TestCase {
 		SQLServerDataSource ds = new SQLServerDataSource();
 		ds.setUser("sa");  
         ds.setPassword("e@mP0wer");  
-        ds.setServerName("192.168.136.143");  
+        ds.setServerName("192.168.23.129");  
         ds.setPortNumber(1433);   
         ds.setDatabaseName("EAMPROD");
         
@@ -73,7 +71,7 @@ public class XadataApplicationTests extends TestCase {
         
         DataManFactory dmf = new DMFSmart(filesRepo, dataSources, "default");
         
-        RMEvaluatorSetup evSetup = new RMEvaluatorSetup();
+        DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
         
         evSetup.addVaraiable("start", String.class, "01/02/2016");
         evSetup.addVaraiable("end", String.class, "17/08/2018");

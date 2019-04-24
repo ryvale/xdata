@@ -1,9 +1,11 @@
 package com.exa.data.config;
 
+import java.io.IOException;
 import java.util.Map;
 
 import com.exa.data.DataReader;
-import com.exa.data.expression.RMEvaluatorSetup;
+import com.exa.data.expression.DCEvaluatorSetup;
+import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.MapVariableContext;
 import com.exa.expression.eval.XPEvaluator;
@@ -31,21 +33,34 @@ public abstract class DataManFactory {
 	
 	public DataManFactory(FilesRepositories filesRepos) {
 		this(filesRepos, (id, context) -> {
-			if("ovRoot".equals(id)) return "ObjectValue";
+			if("rootDr".equals(id)) return "DataReader";
+			if("rootOv".equals(id)) return "ObjectValue";
 			String p[] = context.split("[.]");
-			if(p.length<3 || !getDRVariableName(p[2]).equals(id)) return null;
+			if(p.length<3 || !"this".equals(id)) return null;
 			
 			return "DataReader";
 		});
 	}
 	
-	public DataReader<?> getDataReader(String drName, RMEvaluatorSetup evSetup) throws ManagedException {
+	public DataReader<?> getDataReader(String drName, DCEvaluatorSetup evSetup) throws ManagedException {
 		
 		String parts[] = drName.split("[#]");
 		
 		String drConfigFileName = filesRepos.getName(parts[0] +".ds.xal");
 		
-		ObjectValue<XPOperand<?>> rootOV = parser.parseFile(drConfigFileName, evSetup, uiv);
+		/**/
+		
+		Computing computing = parser.getComputeObjectFormFile(drConfigFileName, evSetup, uiv);
+		
+		XPEvaluator evaluator = computing.getXPEvaluator();
+		
+		ObjectValue<XPOperand<?>> rootOV = computing.execute();
+		
+		try {
+			computing.closeCharReader();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		ObjectValue<XPOperand<?>> ovEntities = rootOV.getAttributAsObjectValue("entities");
 		
@@ -60,28 +75,31 @@ public abstract class DataManFactory {
 			
 		}
 		
-		XPEvaluator eval = new XPEvaluator();
-		eval.addVariable("ovRoot", ObjectValue.class, rootOV);
-		evSetup.setup(eval);
+		evaluator.addVariable("rootOv", ObjectValue.class, rootOV);
 		
-		eval.pushVariableContext(new MapVariableContext());
+		VariableContext vc = new MapVariableContext(evaluator.getCurrentVariableContext());
+		evaluator.pushVariableContext(vc);
 		
-		return getDataReader(ovEntities, name, eval, Computing.getDefaultObjectLib(rootOV));
+		DataReader<?> dr = getDataReader(ovEntities, name, evaluator, vc, Computing.getDefaultObjectLib(rootOV));
+		
+		vc.addVariable("rootDr", DataReader.class, dr);
+		
+		return dr;
 	}
 	
 	public static String getDRVariableName(String entityName) {
-		return "dr"+entityName.substring(0, 1).toUpperCase()+entityName.substring(1);
+		return entityName.substring(0, 1).toUpperCase()+entityName.substring(1)+"Dr";
 	}
 	
-	public DataReader<?> getDataReader(ObjectValue<XPOperand<?>> ovEntities, String name, XPEvaluator eval, Map<String, ObjectValue<XPOperand<?>>> libOV) throws ManagedException {
+	public DataReader<?> getDataReader(ObjectValue<XPOperand<?>> ovEntities, String name, XPEvaluator eval, VariableContext vc, Map<String, ObjectValue<XPOperand<?>>> libOV) throws ManagedException {
 		
-		ObjectValue<XPOperand<?>> ovEntity = parser.object(ovEntities, name, eval, libOV);
+		ObjectValue<XPOperand<?>> ovEntity = parser.object(ovEntities, name, eval, vc, libOV);
 		
-		DataReader<?> res = getDataReader(name, ovEntity, eval);
+		DataReader<?> res = getDataReader(name, ovEntity, eval, vc);
 		
 		return res;
 	}
 	
 	
-	public abstract DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval) throws ManagedException;
+	public abstract DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext vc) throws ManagedException;
 }

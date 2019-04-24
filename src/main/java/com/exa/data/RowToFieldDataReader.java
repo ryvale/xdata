@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import com.exa.data.config.DataManFactory;
+import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.XPEvaluator;
 import com.exa.utils.ManagedException;
@@ -24,25 +25,32 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 		protected Value<?, XPOperand<?>> valueExp;
 		
 		protected Value<?, XPOperand<?>> ifExp;
+		
+		protected Value<?, XPOperand<?>> defaultValueExp;
 
-		public Field(String name, String type, Value<?, XPOperand<?>> ifExp, Value<?, XPOperand<?>> valueExp) {
+		public Field(String name, String type, Value<?, XPOperand<?>> ifExp, Value<?, XPOperand<?>> valueExp, Value<?, XPOperand<?>> defaultValueExp) {
 			super(name, type);
 			
 			this.ifExp = ifExp;
 			this.valueExp = valueExp;
+			this.defaultValueExp = defaultValueExp;
 		}
 	}
 	
-	protected DataReader<?> drSource;
+	protected DataReader<?> drSource = null;
 	
-	protected Value<?, XPOperand<?>> defaultValueExp;
+	protected Value<?, XPOperand<?>> valueExp;
 	
 	protected Value<?, XPOperand<?>> defaultIfExp;
 	
+	protected Value<?, XPOperand<?>> typeExp;
+	
+	protected Value<?, XPOperand<?>> defaultValueExp;
+	
 	protected Map<String, Object> values = new LinkedHashMap<>();
 	
-	public RowToFieldDataReader(String name, ObjectValue<XPOperand<?>> config, XPEvaluator evaluator, FilesRepositories filesRepos, Map<String, DataSource> dataSources, String defaultDataSource) {
-		super(name, config, evaluator, filesRepos, dataSources, defaultDataSource);
+	public RowToFieldDataReader(String name, ObjectValue<XPOperand<?>> config, XPEvaluator evaluator, VariableContext variableContext, FilesRepositories filesRepos, Map<String, DataSource> dataSources, String defaultDataSource) {
+		super(name, config, evaluator, variableContext, filesRepos, dataSources, defaultDataSource);
 	}
 
 	@Override
@@ -51,7 +59,12 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 		while(drSource.next()) {
 			for(Field field : fields.values()) {
 				try {
-					if( field.ifExp.asBoolean()) values.put(field.getName(), field.valueExp.getValue());
+					
+					if(field.ifExp.asBoolean()) {
+						Object v = field.valueExp.getValue();
+						if(!values.containsKey(field.getName()) || v !=null)
+							values.put(field.getName(), v);
+					}
 				} catch (ManagedException e) {
 					throw new DataException(e);
 				}
@@ -83,25 +96,35 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 	public boolean open() throws DataException {
 		
 		try {
-			String drVariableName = DataManFactory.getDRVariableName(name);
-			evaluator.getCurrentVariableContext().addVariable(drVariableName, DataReader.class, this);
+			/*String drVariableName = DataManFactory.getDRVariableName(name);
+			evaluator.getCurrentVariableContext().addVariable(drVariableName, DataReader.class, this);*/
 			
 			ObjectValue<XPOperand<?>> ovSource = config.getRequiredAttributAsObjectValue("source");
 			
 			String type = ovSource.getRequiredAttributAsString("type");
 			
-			
 			DataManFactory dmf = dmFactories.get(type);
 			
 			if(dmf == null) throw new ManagedException(String.format("the type %s is unknown", type));
 			
-			drSource = dmf.getDataReader("source", ovSource, evaluator);
+			drSource = dmf.getDataReader("source", ovSource, evaluator, variableContext);
+			
+			variableContext.addVariable("sourceDr", DataReader.class, drSource);
 			
 			ObjectValue<XPOperand<?>> fm = config.getAttributAsObjectValue("fields");
 			
 			this.defaultIfExp = fm.getAttribut("if");
 			
-			this.defaultValueExp = fm.getAttribut("value");
+			this.valueExp = fm.getAttribut("value");
+			
+			this.defaultValueExp = fm.getAttribut("default");
+			
+			this.typeExp = fm.getAttribut("type");
+			
+			String defaultType = null;
+			
+			if(this.typeExp != null) defaultType = this.typeExp.asString();
+			if(defaultType == null) defaultType = "string";
 			
 			ObjectValue<XPOperand<?>> ovItems = fm.getRequiredAttributAsObjectValue("items");
 			Map<String, Value<?,XPOperand<?>>> mpFields = ovItems.getValue();
@@ -109,7 +132,7 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 			for(String fname : mpFields.keySet()) {
 				Value<?, XPOperand<?>> vlField = mpFields.get(fname);
 				
-				String fieldType; Value<?, XPOperand<?>> ifExp = null; Value<?, XPOperand<?>> valueExp = null;
+				String fieldType; Value<?, XPOperand<?>> ifExp = null; Value<?, XPOperand<?>> valueExp = null; ; Value<?, XPOperand<?>> defaultValueExp = null;
 				BooleanValue<?> blField = vlField.asBooleanValue();
 				
 				if(blField == null) {
@@ -118,30 +141,38 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 					BooleanValue<XPOperand<?>> bv = vlField.asBooleanValue();
 					DecimalValue<XPOperand<?>> dcv = vlField.asDecimalValue();
 					
-					
 					if(sv == null && iv == null && bv == null && dcv == null) {
 						ObjectValue<XPOperand<?>> ovField = vlField.asRequiredObjectValue();
 						
 						fieldType = ovField.getAttributAsString("type");
-						if(fieldType == null) fieldType = "string";
+						if(fieldType == null) fieldType = defaultType;
 						
 						ifExp = ovField.getAttribut("if");
 						if(ifExp == null) ifExp = this.defaultIfExp;
 						
 						valueExp = ovField.getAttribut("value");
-						if(valueExp == null) valueExp = this.defaultValueExp;
+						if(valueExp == null) valueExp = this.valueExp;
+						
+						defaultValueExp = ovField.getAttribut("default");
+						if(defaultValueExp == null) defaultValueExp = this.defaultValueExp;
 					}
 					else {
-						fieldType = "string";
+						fieldType = defaultType;
 						valueExp = vlField;
 					}
 				}
 				else {
-					fieldType = "string";
-					valueExp = this.defaultValueExp;
+					fieldType = defaultType;
+					valueExp = this.valueExp;
 				}
 				if(valueExp == null) throw new DataException(String.format("No value expression defined for field %s", fname) );
-				fields.put(fname, new Field(fname, fieldType, ifExp == null ? new BooleanValue<>(Boolean.TRUE) : ifExp, valueExp));
+				fields.put(fname, new Field(fname, fieldType, ifExp == null ? new BooleanValue<>(Boolean.TRUE) : ifExp, valueExp, defaultValueExp));
+			}
+			
+			for(Field field : fields.values()) {
+				if(field.defaultValueExp == null) continue;
+				
+				values.put(field.name, field.defaultValueExp.getValue());
 			}
 			
 			return drSource.open();
@@ -154,7 +185,7 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 
 	@Override
 	public void close() throws DataException {
-		
+		if(drSource == null) drSource.close();
 	}
 
 	@Override
@@ -164,7 +195,7 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 
 	@Override
 	public RowToFieldDataReader cloneDR() throws DataException {
-		return new RowToFieldDataReader(name, config, evaluator, filesRepos, dataSources, defaultDataSource);
+		return new RowToFieldDataReader(name, config, evaluator, variableContext, filesRepos, dataSources, defaultDataSource);
 	}
 
 	@Override

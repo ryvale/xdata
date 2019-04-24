@@ -9,6 +9,7 @@ import com.exa.data.config.DMFLibre;
 import com.exa.data.config.DMFRowToField;
 import com.exa.data.config.DMFSql;
 import com.exa.data.config.DataManFactory;
+import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.XPEvaluator;
 import com.exa.utils.io.FilesRepositories;
@@ -33,8 +34,8 @@ public abstract class StandardDRWithDSBase<_FIELD extends Field> extends Standar
 	
 	protected String defaultDataSource;
 	
-	public StandardDRWithDSBase(String name, ObjectValue<XPOperand<?>> config, XPEvaluator evaluator, FilesRepositories filesRepos, Map<String, DataSource> dataSources, String defaultDataSource) {
-		super(name, evaluator);
+	public StandardDRWithDSBase(String name, ObjectValue<XPOperand<?>> config, XPEvaluator evaluator, VariableContext variableContext, FilesRepositories filesRepos, Map<String, DataSource> dataSources, String defaultDataSource) {
+		super(name, evaluator, variableContext);
 		
 		this.config = config;
 		
@@ -49,8 +50,8 @@ public abstract class StandardDRWithDSBase<_FIELD extends Field> extends Standar
 		dmFactories.put(DMFN_SQL, new DMFSql(filesRepos, dataSources, defaultDataSource));
 	}
 
-	public StandardDRWithDSBase(String name, ObjectValue<XPOperand<?>> config, FilesRepositories filesRepos, Map<String, DataSource> dataSources, String defaultDataSource) {
+	/*public StandardDRWithDSBase(String name, ObjectValue<XPOperand<?>> config, FilesRepositories filesRepos, Map<String, DataSource> dataSources, String defaultDataSource) {
 		this(name, config, null, filesRepos, dataSources, defaultDataSource);
-	}
+	}*/
 
 }

@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 
 import com.exa.data.DataReader;
 import com.exa.data.sql.SQLDataReader;
+import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.XPEvaluator;
 
@@ -29,7 +30,7 @@ public class DMFSql extends DataManFactory {
 	}
 
 	@Override
-	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval) throws ManagedException {
+	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext variableContext) throws ManagedException {
 		
 		String dsName = ovEntity.getAttributAsString("dataSource");
 		
@@ -40,7 +41,7 @@ public class DMFSql extends DataManFactory {
 		DataSource ds = dataSources.get(dsName);
 		if(ds == null) throw new ManagedException(String.format("The data source %s specified  is not present.", dsName));
 		
-		DataReader<?> dr = new SQLDataReader(name, ds, eval, ovEntity);
+		DataReader<?> dr = new SQLDataReader(name, ds, eval, variableContext, ovEntity);
 		
 		return dr;
 	}

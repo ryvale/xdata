@@ -5,11 +5,12 @@ references {
 
 entities {
 	entity1 {
+		type "smart",
 			
 		main {
 			type "libre",
 			
-			eof => drMain.lineVisited == 1
+			eof => this.lineVisited == 1
 		}
 		
 	}
