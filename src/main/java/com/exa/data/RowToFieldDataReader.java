@@ -185,7 +185,7 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 
 	@Override
 	public void close() throws DataException {
-		if(drSource == null) drSource.close();
+		if(drSource != null) drSource.close();
 	}
 
 	@Override

@@ -16,12 +16,10 @@ import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
 import junit.framework.TestCase;
 
 public class XadataApplicationTests extends TestCase {
-
 	
 	public XadataApplicationTests( String testName ) {
         super( testName );
     }
-	
 	
 	public void testSmart1() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
@@ -51,6 +49,7 @@ public class XadataApplicationTests extends TestCase {
         
         assertFalse(new Boolean(dr.next()));
         
+        dr.close();
 	}
 	
 	public void testSmart2() throws ManagedException {
@@ -63,7 +62,7 @@ public class XadataApplicationTests extends TestCase {
 		ds.setUser("sa");  
         ds.setPassword("e@mP0wer");  
         ds.setServerName("192.168.23.129");  
-        ds.setPortNumber(1433);   
+        ds.setPortNumber(1433);
         ds.setDatabaseName("EAMPROD");
         
         Map<String, DataSource> dataSources = new HashMap<>();
@@ -88,7 +87,7 @@ public class XadataApplicationTests extends TestCase {
         
         assertFalse(new Boolean(dr.next()));
         
-		
+		dr.close();
 	}
 }
  

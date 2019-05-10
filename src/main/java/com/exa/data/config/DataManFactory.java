@@ -72,7 +72,6 @@ public abstract class DataManFactory {
 			Map<String, Value<?, XPOperand<?>>> mapEntities = ovEntities.getValue();
 			if(mapEntities.size() == 0) throw new ManagedException(String.format("No entity found while seeking %s", drName));
 			name = mapEntities.keySet().iterator().next();
-			
 		}
 		
 		evaluator.addVariable("rootOv", ObjectValue.class, rootOV);
