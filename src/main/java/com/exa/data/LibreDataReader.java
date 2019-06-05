@@ -91,7 +91,7 @@ public class LibreDataReader extends StandardDataReaderBase<Field> {
 	}
 
 	@Override
-	public StandardDataReaderBase<Field> cloneDR() throws DataException {
+	public StandardDataReaderBase<Field> cloneDM() throws DataException {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -2,6 +2,7 @@ package com.exa.data.config;
 
 
 import com.exa.data.DataReader;
+import com.exa.data.DataWriter;
 import com.exa.data.LibreDataReader;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
@@ -20,6 +21,13 @@ public class DMFLibre extends DataManFactory {
 	@Override
 	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext variableContext) throws ManagedException {
 		return new LibreDataReader(name, ovEntity, eval, variableContext);
+	}
+
+	@Override
+	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval,
+			VariableContext vc) throws ManagedException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	

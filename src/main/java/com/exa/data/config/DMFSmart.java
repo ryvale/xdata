@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import com.exa.data.DataReader;
+import com.exa.data.DataWriter;
 import com.exa.data.SmartDataReader;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
@@ -36,6 +37,13 @@ public class DMFSmart extends DataManFactory {
 	@Override
 	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> config, XPEvaluator eval, VariableContext variableContext) throws ManagedException {
 		return new SmartDataReader(name, config, eval, variableContext, filesRepos, dataSources, defaultDataSource);
+	}
+
+	@Override
+	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval,
+			VariableContext vc) throws ManagedException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

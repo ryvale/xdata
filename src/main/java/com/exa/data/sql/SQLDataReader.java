@@ -11,10 +11,8 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import com.exa.data.DataException;
-import com.exa.data.DataReader;
 import com.exa.data.Field;
 import com.exa.data.StandardDataReaderBase;
-import com.exa.data.config.DataManFactory;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.XPEvaluator;
@@ -25,33 +23,7 @@ import com.exa.utils.values.ObjectValue;
 import com.exa.utils.values.StringValue;
 import com.exa.utils.values.Value;
 
-public class SQLDataReader extends StandardDataReaderBase<Field> implements SQLDataMan {
-	
-	static class FieldManagerFactory {
-		static FieldManager DEFAULT_FIELD_MANAGER = new FieldManager();
-		
-		FieldManager create(ObjectValue<XPOperand<?>> fieldManagerConfig) throws DataException {
-			return DEFAULT_FIELD_MANAGER;
-		}
-	}
-	
-	static class XAFieldManagerFactory extends FieldManagerFactory {
-
-		@Override
-		FieldManager create(ObjectValue<XPOperand<?>> fieldManagerConfig) throws DataException {
-			String prefix;
-			if(fieldManagerConfig == null) throw new DataException(String.format("No field manager provided while expected on in xa field manager factory."));
-			try {
-				prefix = fieldManagerConfig.getAttributAsString("prefix");
-			} catch (ManagedException e) {
-				throw new DataException(e);
-			}
-			if(prefix == null) throw new DataException(String.format("The property prefix is not defined for XA Field Manager"));
-			
-			return new XAFieldManager(prefix);
-		}
-		
-	}
+public class SQLDataReader extends StandardDataReaderBase<Field> {
 	
 	protected String from = null;
 	protected String criteria = null;
@@ -93,7 +65,6 @@ public class SQLDataReader extends StandardDataReaderBase<Field> implements SQLD
 		
 	}
 
-	@Override
 	public String getSQL() throws DataException {
 		StringBuilder sql  = new StringBuilder();
 		
@@ -257,7 +228,7 @@ public class SQLDataReader extends StandardDataReaderBase<Field> implements SQLD
 	}
 
 	@Override
-	public SQLDataReader cloneDR() throws DataException {
+	public SQLDataReader cloneDM() throws DataException {
 		SQLDataReader res = new SQLDataReader(name, dataSource, evaluator, variableContext, config);
 		if(isOpen()) res.open();
 		return res;

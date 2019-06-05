@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import com.exa.data.DataReader;
+import com.exa.data.DataWriter;
 import com.exa.data.RowToFieldDataReader;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
@@ -36,6 +37,13 @@ public class DMFRowToField extends DataManFactory {
 	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator evaluator, VariableContext variableContext) throws ManagedException {
 	
 		return new RowToFieldDataReader(name, ovEntity, evaluator, variableContext, filesRepos, dataSources, defaultDataSource);
+	}
+
+	@Override
+	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval,
+			VariableContext vc) throws ManagedException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

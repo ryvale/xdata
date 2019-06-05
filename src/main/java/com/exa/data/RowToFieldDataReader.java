@@ -194,7 +194,7 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 	}
 
 	@Override
-	public RowToFieldDataReader cloneDR() throws DataException {
+	public RowToFieldDataReader cloneDM() throws DataException {
 		return new RowToFieldDataReader(name, config, evaluator, variableContext, filesRepos, dataSources, defaultDataSource);
 	}
 

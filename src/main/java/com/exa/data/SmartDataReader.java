@@ -230,7 +230,7 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 	}
 
 	@Override
-	public SmartDataReader cloneDR() {
+	public SmartDataReader cloneDM() {
 		
 		return null;
 	}

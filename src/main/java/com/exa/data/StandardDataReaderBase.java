@@ -58,7 +58,7 @@ public abstract class StandardDataReaderBase<_FIELD extends Field> implements Da
 	}
 	
 	@Override
-	public abstract StandardDataReaderBase<_FIELD> cloneDR() throws DataException;
+	public abstract StandardDataReaderBase<_FIELD> cloneDM() throws DataException;
 	
 	@Override
 	public DataReader<?> getSubDataReader(String name) {
@@ -103,7 +103,7 @@ public abstract class StandardDataReaderBase<_FIELD extends Field> implements Da
 	}
 
 	@Override
-	public DataReader<?> asDataReader() {
+	public StandardDataReaderBase<_FIELD> asDataReader() {
 		return this;
 	}
 
@@ -114,6 +114,12 @@ public abstract class StandardDataReaderBase<_FIELD extends Field> implements Da
 	public void setVariableContext(VariableContext variableContext) {
 		this.variableContext = variableContext;
 	}
+	
+	@Override
+	public DataWriter<?> asDataWriter() {
+		return null;
+	}
+
 	
 	public static void updateVariableContext(ObjectValue<XPOperand<?>> ov, VariableContext vc, VariableContext prentVC) {
 		Map<String, Value<?, XPOperand<?>>> mp = ov.getValue();

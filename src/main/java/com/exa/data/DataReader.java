@@ -4,7 +4,6 @@ import java.util.Date;
 
 public interface DataReader<_FIELD extends Field> extends DataMan {
 	_FIELD getField(String name);
-	boolean containsField(String fieldName);
 	
 	void executeFieldsAction(FieldAction<_FIELD> fa) throws DataException;
 	boolean next() throws DataException;
@@ -26,7 +25,7 @@ public interface DataReader<_FIELD extends Field> extends DataMan {
 	boolean isOpen();
 	
 	@Override
-	DataReader<_FIELD> cloneDR() throws DataException;
+	DataReader<_FIELD> cloneDM() throws DataException;
 	
 	DataReader<?> getSubDataReader(String name);
 	

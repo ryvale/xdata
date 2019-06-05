@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import com.exa.data.DataReader;
+import com.exa.data.DataWriter;
 import com.exa.data.sql.SQLDataReader;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
@@ -18,7 +19,6 @@ import com.exa.utils.values.ObjectValue;
 
 public class DMFSql extends DataManFactory {
 
-	
 	private Map<String, DataSource> dataSources = new HashMap<>();
 	
 	private String defaultDataSource;
@@ -44,6 +44,13 @@ public class DMFSql extends DataManFactory {
 		DataReader<?> dr = new SQLDataReader(name, ds, eval, variableContext, ovEntity);
 		
 		return dr;
+	}
+
+	@Override
+	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval,
+			VariableContext vc) throws ManagedException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
