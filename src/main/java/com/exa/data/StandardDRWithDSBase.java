@@ -8,6 +8,7 @@ import javax.sql.DataSource;
 import com.exa.data.config.DMFLibre;
 import com.exa.data.config.DMFRowToField;
 import com.exa.data.config.DMFSql;
+import com.exa.data.config.DMFXLiteral;
 import com.exa.data.config.DataManFactory;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
@@ -23,6 +24,8 @@ public abstract class StandardDRWithDSBase<_FIELD extends Field> extends Standar
 	public static final String DMFN_ROW_TO_FIELD = "row-to-field";
 	
 	public static final String DMFN_LIBRE = "libre";
+	
+	public static final String DMFN_XLITERAL = "x-literal";
 	
 	protected Map<String, DataManFactory> dmFactories = new HashMap<>();
 	
@@ -45,9 +48,18 @@ public abstract class StandardDRWithDSBase<_FIELD extends Field> extends Standar
 		
 		dmFactories.put(DMFN_LIBRE, new DMFLibre(filesRepos));
 		
+		dmFactories.put(DMFN_XLITERAL, new DMFXLiteral(filesRepos));
+		
 		dmFactories.put(DMFN_ROW_TO_FIELD, new DMFRowToField(filesRepos, dataSources, defaultDataSource));
 		
-		dmFactories.put(DMFN_SQL, new DMFSql(filesRepos, dataSources, defaultDataSource));
+		DataManFactory dmf = new DMFSql(filesRepos, dataSources, defaultDataSource);
+		
+		dmFactories.put(DMFN_SQL, dmf);
+		dmFactories.put("tsql", dmf);
+		dmFactories.put("plsql", dmf);
+		dmFactories.put("sql-server", dmf);
+		dmFactories.put("sql-oracle", dmf);
+		dmFactories.put("oracle", dmf);
 	}
 
 	/*public StandardDRWithDSBase(String name, ObjectValue<XPOperand<?>> config, FilesRepositories filesRepos, Map<String, DataSource> dataSources, String defaultDataSource) {

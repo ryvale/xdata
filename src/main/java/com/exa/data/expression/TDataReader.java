@@ -33,9 +33,14 @@ public class TDataReader extends TObjectClass<DataReader<?>, DataMan> {
 		omInt.addOperator(new MethodGetInteger());
 		methods.put("getInteger", new Method<>("getInteger", Integer.class, omInt));
 		
+		OMMethod<Boolean> omBl = new OMMethod<>("execute", 1, OMOperandType.POST_OPERAND);
+		omBl.addOperator(new MethodExecute());
+		methods.put("execute", new Method<>("execute", Boolean.class, omBl));
+		
 		properties.put("lineVisited", new Property<>("lineVisited", Integer.class, object -> object.lineVisited()));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Type<DataReader<?>> specificType() {
 		return this;

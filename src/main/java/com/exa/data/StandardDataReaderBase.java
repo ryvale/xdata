@@ -68,7 +68,9 @@ public abstract class StandardDataReaderBase<_FIELD extends Field> implements Da
 	@Override
 	public Object getObject(String fieldName) throws DataException {
 		_FIELD field = fields.get(fieldName);
-		if(field == null) throw new DataException(String.format("Unknown field name %s", fieldName));
+		if(field == null) return null; //throw new DataException(String.format("Unknown field name %s in data reader %s", fieldName, name));
+		
+		if("int".equals(field.getType()) || "integer".equals(field.getType())) return getInteger(fieldName);
 		
 		if("date".equals(field.getType()) || "datetime".equals(field.getType())) return getDate(fieldName);
 		

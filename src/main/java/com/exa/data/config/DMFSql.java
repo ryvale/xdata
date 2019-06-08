@@ -8,10 +8,11 @@ import javax.sql.DataSource;
 import com.exa.data.DataReader;
 import com.exa.data.DataWriter;
 import com.exa.data.sql.SQLDataReader;
+import com.exa.data.sql.SQLDataWriter;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.XPEvaluator;
-
+import com.exa.expression.parsing.Parser.UnknownIdentifierValidation;
 import com.exa.utils.ManagedException;
 import com.exa.utils.io.FilesRepositories;
 import com.exa.utils.values.ObjectValue;
@@ -25,6 +26,12 @@ public class DMFSql extends DataManFactory {
 	
 	public DMFSql(FilesRepositories filesRepos, Map<String, DataSource> dataSources, String defaultDataSource) {
 		super(filesRepos);
+		this.dataSources = dataSources;
+		this.defaultDataSource = defaultDataSource;
+	}
+	
+	public DMFSql(FilesRepositories filesRepos, Map<String, DataSource> dataSources, String defaultDataSource, UnknownIdentifierValidation uiv) {
+		super(filesRepos, uiv);
 		this.dataSources = dataSources;
 		this.defaultDataSource = defaultDataSource;
 	}
@@ -47,10 +54,19 @@ public class DMFSql extends DataManFactory {
 	}
 
 	@Override
-	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval,
-			VariableContext vc) throws ManagedException {
-		// TODO Auto-generated method stub
-		return null;
+	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext vc, DataReader<?> drSource) throws ManagedException {
+		String dsName = ovEntity.getAttributAsString("dataSource");
+		
+		if(dsName == null) dsName = defaultDataSource;
+		
+		if(dsName == null) throw new ManagedException(String.format("No data source provided."));
+		
+		DataSource ds = dataSources.get(dsName);
+		if(ds == null) throw new ManagedException(String.format("The data source %s specified  is not present.", dsName));
+		
+		DataWriter<?> dw = new SQLDataWriter(name, ds, drSource, eval, vc, ovEntity);
+		
+		return dw;
 	}
 
 }

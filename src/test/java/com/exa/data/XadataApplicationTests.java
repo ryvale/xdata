@@ -6,6 +6,8 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import com.exa.data.config.DMFSmart;
+import com.exa.data.config.DMFSql;
+import com.exa.data.config.DMFXLiteral;
 import com.exa.data.config.DataManFactory;
 import com.exa.data.expression.DCEvaluatorSetup;
 import com.exa.utils.ManagedException;
@@ -88,6 +90,53 @@ public class XadataApplicationTests extends TestCase {
         assertFalse(new Boolean(dr.next()));
         
 		dr.close();
+	}
+	
+	public void testDwSQL() throws ManagedException {
+		FilesRepositories filesRepo = new FilesRepositories();
+		
+		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
+		filesRepo.addRepoPart("data-config", new OSFileRepoPart("C:/Users/leader/Desktop/travaux"));
+		
+		SQLServerDataSource ds = new SQLServerDataSource();
+		ds.setUser("sa");  
+        ds.setPassword("e@mP0wer");  
+        ds.setServerName("192.168.23.129");  
+        ds.setPortNumber(1433);
+        ds.setDatabaseName("EAMPROD");
+        
+        Map<String, DataSource> dataSources = new HashMap<>();
+        dataSources.put("default", ds);
+        
+        DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
+        
+        DataManFactory dmfSQL = new DMFSql(filesRepo, dataSources, "default", (id, context) -> {
+        	if("updateMode".equals(id)) return "string";
+        	
+        	return null;
+        });//new DMFSmart(filesRepo, dataSources, "default");
+        DataManFactory dmfXL = new DMFXLiteral(filesRepo, (id, context) -> {
+        	if("updateMode".equals(id)) return "string";
+        	
+        	return null;
+        });
+        
+        DataReader<?> drSource = dmfXL.getDataReader("default:/test4#testData", evSetup);
+        
+        DataWriter<?> dw = dmfSQL.getDataWriter("default:/test4#r5uoms", evSetup, drSource);
+        
+        dw.open();
+        
+        drSource.open();
+        
+        while(drSource.next()) {
+        	dw.execute();
+        }
+        
+        drSource.close();
+        
+        
+		dw.close();
 	}
 }
  

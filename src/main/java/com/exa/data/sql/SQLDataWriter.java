@@ -29,7 +29,7 @@ import com.exa.utils.values.ObjectValue;
 import com.exa.utils.values.StringValue;
 import com.exa.utils.values.Value;
 
-public class SQLWriter extends StandardDataWriterBase<DynamicField> {
+public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 	protected final static Map<String, DataFormatter<?>> formatters = new HashMap<>();
 	protected final static Set<String> expTypes = new HashSet<>();
 	
@@ -44,12 +44,19 @@ public class SQLWriter extends StandardDataWriterBase<DynamicField> {
 		formatters.put("string-tsql", DF_STRING);
 		
 		DataFormatter<?> df = new SQLNumberFormatter();
-		formatters.put("string-sql", df);
-		formatters.put("string-sql-server", df);
-		formatters.put("string-oracle", df);
-		formatters.put("string-sql-oracle", df);
-		formatters.put("string-plsql", df);
-		formatters.put("string-tsql", df);
+		formatters.put("int-sql", df);
+		formatters.put("int-sql-server", df);
+		formatters.put("int-oracle", df);
+		formatters.put("int-sql-oracle", df);
+		formatters.put("int-plsql", df);
+		formatters.put("int-tsql", df);
+		
+		formatters.put("float-sql", df);
+		formatters.put("float-sql-server", df);
+		formatters.put("float-oracle", df);
+		formatters.put("float-sql-oracle", df);
+		formatters.put("float-plsql", df);
+		formatters.put("float-tsql", df);
 		
 		df = new PLSQLDateFormatter();
 		formatters.put("datetime-oracle", df);
@@ -57,6 +64,12 @@ public class SQLWriter extends StandardDataWriterBase<DynamicField> {
 		formatters.put("datetime-oracle", df);
 		formatters.put("datetime-sql-oracle", df);
 		formatters.put("datetime-plsql", df);
+		
+		formatters.put("date-oracle", df);
+		formatters.put("date-sql-oracle", df);
+		formatters.put("date-oracle", df);
+		formatters.put("date-sql-oracle", df);
+		formatters.put("date-plsql", df);
 		
 		expTypes.add("reader");expTypes.add("value");expTypes.add("sql");
 	}
@@ -76,11 +89,13 @@ public class SQLWriter extends StandardDataWriterBase<DynamicField> {
 	private Value<?, XPOperand<?>> vlType;
 	private List<Value<?, XPOperand<?>>> lstKey = new ArrayList<>();
 
-	public SQLWriter(String name, DataSource dataSource, DataReader<?> drSource, XPEvaluator evaluator, VariableContext variableContext, ObjectValue<XPOperand<?>> config) {
+	public SQLDataWriter(String name, DataSource dataSource, DataReader<?> drSource, XPEvaluator evaluator, VariableContext variableContext, ObjectValue<XPOperand<?>> config) {
 		super(name, drSource, evaluator, variableContext);
 		
 		this.config = config;
 		this.dataSource = dataSource;
+		
+		this.drSource = drSource;
 		
 		fieldsManagerFactories.put("default", new FieldManagerFactory());
 		fieldsManagerFactories.put("exa", new XAFieldManagerFactory());
@@ -93,6 +108,7 @@ public class SQLWriter extends StandardDataWriterBase<DynamicField> {
 			String table = vlTable.asRequiredString();
 			
 			if(lstKey.size() == 0) {
+				variableContext.assignOrDeclareVariable("updateMode", String.class, "insert");
 				String sql = getInsertSQL(table);
 				PreparedStatement ps = connection.prepareStatement(sql);
 				return ps.executeUpdate();
@@ -149,11 +165,11 @@ public class SQLWriter extends StandardDataWriterBase<DynamicField> {
 			
 			String updateSQL;
 			if(rs.next()) {
-				variableContext.assignOrDeclareVariable("updateMode", String.class, "insert");
+				variableContext.assignOrDeclareVariable("updateMode", String.class, "update");
 				updateSQL = getUpdateSQL(table, sbWhere.toString());
 			}
 			else {
-				variableContext.assignOrDeclareVariable("updateMode", String.class, "update");
+				variableContext.assignOrDeclareVariable("updateMode", String.class, "insert");
 				updateSQL = getInsertSQL(table);
 			}
 			ps.close();
@@ -182,6 +198,8 @@ public class SQLWriter extends StandardDataWriterBase<DynamicField> {
 		String type = vlType.asRequiredString();
 		
 		for(DynamicField field : fields.values()) {
+			if(!field.getVlCondition().asBoolean()) continue;
+			
 			sbFields.append(", ").append(fieldManager.toSQL(field.getName()));
 			if("reader".equals(field.getExpType())) {
 				String ft = field.getType() + "-" + type;
@@ -216,6 +234,8 @@ public class SQLWriter extends StandardDataWriterBase<DynamicField> {
 		String type = vlType.asRequiredString();
 		
 		for(DynamicField field : fields.values()) {
+			if(!field.getVlCondition().asBoolean()) continue;
+			
 			if("reader".equals(field.getExpType())) {
 				String ft = field.getType() + "-" + type;
 				DataFormatter<?> dataf = formatters.get(ft);
@@ -234,7 +254,8 @@ public class SQLWriter extends StandardDataWriterBase<DynamicField> {
 			
 			if("sql".equals(field.getExpType())) {
 				
-				sbFields.append(", ").append(field.getVlExp().asRequiredString());
+				sbFields.append(", ").
+					append(fieldManager.toSQL(field.getName())).append(" = ").append(field.getVlExp().asRequiredString());
 				continue;
 			}
 		}
@@ -249,24 +270,29 @@ public class SQLWriter extends StandardDataWriterBase<DynamicField> {
 		vlTable = config.getAttribut("table");
 		if(vlTable == null) vlTable = new StringValue<>(name);
 		
-		Value<?, XPOperand<?>> vlKey = config.getAttribut("key");
-		ArrayValue<XPOperand<?>> avKey = vlKey.asArrayValue();
-		if(avKey == null) {
-			StringValue<XPOperand<?>> svKey = vlKey.asStringValue();
-			if(svKey == null) {
-				CalculableValue<?, XPOperand<?>> clKey = vlKey.asCalculableValue();
-				if(clKey == null) throw new DataException(String.format("The Key attribut should be array, string or formula"));
-			}
-			lstKey.add(vlKey);
-		}
-		else {
-			for(Value<?, XPOperand<?>> vl : avKey.getValue()) {
-				lstKey.add(vl);
-			}
-		}
+		
 		try {
 			vlType = config.getRequiredAttribut("type");
 			ObjectValue<XPOperand<?>> fm = config.getAttributAsObjectValue("fields");
+			
+			Value<?, XPOperand<?>> vlKey = fm.getAttribut("key");
+			
+			if(vlKey != null) {
+				ArrayValue<XPOperand<?>> avKey = vlKey.asArrayValue();
+				if(avKey == null) {
+					StringValue<XPOperand<?>> svKey = vlKey.asStringValue();
+					if(svKey == null) {
+						CalculableValue<?, XPOperand<?>> clKey = vlKey.asCalculableValue();
+						if(clKey == null) throw new DataException(String.format("The Key attribut should be array, string or formula"));
+					}
+					lstKey.add(vlKey);
+				}
+				else {
+					for(Value<?, XPOperand<?>> vl : avKey.getValue()) {
+						lstKey.add(vl);
+					}
+				}
+			}
 			
 			String man;
 			ObjectValue<XPOperand<?>> ovManager = fm.getAttributAsObjectValue("manager");
@@ -286,7 +312,7 @@ public class SQLWriter extends StandardDataWriterBase<DynamicField> {
 				for(String fname : mpFields.keySet()) {
 					Value<?, XPOperand<?>> vlField = mpFields.get(fname);
 					
-					Value<?, XPOperand<?>> vlExp;
+					Value<?, XPOperand<?>> vlExp, vlCondition;
 					String type, expType;
 					BooleanValue<?> blField = vlField.asBooleanValue();
 					if(blField == null) {
@@ -297,17 +323,31 @@ public class SQLWriter extends StandardDataWriterBase<DynamicField> {
 							vlExp = ov.getRequiredAttribut("exp");
 							type = ov.getAttributAsString("type", "string");
 							expType = ov.getAttributAsString("expType", "reader");
+							vlCondition = ov.getAttribut("condition");
+							if(vlCondition == null) vlCondition = new BooleanValue<XPOperand<?>>(Boolean.TRUE);
+							else {
+								CalculableValue<?, XPOperand<?>> clCondition = vlCondition.asCalculableValue();
+								if(clCondition == null) {
+									if(vlCondition.asBooleanValue() == null) throw new ManagedException(String.format("Boolean expression expected as value of 'condition' propertu for the entity %s", name));
+								}
+								else {
+									if(!"boolean".equals(clCondition.typeName())) throw new ManagedException(String.format("Boolean expression expected as value of 'condition' propertu for the entity %s", name));
+								}
+								
+							}
 						}
 						else {
 							vlExp = sv;
 							expType = "reader";
 							type = "string";
+							vlCondition = new BooleanValue<XPOperand<?>>(Boolean.TRUE);
 						}
 					}
 					else {
 						vlExp = new StringValue<>(fname);
 						expType = "reader";
 						type = "string";
+						vlCondition = new BooleanValue<XPOperand<?>>(Boolean.TRUE);
 					}
 					
 					if(!expTypes.contains(expType)) throw new DataException(String.format("Invalid expresssion type '%' for field '%s'", expType, fname));
@@ -317,6 +357,7 @@ public class SQLWriter extends StandardDataWriterBase<DynamicField> {
 					
 					DynamicField field = new DynamicField(fname, type, expType);
 					field.setVlExp(vlExp);
+					field.setVlCondition(vlCondition);
 					
 					fields.put(fname, field);
 				}

@@ -52,18 +52,7 @@ public abstract class StandardDataWriterBase<_FIELD extends Field> implements Da
 
 	@Override
 	public boolean execute() throws DataException {
-		try {
-			drSource.open();
-			
-			while(drSource.next()) {
-				update(drSource);
-			}
-			
-			drSource.close();
-		}
-		finally {
-			try { drSource.close(); } catch(Exception e) {}
-		}
+		update(drSource);
 		
 		return true;
 	}

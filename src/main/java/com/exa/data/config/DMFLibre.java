@@ -25,7 +25,7 @@ public class DMFLibre extends DataManFactory {
 
 	@Override
 	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval,
-			VariableContext vc) throws ManagedException {
+			VariableContext vc, DataReader<?> drSource) throws ManagedException {
 		// TODO Auto-generated method stub
 		return null;
 	}
