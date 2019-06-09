@@ -54,7 +54,7 @@ public class DMFSql extends DataManFactory {
 	}
 
 	@Override
-	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext vc, DataReader<?> drSource) throws ManagedException {
+	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext vc, DataReader<?> drSource, boolean preventInsertion, boolean preventUpdate) throws ManagedException {
 		String dsName = ovEntity.getAttributAsString("dataSource");
 		
 		if(dsName == null) dsName = defaultDataSource;
@@ -64,7 +64,7 @@ public class DMFSql extends DataManFactory {
 		DataSource ds = dataSources.get(dsName);
 		if(ds == null) throw new ManagedException(String.format("The data source %s specified  is not present.", dsName));
 		
-		DataWriter<?> dw = new SQLDataWriter(name, ds, drSource, eval, vc, ovEntity);
+		DataWriter<?> dw = new SQLDataWriter(name, ds, drSource, eval, vc, ovEntity, preventInsertion, preventUpdate);
 		
 		return dw;
 	}

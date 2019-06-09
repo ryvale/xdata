@@ -22,8 +22,6 @@ public interface DataReader<_FIELD extends Field> extends DataMan {
 	
 	void close() throws DataException;
 	
-	boolean isOpen();
-	
 	@Override
 	DataReader<_FIELD> cloneDM() throws DataException;
 	

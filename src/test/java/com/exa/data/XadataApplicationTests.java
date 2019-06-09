@@ -111,6 +111,8 @@ public class XadataApplicationTests extends TestCase {
         DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
         
         DataManFactory dmfSQL = new DMFSql(filesRepo, dataSources, "default", (id, context) -> {
+        	if("rootOv".equals(id)) return "ObjectValue";
+        	
         	if("updateMode".equals(id)) return "string";
         	
         	return null;
@@ -134,7 +136,6 @@ public class XadataApplicationTests extends TestCase {
         }
         
         drSource.close();
-        
         
 		dw.close();
 	}

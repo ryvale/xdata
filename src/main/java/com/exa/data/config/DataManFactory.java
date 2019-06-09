@@ -91,7 +91,7 @@ public abstract class DataManFactory {
 		return dr;
 	}
 	
-	public DataWriter<?> getDataWriter(String drName, DCEvaluatorSetup evSetup, DataReader<?> drSource) throws ManagedException {
+	public DataWriter<?> getDataWriter(String drName, DCEvaluatorSetup evSetup, DataReader<?> drSource, boolean preventInsertion, boolean preventUpdate) throws ManagedException {
 		
 		String parts[] = drName.split("[#]");
 		
@@ -128,12 +128,16 @@ public abstract class DataManFactory {
 		VariableContext vc = new MapVariableContext(evaluator.getCurrentVariableContext());
 		evaluator.pushVariableContext(vc);
 		
-		DataWriter<?> dm = getDataWriter(ovEntities, name, evaluator, vc, drSource, Computing.getDefaultObjectLib(rootOV));
+		DataWriter<?> dm = getDataWriter(ovEntities, name, evaluator, vc, drSource, Computing.getDefaultObjectLib(rootOV), preventInsertion, preventUpdate);
 		
 		vc.addVariable("sourceDr", DataReader.class, drSource);
 		
 		vc.addVariable("rootDw", DataWriter.class, dm);
 		return dm;
+	}
+	
+	public DataWriter<?> getDataWriter(String drName, DCEvaluatorSetup evSetup, DataReader<?> drSource) throws ManagedException {
+		return getDataWriter(drName, evSetup, drSource, true, true);
 	}
 	
 	public static String getDRVariableName(String entityName) {
@@ -149,11 +153,11 @@ public abstract class DataManFactory {
 		return res;
 	}
 	
-	public DataWriter<?> getDataWriter(ObjectValue<XPOperand<?>> ovEntities, String name, XPEvaluator eval, VariableContext vc, DataReader<?> drSource, Map<String, ObjectValue<XPOperand<?>>> libOV) throws ManagedException {
+	public DataWriter<?> getDataWriter(ObjectValue<XPOperand<?>> ovEntities, String name, XPEvaluator eval, VariableContext vc, DataReader<?> drSource, Map<String, ObjectValue<XPOperand<?>>> libOV, boolean preventInsertion, boolean preventUpdate) throws ManagedException {
 		
 		ObjectValue<XPOperand<?>> ovEntity = parser.object(ovEntities, name, eval, vc, libOV);
 		
-		DataWriter<?> res = getDataWriter(name, ovEntity, eval, vc, drSource);
+		DataWriter<?> res = getDataWriter(name, ovEntity, eval, vc, drSource, preventInsertion, preventUpdate);
 		
 		return res;
 	}
@@ -161,5 +165,5 @@ public abstract class DataManFactory {
 	
 	public abstract DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext vc) throws ManagedException;
 	
-	public abstract DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext vc, DataReader<?> drSource) throws ManagedException;
+	public abstract DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext vc, DataReader<?> drSource, boolean preventInsertion, boolean preventUpdate) throws ManagedException;
 }

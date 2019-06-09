@@ -10,6 +10,7 @@ import com.exa.data.SmartDataReader;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.XPEvaluator;
+import com.exa.expression.parsing.Parser.UnknownIdentifierValidation;
 import com.exa.utils.ManagedException;
 import com.exa.utils.io.FilesRepositories;
 import com.exa.utils.values.ObjectValue;
@@ -33,6 +34,12 @@ public class DMFSmart extends DataManFactory {
 		this.dataSources = dataSources;
 		this.defaultDataSource = defaultDataSource;
 	}
+	
+	public DMFSmart(FilesRepositories filesRepos, Map<String, DataSource> dataSources, String defaultDataSource, UnknownIdentifierValidation uiv) {
+		super(filesRepos, uiv);
+		this.dataSources = dataSources;
+		this.defaultDataSource = defaultDataSource;
+	}
 
 	@Override
 	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> config, XPEvaluator eval, VariableContext variableContext) throws ManagedException {
@@ -41,7 +48,7 @@ public class DMFSmart extends DataManFactory {
 
 	@Override
 	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval,
-			VariableContext vc, DataReader<?> drSource) throws ManagedException {
+			VariableContext vc, DataReader<?> drSource, boolean preventInsertion, boolean preventUpdate) throws ManagedException {
 		// TODO Auto-generated method stub
 		return null;
 	}

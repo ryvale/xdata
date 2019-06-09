@@ -78,6 +78,10 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 	private Connection connection = null;
 	private ObjectValue<XPOperand<?>> config;
 	
+	private boolean preventUpdate;
+	
+	private boolean preventInsertion;
+	
 	private FieldManager fieldManager = null;
 	
 	protected Map<String, FieldManagerFactory> fieldsManagerFactories = new HashMap<>();
@@ -89,8 +93,11 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 	private Value<?, XPOperand<?>> vlType;
 	private List<Value<?, XPOperand<?>>> lstKey = new ArrayList<>();
 
-	public SQLDataWriter(String name, DataSource dataSource, DataReader<?> drSource, XPEvaluator evaluator, VariableContext variableContext, ObjectValue<XPOperand<?>> config) {
+	public SQLDataWriter(String name, DataSource dataSource, DataReader<?> drSource, XPEvaluator evaluator, VariableContext variableContext, ObjectValue<XPOperand<?>> config, boolean preventInsertion, boolean preventUpdate) {
 		super(name, drSource, evaluator, variableContext);
+		
+		this.preventInsertion = preventInsertion;
+		this.preventUpdate = preventUpdate;
 		
 		this.config = config;
 		this.dataSource = dataSource;
@@ -108,6 +115,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 			String table = vlTable.asRequiredString();
 			
 			if(lstKey.size() == 0) {
+				if(preventInsertion) return 0;
 				variableContext.assignOrDeclareVariable("updateMode", String.class, "insert");
 				String sql = getInsertSQL(table);
 				PreparedStatement ps = connection.prepareStatement(sql);
@@ -165,10 +173,12 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 			
 			String updateSQL;
 			if(rs.next()) {
+				if(preventUpdate) return 0;
 				variableContext.assignOrDeclareVariable("updateMode", String.class, "update");
 				updateSQL = getUpdateSQL(table, sbWhere.toString());
 			}
 			else {
+				if(preventInsertion) return 0;
 				variableContext.assignOrDeclareVariable("updateMode", String.class, "insert");
 				updateSQL = getInsertSQL(table);
 			}
@@ -395,13 +405,21 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 
 	@Override
 	public void close() throws DataException {
-		if(connection != null)
+		if(connection != null) {
 			try {
 				connection.close();
 			} catch (SQLException e) {
 				throw new DataException(e);
 			}
+			
+			connection = null;
+		}
 		
+	}
+
+	@Override
+	public boolean isOpen() {
+		return connection != null;
 	}
 
 }

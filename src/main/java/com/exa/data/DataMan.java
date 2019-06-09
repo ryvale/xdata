@@ -7,6 +7,8 @@ public interface DataMan {
 	
 	boolean execute() throws DataException;
 	
+	boolean isOpen();
+	
 	DataMan cloneDM() throws DataException;
 	
 	void setEvaluator(XPEvaluator evaluator);
