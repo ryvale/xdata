@@ -22,11 +22,14 @@ entities {
 		params { 
 			type 'requestbody-json',
 			
-			items [
-				{ name 'login',  value = login },
-				{ name 'pwd',  value = pwd },
-				{ name 'tokenRequired',  value true }
-			]
+			items {
+				login = login,
+				
+				pwd = pwd,
+				
+				tokenRequired { name 'tokenRequired', exp true }
+
+			}
 		},
 		
 		

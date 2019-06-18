@@ -27,7 +27,7 @@ entities {
 				
 				pwd = pwd,
 				
-				tokenRequired { column 'tokenRequired', exp true }
+				tokenRequired { name 'tokenRequired', exp true }
 
 			}
 		},

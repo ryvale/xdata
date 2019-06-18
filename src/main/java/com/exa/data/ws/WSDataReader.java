@@ -52,10 +52,12 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 	
 	private Value<?, XPOperand<?>> vlTable;
 	
+	private Value<?, XPOperand<?>> vlPath;
+	
 	private ArrayValue<XPOperand<?>> avHeaders;
 	
 	private Value<?, XPOperand<?>> vlParamsType;
-	private ArrayValue<XPOperand<?>> avParams;
+	private ObjectValue<XPOperand<?>> ovParams;
 	
 	protected int _lineVisited = 0;
 	
@@ -88,8 +90,12 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 
 	@Override
 	public String getString(String fieldName) throws DataException {
-		// TODO Auto-generated method stub
-		return null;
+		
+		try {
+			return responseMan.getString(fieldName);
+		} catch (ManagedException e) {
+			throw new DataException(e);
+		}
 	}
 
 	@Override
@@ -130,13 +136,18 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 			else avHeaders = null;
 			
 			if(config.containsAttribut("params")) {
-				ObjectValue<XPOperand<?>> ovParams = config.getAttributAsObjectValue("params");
-				if(ovParams == null) throw new DataException(String.format("The property '%s' of the entity %s should be an object", "params", name));
+				ObjectValue<XPOperand<?>> ovParamsRoot = config.getAttributAsObjectValue("params");
+				if(ovParamsRoot == null) throw new DataException(String.format("The property '%s' of the entity %s should be an object", "params", name));
 				
-				vlParamsType  = ovParams.getAttribut("type");
+				vlParamsType  = ovParamsRoot.getAttribut("type");
 				
-				avParams = ovParams.getRequiredAttributAsArrayValue("items");
+				ovParams = ovParamsRoot.getRequiredAttributAsObjectValue("items");
 			}
+			
+			ObjectValue<XPOperand<?>> ovFieldMan = config.getRequiredAttributAsObjectValue("fields");
+			
+			vlPath = ovFieldMan.getAttribut("path");
+			if(vlPath != null && !"string".equals(vlPath.typeName())) throw new DataException(String.format("The property '%s' of the entity %s should be an object", "fields.path", name));
 			
 			Value<?, XPOperand<?>> vlFields = config.getPathAttribut("fields.items");
 			if(vlFields == null) throw new DataException(String.format("The property '%s' of the entity %s should be an array", "fields.items", name));
@@ -202,25 +213,30 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 			}
 			
 			
+			String rt = vlResponseType.asRequiredString();
+			RMFactory rf = respManagers.get(rt);
+			if(rf == null) throw new DataException(String.format("The response manager %s is unknown in entity", rt, name));
+			
 			Request.Builder rb = wsDataSource.getRequestBuilder(vlTable.asString());
 			
-			RequestBody body;
 			if(vlParamsType != null) {
 				String paramType = vlParamsType.asRequiredString();
 				ParamTranslartor pt = paramsTranslators.get(paramType);
 				
 				if(pt == null) throw new DataException(String.format("The params type %s is unknown in entity %s", paramType, name));
 				
-				body = pt.translate(rb, avParams);
+				RequestBody body = pt.translate(rb, ovParams);
 				
 				if(body != null) rb.post(body);
 			}
 			
-			String rt = vlResponseType.asRequiredString();
+			/*String rt = vlResponseType.asRequiredString();
 			RMFactory rf = respManagers.get(rt);
-			if(rf == null) throw new DataException(String.format("The response manager %s is unknown in entity", rt, name));
+			if(rf == null) throw new DataException(String.format("The response manager %s is unknown in entity", rt, name));*/
 			
-			ResponseManager rm = rf.create(fields, vlTable.asString());
+			responseMan = rf.create(fields, vlPath == null ? null : vlPath.asString());
+			
+			responseMan.manage(rb);
 			
 			Request request = rb.build();
 			
@@ -228,9 +244,9 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 			
 			Response response = httpClient.newCall(request).execute();
 			
-			rm.open(response);
+			responseMan.manage(response);
 			
-			rm.close();
+			//rm.close();
 			
 		} catch (ManagedException | IOException e) {
 			throw new DataException(e);

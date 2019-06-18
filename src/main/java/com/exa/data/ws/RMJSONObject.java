@@ -3,17 +3,19 @@ package com.exa.data.ws;
 import java.io.IOException;
 import java.util.Map;
 
-import org.springframework.boot.json.JsonJsonParser;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+
+import com.exa.data.DataException;
 import com.exa.data.DynamicField;
 import com.exa.utils.ManagedException;
+import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 public class RMJSONObject extends ResponseManager {
-	//protected Response response;
-	JsonJsonParser jsonParser = new JsonJsonParser();
 	
-	private Map<String, Object> valuesCache = null;
+	private JSONObject valuesCache = null;
 	
 	private Map<String, DynamicField> fields;
 	
@@ -50,32 +52,37 @@ public class RMJSONObject extends ResponseManager {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public void open(Response response) throws IOException, ManagedException {
-		Map<String, Object> valuesCacheRoot = jsonParser.parseMap(response.body().string());
-		if(path == null) {
-			valuesCache = valuesCacheRoot;
-			return;
-		}
-		
-		String[] parts = path.split("[.]");
-		
-		Map<String, Object> mpValues = valuesCache;
-		
-		for(int i=0; i < parts.length;i++) {
-			Object obj = mpValues.get(parts[i]);
-			if(obj == null) read = true;
+	public void manage(Response response) throws DataException {
+		String strResp;
+		try {
+			strResp = response.body().string();
 			
-			if(!(obj instanceof Map)) throw new ManagedException(String.format("Non json object met when following the path %", path));
+			valuesCache = new JSONObject(strResp);
+			
+			if(path == null) return;
+			
+			
+			String[] parts = path.split("[.]");
+			
+			JSONObject mpValues = valuesCache;
+			
+			for(int i=0; i < parts.length;i++) {
+				JSONObject obj = mpValues.getJSONObject(parts[i]);
+				if(obj == null) read = true;
+				
+				//if(!(obj instanceof Map)) throw new DataException(String.format("Non json object met when following the path %", path));
 
-			mpValues = (Map<String, Object>)obj;
+				mpValues = obj;
+			}
+			
+			valuesCache = mpValues;
+		} catch (IOException | JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		
-		valuesCache = mpValues;
-	}
+			
+		//System.out.println(strResp);
 
-	@Override
-	public void close() {
-		// TODO Auto-generated method stub
 		
 	}
 
@@ -85,43 +92,55 @@ public class RMJSONObject extends ResponseManager {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private Object browseCache(String path) throws ManagedException {
+	private Object browseCache(String path) throws JSONException  {
 		String[] parts = path.split("[.]");
 		
-		Map<String, Object> mpValues = valuesCache;
+		JSONObject mpValues = valuesCache;
 		
 		for(int i=0; i < parts.length-1; i++) {
-			Object obj = mpValues.get(parts[i]);
+			JSONObject obj = mpValues.getJSONObject(parts[i]);
 			if(obj == null) read = true;
 			
-			if(!(obj instanceof Map)) throw new ManagedException(String.format("Non json object met when following the path %", path));
+			//if(!(obj instanceof Map)) throw new ManagedException(String.format("Non json object met when following the path %", path));
 
-			mpValues = (Map<String, Object>)obj;
+			mpValues = obj;
 		}
 		
 		return mpValues.get(parts[parts.length - 1]);
 	}
 	
 	@Override
-	public String getString(String name) throws ManagedException {
+	public String getString(String name) throws DataException {
 		DynamicField df = fields.get(name);
 		
-		if(df == null) throw new ManagedException(String.format("The field %s is not defined", name));
+		if(df == null) throw new DataException(String.format("The field %s is not defined", name));
 		
-		if(!"string".equals(df.getType())) throw new ManagedException(String.format("The field %s is not string", name));
+		if(!"string".equals(df.getType())) throw new DataException(String.format("The field %s is not string", name));
 		
-		if("ws".equals(df.getExpType()))  {
-			String path = df.getVlExp().asString();
+		try {
+			if("ws".equals(df.getExpType()))  {
+				String path = df.getVlExp().asString();
+				
+				Object ob = browseCache(path);
+				if(!(ob instanceof String))  throw new ManagedException(String.format("The field %s value is not string", name));
+				
+				return ob.toString();
+			}
 			
-			Object ob = browseCache(path);
-			if(!(ob instanceof String))  throw new ManagedException(String.format("The field %s value is not string", name));
-			
-			return ob.toString();
-		}
-		
-		if("value".equals(df.getExpType())) return df.getVlExp().asString();
+			if("value".equals(df.getExpType())) return df.getVlExp().asString();
 		
 		return null;
+		
+		}
+		catch (Exception e) {
+			throw new DataException(e);
+		}
+	}
+
+	@Override
+	public void manage(Request.Builder builder) throws IOException, ManagedException {
+		builder.addHeader("content-type", "application/json");
+		
 	}
 	
 

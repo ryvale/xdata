@@ -168,7 +168,11 @@ public class XadataApplicationTests extends TestCase {
 		
 		dr.next();
 		
-		System.out.println(dr.getInteger("admin"));
+		System.out.println(dr.getString("status"));
+		
+		System.out.println(dr.getString("profile"));
+		
+		System.out.println(dr.getString("token"));
 		
 		dr.close();
 	}
