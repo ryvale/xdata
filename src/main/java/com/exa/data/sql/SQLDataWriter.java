@@ -16,6 +16,7 @@ import javax.sql.DataSource;
 import com.exa.data.DataException;
 import com.exa.data.DataReader;
 import com.exa.data.DataWriter;
+import com.exa.data.DynamicField;
 import com.exa.data.StandardDataWriterBase;
 import com.exa.data.sql.oracle.PLSQLDateFormatter;
 import com.exa.expression.VariableContext;
@@ -71,7 +72,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 		formatters.put("date-sql-oracle", df);
 		formatters.put("date-plsql", df);
 		
-		expTypes.add("reader");expTypes.add("value");expTypes.add("sql");
+		expTypes.add("default");expTypes.add("reader");expTypes.add("value");expTypes.add("sql");
 	}
 	
 	private DataSource dataSource;
@@ -364,6 +365,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 					
 					if("value".equals(expType) && !"string".equals(type)) throw new DataException(String.format("For the expression type 'value' the field type should be instead of %s for field %s", type, fname));
 					
+					if("default".equals(expType)) expType = "reader";
 					
 					DynamicField field = new DynamicField(fname, type, expType);
 					field.setVlExp(vlExp);

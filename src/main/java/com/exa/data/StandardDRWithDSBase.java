@@ -3,11 +3,10 @@ package com.exa.data;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.sql.DataSource;
-
 import com.exa.data.config.DMFLibre;
 import com.exa.data.config.DMFRowToField;
 import com.exa.data.config.DMFSql;
+import com.exa.data.config.DMFWebService;
 import com.exa.data.config.DMFXLiteral;
 import com.exa.data.config.DataManFactory;
 import com.exa.expression.VariableContext;
@@ -27,17 +26,19 @@ public abstract class StandardDRWithDSBase<_FIELD extends Field> extends Standar
 	
 	public static final String DMFN_XLITERAL = "x-literal";
 	
+	public static final String DMFN_WS = "ws";
+	
 	protected Map<String, DataManFactory> dmFactories = new HashMap<>();
 	
 	protected ObjectValue<XPOperand<?>> config;
 	
 	protected FilesRepositories filesRepos;
 	
-	protected Map<String, DataSource> dataSources;
+	protected Map<String, XADataSource> dataSources;
 	
 	protected String defaultDataSource;
 	
-	public StandardDRWithDSBase(String name, ObjectValue<XPOperand<?>> config, XPEvaluator evaluator, VariableContext variableContext, FilesRepositories filesRepos, Map<String, DataSource> dataSources, String defaultDataSource) {
+	public StandardDRWithDSBase(String name, ObjectValue<XPOperand<?>> config, XPEvaluator evaluator, VariableContext variableContext, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource) {
 		super(name, evaluator, variableContext);
 		
 		this.config = config;
@@ -51,6 +52,8 @@ public abstract class StandardDRWithDSBase<_FIELD extends Field> extends Standar
 		dmFactories.put(DMFN_XLITERAL, new DMFXLiteral(filesRepos));
 		
 		dmFactories.put(DMFN_ROW_TO_FIELD, new DMFRowToField(filesRepos, dataSources, defaultDataSource));
+		
+		dmFactories.put(DMFN_WS, new DMFWebService(filesRepos, dataSources, defaultDataSource));
 		
 		DataManFactory dmf = new DMFSql(filesRepos, dataSources, defaultDataSource);
 		

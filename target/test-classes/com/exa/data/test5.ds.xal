@@ -1,0 +1,44 @@
+:sql,
+
+references {
+	
+},
+
+entities {
+
+	loginParam(login, pwd, tokenRequired @boolean ) {
+		type 'ws',
+		
+		table 'user/check-access',
+		
+		requestType 'post',
+		
+		responseType 'json-object',
+		
+		headers [ 
+			{ name 'Content-Type', value 'application/json' } 
+		],
+		
+		params { 
+			type 'requestbody-json',
+			
+			items [
+				{ name 'login',  value = login },
+				{ name 'pwd',  value = pwd },
+				{ name 'tokenRequired',  value true }
+			]
+		},
+		
+		
+		fields {
+			
+			items {
+				status,
+				
+				token 'extended.token',
+				
+				profile 'extended.profile'
+			}
+		}
+	}
+}

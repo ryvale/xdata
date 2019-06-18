@@ -7,9 +7,12 @@ import javax.sql.DataSource;
 
 import com.exa.data.config.DMFSmart;
 import com.exa.data.config.DMFSql;
+import com.exa.data.config.DMFWebService;
 import com.exa.data.config.DMFXLiteral;
 import com.exa.data.config.DataManFactory;
 import com.exa.data.expression.DCEvaluatorSetup;
+import com.exa.data.sql.XASQLDataSource;
+import com.exa.data.ws.WSDataSource;
 import com.exa.utils.ManagedException;
 import com.exa.utils.io.FilesRepositories;
 import com.exa.utils.io.OSFileRepoPart;
@@ -36,8 +39,8 @@ public class XadataApplicationTests extends TestCase {
         ds.setPortNumber(1433);   
         ds.setDatabaseName("EAMPROD");
         
-        Map<String, DataSource> dataSources = new HashMap<>();
-        dataSources.put("default", ds);
+        Map<String, XADataSource> dataSources = new HashMap<>();
+        dataSources.put("default", new XASQLDataSource(ds));
         
         DataManFactory dmf = new DMFSmart(filesRepo, dataSources, "default");
         
@@ -67,8 +70,8 @@ public class XadataApplicationTests extends TestCase {
         ds.setPortNumber(1433);
         ds.setDatabaseName("EAMPROD");
         
-        Map<String, DataSource> dataSources = new HashMap<>();
-        dataSources.put("default", ds);
+        Map<String, XADataSource> dataSources = new HashMap<>();
+        dataSources.put("default", new XASQLDataSource(ds));
         
         DataManFactory dmf = new DMFSmart(filesRepo, dataSources, "default");
         
@@ -105,8 +108,8 @@ public class XadataApplicationTests extends TestCase {
         ds.setPortNumber(1433);
         ds.setDatabaseName("EAMPROD");
         
-        Map<String, DataSource> dataSources = new HashMap<>();
-        dataSources.put("default", ds);
+        Map<String, XADataSource> dataSources = new HashMap<>();
+        dataSources.put("default", new XASQLDataSource(ds));
         
         DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
         
@@ -138,6 +141,36 @@ public class XadataApplicationTests extends TestCase {
         drSource.close();
         
 		dw.close();
+	}
+	
+	public void testWS() throws ManagedException {
+		FilesRepositories filesRepo = new FilesRepositories();
+		
+		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
+		
+		Map<String, XADataSource> dataSources = new HashMap<>();
+		dataSources.put("default", new WSDataSource("http://localhost:8082/i-eam-jade/"));
+		
+		DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
+		evSetup.addVaraiable("login", String.class, "admin");
+        evSetup.addVaraiable("pwd", String.class, "admin");
+        evSetup.addVaraiable("tokenRequired", Boolean.class, Boolean.TRUE);
+		
+		DataManFactory dmfWS = new DMFWebService(filesRepo, dataSources, "default", (id, context) -> {
+        	if("rootOv".equals(id)) return "ObjectValue";
+        	
+        	return null;
+        });
+		
+		DataReader<?> dr = dmfWS.getDataReader("default:/test5#loginParam", evSetup);
+		
+		dr.open();
+		
+		dr.next();
+		
+		System.out.println(dr.getInteger("admin"));
+		
+		dr.close();
 	}
 }
  

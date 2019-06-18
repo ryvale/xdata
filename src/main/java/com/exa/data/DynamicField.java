@@ -1,6 +1,5 @@
-package com.exa.data.sql;
+package com.exa.data;
 
-import com.exa.data.Field;
 import com.exa.expression.XPOperand;
 import com.exa.utils.values.Value;
 

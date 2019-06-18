@@ -2,11 +2,10 @@ package com.exa.data.config;
 
 import java.util.Map;
 
-import javax.sql.DataSource;
-
 import com.exa.data.DataReader;
 import com.exa.data.DataWriter;
 import com.exa.data.SmartDataReader;
+import com.exa.data.XADataSource;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.XPEvaluator;
@@ -17,10 +16,10 @@ import com.exa.utils.values.ObjectValue;
 
 public class DMFSmart extends DataManFactory {
 	
-	private Map<String, DataSource> dataSources;
+	private Map<String, XADataSource> dataSources;
 	private String defaultDataSource;
 
-	public DMFSmart(FilesRepositories filesRepos, Map<String, DataSource> dataSources, String defaultDataSource) {
+	public DMFSmart(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource) {
 		
 		super(filesRepos, (id, context) -> {
 			if("rootDr".equals(id)) return "DataReader";
@@ -35,7 +34,7 @@ public class DMFSmart extends DataManFactory {
 		this.defaultDataSource = defaultDataSource;
 	}
 	
-	public DMFSmart(FilesRepositories filesRepos, Map<String, DataSource> dataSources, String defaultDataSource, UnknownIdentifierValidation uiv) {
+	public DMFSmart(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, UnknownIdentifierValidation uiv) {
 		super(filesRepos, uiv);
 		this.dataSources = dataSources;
 		this.defaultDataSource = defaultDataSource;
