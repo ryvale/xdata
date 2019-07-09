@@ -1,4 +1,4 @@
-package com.exa.data.ws;
+package com.exa.data.web;
 
 import java.io.IOException;
 import java.util.Map;

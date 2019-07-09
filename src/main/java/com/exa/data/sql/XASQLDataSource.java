@@ -3,7 +3,7 @@ package com.exa.data.sql;
 import javax.sql.DataSource;
 
 import com.exa.data.XADataSource;
-import com.exa.data.ws.WSDataSource;
+import com.exa.data.web.WSDataSource;
 
 public class XASQLDataSource implements XADataSource {
 	

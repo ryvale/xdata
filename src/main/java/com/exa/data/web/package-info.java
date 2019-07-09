@@ -5,4 +5,4 @@
  * @author leader
  *
  */
-package com.exa.data.ws;
+package com.exa.data.web;

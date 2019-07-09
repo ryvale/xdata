@@ -1,4 +1,4 @@
-package com.exa.data.ws;
+package com.exa.data.web;
 
 import java.util.Date;
 import java.util.Map;
@@ -91,7 +91,7 @@ class PTJSONRequestBody implements ParamTranslartor {
 		MediaType mediaType = MediaType.parse("application/json;");
 		String strBody = "{" + (sb.length() > 0 ? sb.substring(2) : "") + "}";
 		
-		System.out.println(strBody);
+		//System.out.println(strBody);
 		
 		RequestBody body = RequestBody.create(mediaType, strBody);
 		

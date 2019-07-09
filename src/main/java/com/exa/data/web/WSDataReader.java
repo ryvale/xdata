@@ -1,10 +1,12 @@
-package com.exa.data.ws;
+package com.exa.data.web;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -46,6 +48,8 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 	private ObjectValue<XPOperand<?>> config;
 	
 	private WSDataSource wsDataSource;
+	
+	private List<Value<?, XPOperand<?>>>  respFormatsValid = new ArrayList<>();
 	
 	private Value<?, XPOperand<?>> vlRequestType = null;
 	private Value<?, XPOperand<?>> vlResponseType;
@@ -149,7 +153,7 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 			vlPath = ovFieldMan.getAttribut("path");
 			if(vlPath != null && !"string".equals(vlPath.typeName())) throw new DataException(String.format("The property '%s' of the entity %s should be an object", "fields.path", name));
 			
-			Value<?, XPOperand<?>> vlFields = config.getPathAttribut("fields.items");
+			Value<?, XPOperand<?>> vlFields = ovFieldMan.getAttribut("items");
 			if(vlFields == null) throw new DataException(String.format("The property '%s' of the entity %s should be an array", "fields.items", name));
 			
 			ObjectValue<XPOperand<?>> ovFields = vlFields.asObjectValue();

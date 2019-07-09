@@ -3,8 +3,7 @@ package com.exa.data;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.sql.DataSource;
-
+import com.exa.data.config.DMFMap;
 import com.exa.data.config.DMFSmart;
 import com.exa.data.config.DMFSql;
 import com.exa.data.config.DMFWebService;
@@ -12,7 +11,7 @@ import com.exa.data.config.DMFXLiteral;
 import com.exa.data.config.DataManFactory;
 import com.exa.data.expression.DCEvaluatorSetup;
 import com.exa.data.sql.XASQLDataSource;
-import com.exa.data.ws.WSDataSource;
+import com.exa.data.web.WSDataSource;
 import com.exa.utils.ManagedException;
 import com.exa.utils.io.FilesRepositories;
 import com.exa.utils.io.OSFileRepoPart;
@@ -159,6 +158,8 @@ public class XadataApplicationTests extends TestCase {
 		DataManFactory dmfWS = new DMFWebService(filesRepo, dataSources, "default", (id, context) -> {
         	if("rootOv".equals(id)) return "ObjectValue";
         	
+        	if("rootDr".equals(id)) return "DataReader";
+        	
         	return null;
         });
 		
@@ -173,6 +174,32 @@ public class XadataApplicationTests extends TestCase {
 		System.out.println(dr.getString("profile"));
 		
 		System.out.println(dr.getString("token"));
+		
+		dr.close();
+	}
+	
+	public void testMapReader() throws ManagedException {
+		FilesRepositories filesRepo = new FilesRepositories();
+		
+		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
+		
+		Map<String, Object> mp = new HashMap<>();
+		mp.put("f1", "a");
+		mp.put("f2", "b");
+		
+		DataManFactory dmf =  new DMFMap(filesRepo, () -> mp);
+		
+		DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
+		
+		DataReader<?> dr = dmf.getDataReader("default:/test6#test", evSetup);
+		
+		dr.open();
+		
+		dr.next();
+		
+		System.out.println(dr.getString("f1"));
+		
+		assertTrue("b".equals(dr.getString("f2")));
 		
 		dr.close();
 	}

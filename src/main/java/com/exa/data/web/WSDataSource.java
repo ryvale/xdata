@@ -1,4 +1,4 @@
-package com.exa.data.ws;
+package com.exa.data.web;
 
 import com.exa.data.XADataSource;
 import com.exa.data.sql.XASQLDataSource;

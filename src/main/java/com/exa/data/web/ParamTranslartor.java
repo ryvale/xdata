@@ -1,4 +1,4 @@
-package com.exa.data.ws;
+package com.exa.data.web;
 
 import com.exa.expression.XPOperand;
 import com.exa.utils.ManagedException;
