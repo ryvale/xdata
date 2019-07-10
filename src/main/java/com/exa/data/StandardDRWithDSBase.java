@@ -7,6 +7,7 @@ import com.exa.data.MapReader.MapGetter;
 import com.exa.data.config.DMFLibre;
 import com.exa.data.config.DMFMap;
 import com.exa.data.config.DMFRowToField;
+import com.exa.data.config.DMFSpSql;
 import com.exa.data.config.DMFSql;
 import com.exa.data.config.DMFWebService;
 import com.exa.data.config.DMFXLiteral;
@@ -31,6 +32,8 @@ public abstract class StandardDRWithDSBase<_FIELD extends Field> extends Standar
 	public static final String DMFN_WS = "ws";
 	
 	public static final String DMFN_MAP = "map";
+	
+	public static final String DMFN_SP_SQL = "sp-sql";
 	
 	protected Map<String, DataManFactory> dmFactories = new HashMap<>();
 	
@@ -60,6 +63,8 @@ public abstract class StandardDRWithDSBase<_FIELD extends Field> extends Standar
 		dmFactories.put(DMFN_WS, new DMFWebService(filesRepos, dataSources, defaultDataSource));
 		
 		dmFactories.put(DMFN_MAP, new DMFMap(filesRepos, dataSources, defaultDataSource));
+		
+		dmFactories.put(DMFN_SP_SQL, new DMFSpSql(filesRepos, dataSources, defaultDataSource));
 		
 		DataManFactory dmf = new DMFSql(filesRepos, dataSources, defaultDataSource);
 		

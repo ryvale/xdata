@@ -23,6 +23,7 @@ D:\p-project\exa-data\xadata\src\main\java\com\exa\data\sql\XASQLDataSource.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\config\DataManFactory.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\MethodExecute.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\sql\SQLDataReader.java
+D:\p-project\exa-data\xadata\src\main\java\com\exa\data\sql\StoredProcedureReader.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\sql\oracle\PLSQLDateFormatter.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\config\DMFLibre.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\XADataSource.java
@@ -41,6 +42,7 @@ D:\p-project\exa-data\xadata\src\main\java\com\exa\data\config\DMFSql.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\MethodGetDouble.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\config\DMFRowToField.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\DataWriter.java
+D:\p-project\exa-data\xadata\src\main\java\com\exa\data\config\DMFSpSql.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\FieldAction.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\config\package-info.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\DataMan.java

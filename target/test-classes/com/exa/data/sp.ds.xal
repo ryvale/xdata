@@ -1,0 +1,34 @@
+:sp-sql,
+
+references {
+	seqNext(entity, sEcalc) {
+		type 'sp-sql',
+		
+		table 'R5O7_O7MAXSEQ',
+		
+		params { 
+			sCalc,
+			
+			sEtype = entity,
+			
+			sEcalc = sEcalc,
+			
+			sChk
+		},
+		
+		fields {
+		
+			items {
+				value "sCalc",
+				
+				status "sChk"
+			}
+		}
+	}
+},
+
+entities {
+
+	newWOCode @seqNext("EVNT", "1")
+
+}

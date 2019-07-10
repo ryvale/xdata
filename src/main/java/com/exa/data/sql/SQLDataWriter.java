@@ -271,8 +271,6 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 			}
 		}
 		
-		
-		
 		return "UPDATE " + table + " SET " + sbFields.substring(2)  + " WHERE "  + where;
 	}
 

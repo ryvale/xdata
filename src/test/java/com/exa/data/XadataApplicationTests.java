@@ -5,13 +5,12 @@ import java.util.Map;
 
 import com.exa.data.config.DMFMap;
 import com.exa.data.config.DMFSmart;
+import com.exa.data.config.DMFSpSql;
 import com.exa.data.config.DMFSql;
-import com.exa.data.config.DMFWebService;
 import com.exa.data.config.DMFXLiteral;
 import com.exa.data.config.DataManFactory;
 import com.exa.data.expression.DCEvaluatorSetup;
 import com.exa.data.sql.XASQLDataSource;
-import com.exa.data.web.WSDataSource;
 import com.exa.utils.ManagedException;
 import com.exa.utils.io.FilesRepositories;
 import com.exa.utils.io.OSFileRepoPart;
@@ -140,6 +139,34 @@ public class XadataApplicationTests extends TestCase {
         drSource.close();
         
 		dw.close();
+	}
+	
+	public void testStoredProcSQL() throws ManagedException {
+		FilesRepositories filesRepo = new FilesRepositories();
+		
+		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
+		filesRepo.addRepoPart("data-config", new OSFileRepoPart("C:/Users/leader/Desktop/travaux"));
+		
+		SQLServerDataSource ds = new SQLServerDataSource();
+		ds.setUser("sa");  
+        ds.setPassword("e@mP0wer");  
+        ds.setServerName("192.168.23.129");  
+        ds.setPortNumber(1433);
+        ds.setDatabaseName("EAMPROD");
+        
+        Map<String, XADataSource> dataSources = new HashMap<>();
+        dataSources.put("default", new XASQLDataSource(ds));
+        
+        DataManFactory dmf = new DMFSpSql(filesRepo, dataSources, "default");
+        
+        DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
+        
+        DataReader<?> dr = dmf.getDataReader("default:/sp#newWOCode", evSetup);
+        
+        dr.open();
+        
+        System.out.println(dr.getString("value"));
+        dr.close();
 	}
 	
 	/*public void testWS() throws ManagedException {
