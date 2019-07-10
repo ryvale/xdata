@@ -1,11 +1,11 @@
 package com.exa.data.config;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import com.exa.data.DataReader;
 import com.exa.data.DataWriter;
 import com.exa.data.XADataSource;
+import com.exa.data.config.utils.DMutils;
 import com.exa.data.web.WSDataReader;
 import com.exa.data.web.WSDataSource;
 import com.exa.expression.VariableContext;
@@ -18,24 +18,18 @@ import com.exa.utils.values.ObjectValue;
 
 public class DMFWebService extends DataManFactory {
 	
-	private Map<String, XADataSource> dataSources = new HashMap<>();
-	
-	private String defaultDataSource;
-	
 	public DMFWebService(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource) {
-		super(filesRepos);
-		this.dataSources = dataSources;
-		this.defaultDataSource = defaultDataSource;
+		super(filesRepos, dataSources, defaultDataSource);
+
 	}
 	
 	public DMFWebService(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, UnknownIdentifierValidation uiv) {
-		super(filesRepos, uiv);
-		this.dataSources = dataSources;
-		this.defaultDataSource = defaultDataSource;
+		super(filesRepos, dataSources, defaultDataSource, uiv);
+		
 	}
 
 	@Override
-	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval,VariableContext vc) throws ManagedException {
+	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval,VariableContext vc, DMutils dmu) throws ManagedException {
 		String dsName = ovEntity.getAttributAsString("dataSource");
 		
 		if(dsName == null) dsName = defaultDataSource;
@@ -51,13 +45,13 @@ public class DMFWebService extends DataManFactory {
 		/*DataSource ds = xasqlds.getDataSource();
 		if(ds == null) throw new ManagedException(String.format("The data source %s specified is not present.", dsName));*/
 		
-		DataReader<?> dr = new WSDataReader(dsName, eval, vc, ovEntity, ds);
+		DataReader<?> dr = new WSDataReader(dsName, eval, vc, ovEntity, ds, dmu);
 		
 		return dr;
 	}
 
 	@Override
-	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext vc, DataReader<?> drSource, boolean preventInsertion, boolean preventUpdate)
+	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext vc, DataReader<?> drSource, DMutils dmu, boolean preventInsertion, boolean preventUpdate)
 			throws ManagedException {
 		// TODO Auto-generated method stub
 		return null;

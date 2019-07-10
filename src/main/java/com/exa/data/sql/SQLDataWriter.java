@@ -18,6 +18,7 @@ import com.exa.data.DataReader;
 import com.exa.data.DataWriter;
 import com.exa.data.DynamicField;
 import com.exa.data.StandardDataWriterBase;
+import com.exa.data.config.utils.DMutils;
 import com.exa.data.sql.oracle.PLSQLDateFormatter;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
@@ -92,10 +93,11 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 	private Value<?, XPOperand<?>> fieldsItems;
 	private Value<?, XPOperand<?>> vlWhere = null;
 	private Value<?, XPOperand<?>> vlType;
+	private Value<?, XPOperand<?>> vlStop;
 	private List<Value<?, XPOperand<?>>> lstKey = new ArrayList<>();
 
-	public SQLDataWriter(String name, DataSource dataSource, DataReader<?> drSource, XPEvaluator evaluator, VariableContext variableContext, ObjectValue<XPOperand<?>> config, boolean preventInsertion, boolean preventUpdate) {
-		super(name, drSource, evaluator, variableContext);
+	public SQLDataWriter(String name, DataSource dataSource, DataReader<?> drSource, XPEvaluator evaluator, VariableContext variableContext, ObjectValue<XPOperand<?>> config, DMutils dmu, boolean preventInsertion, boolean preventUpdate) {
+		super(name, drSource, evaluator, variableContext, dmu);
 		
 		this.preventInsertion = preventInsertion;
 		this.preventUpdate = preventUpdate;
@@ -112,7 +114,11 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 	@Override
 	public int update(DataReader<?> dr) throws DataException {
 		
+		
 		try {
+			boolean stop = vlStop.asBoolean();
+			if(stop) return 0;
+			
 			String table = vlTable.asRequiredString();
 			
 			if(lstKey.size() == 0) {
@@ -282,6 +288,13 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 		
 		try {
 			vlType = config.getRequiredAttribut("type");
+			
+			vlStop = config.getAttribut("continue");
+			if(vlStop == null) vlStop = new BooleanValue<>(Boolean.FALSE);
+			
+			
+			if(!"boolean".equals(vlStop.typeName()) ) throw new DataException(String.format("The property stop should boolean in reader %s", name));
+			
 			ObjectValue<XPOperand<?>> fm = config.getAttributAsObjectValue("fields");
 			
 			Value<?, XPOperand<?>> vlKey = fm.getAttribut("key");
@@ -391,6 +404,10 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 		 	}
 			vlWhere = config.getAttribut("criteria");
 			
+			for(DataReader<?> dr : dmu.getReaders().values()) {
+				dr.open();
+			}
+			
 			connection = dataSource.getConnection();
 		}
 		catch(ManagedException|SQLException e) {
@@ -405,12 +422,11 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 
 	@Override
 	public void close() throws DataException {
+		for(DataReader<?> dr : dmu.getReaders().values()) {
+			try { dr.close(); } catch(DataException e) { e.printStackTrace();}
+		}
 		if(connection != null) {
-			try {
-				connection.close();
-			} catch (SQLException e) {
-				throw new DataException(e);
-			}
+			try { connection.close(); } catch (SQLException e) { e.printStackTrace(); }
 			
 			connection = null;
 		}

@@ -7,7 +7,7 @@ import com.exa.data.DataWriter;
 import com.exa.data.MapDataSource;
 import com.exa.data.MapReader;
 import com.exa.data.XADataSource;
-
+import com.exa.data.config.utils.DMutils;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.XPEvaluator;
@@ -18,28 +18,16 @@ import com.exa.utils.values.ObjectValue;
 
 public class DMFMap  extends DataManFactory {
 	
-	private Map<String, XADataSource> dataSources;
-	
-	private String defaultDataSource;
-
-
 	public DMFMap(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource) {
-		super(filesRepos);
-		
-		this.dataSources = dataSources;
-		this.defaultDataSource = defaultDataSource;
-
+		super(filesRepos, dataSources, defaultDataSource);
 	}
 	
 	public DMFMap(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, UnknownIdentifierValidation uiv) {
-		super(filesRepos, uiv);
-		
-		this.dataSources = dataSources;
-		this.defaultDataSource = defaultDataSource;
+		super(filesRepos, dataSources, defaultDataSource, uiv);
 	}
 
 	@Override
-	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext vc) throws ManagedException {
+	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext vc, DMutils dmu) throws ManagedException {
 		String dsName = ovEntity.getAttributAsString("dataSource");
 		
 		if(dsName == null) dsName = defaultDataSource;
@@ -51,11 +39,11 @@ public class DMFMap  extends DataManFactory {
 		
 		MapDataSource ds = xaDS.asMapDataSource();
 		
-		return new MapReader(name, eval, vc, ovEntity, ds.getMapGetter());
+		return new MapReader(name, eval, vc, ovEntity, dmu, ds.getMapGetter());
 	}
 
 	@Override
-	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext vc, DataReader<?> drSource, boolean preventInsertion, boolean preventUpdate) throws ManagedException {
+	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext vc, DataReader<?> drSource, DMutils dmu, boolean preventInsertion, boolean preventUpdate) throws ManagedException {
 		// TODO Auto-generated method stub
 		return null;
 	}

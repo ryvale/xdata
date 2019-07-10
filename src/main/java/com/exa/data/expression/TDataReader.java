@@ -37,6 +37,10 @@ public class TDataReader extends TObjectClass<DataReader<?>, DataMan> {
 		omBl.addOperator(new MethodExecute());
 		methods.put("execute", new Method<>("execute", Boolean.class, omBl));
 		
+		omBl = new OMMethod<>("next", 1, OMOperandType.POST_OPERAND);
+		omBl.addOperator(new DrMethodNext());
+		methods.put("next", new Method<>("next", Boolean.class, omBl));
+		
 		properties.put("lineVisited", new Property<>("lineVisited", Integer.class, object -> object.lineVisited()));
 	}
 

@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.exa.data.config.DataManFactory;
+import com.exa.data.config.utils.DMutils;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.XPEvaluator;
@@ -47,8 +48,8 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 	
 	protected Map<String, Object> values = new LinkedHashMap<>();
 	
-	public RowToFieldDataReader(String name, ObjectValue<XPOperand<?>> config, XPEvaluator evaluator, VariableContext variableContext, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource) {
-		super(name, config, evaluator, variableContext, filesRepos, dataSources, defaultDataSource);
+	public RowToFieldDataReader(String name, ObjectValue<XPOperand<?>> config, XPEvaluator evaluator, VariableContext variableContext, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMutils dmu) {
+		super(name, config, evaluator, variableContext, filesRepos, dataSources, defaultDataSource, dmu);
 	}
 
 	@Override
@@ -105,7 +106,7 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 			
 			if(dmf == null) throw new ManagedException(String.format("the type %s is unknown", type));
 			
-			drSource = dmf.getDataReader("source", ovSource, evaluator, variableContext);
+			drSource = dmf.getDataReader("source", ovSource, evaluator, variableContext, dmu);
 			
 			variableContext.addVariable("sourceDr", DataReader.class, drSource);
 			
@@ -173,6 +174,9 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 				values.put(field.name, field.defaultValueExp.getValue());
 			}
 			
+			for(DataReader<?> dr : dmu.getReaders().values()) {
+				dr.open();
+			}
 			return drSource.open();
 		} catch (ManagedException e) {
 			throw new DataException(e);
@@ -183,7 +187,11 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 
 	@Override
 	public void close() throws DataException {
-		if(drSource != null) drSource.close();
+		if(drSource != null) try { drSource.close();} catch(DataException e) { e.printStackTrace();}
+		
+		for(DataReader<?> dr : dmu.getReaders().values()) {
+			try { dr.close(); } catch(DataException e) { e.printStackTrace();}
+		}
 	}
 
 	@Override
@@ -193,7 +201,7 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 
 	@Override
 	public RowToFieldDataReader cloneDM() throws DataException {
-		return new RowToFieldDataReader(name, config, evaluator, variableContext, filesRepos, dataSources, defaultDataSource);
+		return new RowToFieldDataReader(name, config, evaluator, variableContext, filesRepos, dataSources, defaultDataSource, dmu);
 	}
 
 	@Override

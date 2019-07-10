@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.exa.data.MapReader.MapGetter;
 import com.exa.data.config.DataManFactory;
+import com.exa.data.config.utils.DMutils;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.MapVariableContext;
@@ -39,8 +40,8 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 	protected Integer _lineVisited = 0;
 		
 	
-	public SmartDataReader(String name, ObjectValue<XPOperand<?>> config, XPEvaluator evaluator, VariableContext variableContext, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, MapGetter mapGetter) {
-		super(name, config, evaluator, variableContext, filesRepos, dataSources, defaultDataSource);
+	public SmartDataReader(String name, ObjectValue<XPOperand<?>> config, XPEvaluator evaluator, VariableContext variableContext, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMutils dmu, MapGetter mapGetter) {
+		super(name, config, evaluator, variableContext, filesRepos, dataSources, defaultDataSource, dmu);
 	}
 	
 	public void addMainDataReader(String name, DataReader<?> dataReader) throws DataException {
@@ -136,6 +137,10 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		currentMainReader = drIndex.next();
 		currentMainReader.open();
 		
+		for(DataReader<?> dr : dmu.getReaders().values()) {
+			dr.open();
+		}
+		
 		for(DataMan dm : afterMainActions.values()) {
 			DataReader<?> dr = dm.asDataReader();
 			if(dr == null) continue;
@@ -155,7 +160,7 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		if(dmf == null) throw new ManagedException(String.format("the type %s is unknown", type));
 		
 		
-		DataReader<?> res = dmf.getDataReader(drName, ovDRConfig, evaluator, vc);
+		DataReader<?> res = dmf.getDataReader(drName, ovDRConfig, evaluator, vc, dmu);
 		
 		//res.setEvaluator(evaluator);
 		return res;
@@ -163,16 +168,20 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 
 	@Override
 	public void close() throws DataException {
+		for(DataReader<?> dr : dmu.getReaders().values()) {
+			try { dr.close(); } catch(DataException e) { e.printStackTrace();}
+		}
+		
 		for(DataMan dm : afterMainActions.values()) {
 			DataReader<?> dr = dm.asDataReader();
 			if(dr == null) continue;
-			dr.close();
+			try { dr.close(); } catch(DataException e) { e.printStackTrace();}
 		}
 		
 		for(DataMan dm : oneTimeActions.values()) {
 			DataReader<?> dr = dm.asDataReader();
 			if(dr == null) continue;
-			dr.close();
+			try { dr.close(); } catch(DataException e) { e.printStackTrace();}
 		}
 		
 		for(DataMan dm : alwaysActions.values()) {
@@ -184,13 +193,11 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		for(DataMan dm : afterMainOneTimeActions.values()) {
 			DataReader<?> dr = dm.asDataReader();
 			if(dr == null) continue;
-			dr.close();
+			try { dr.close(); } catch(DataException e) { e.printStackTrace();}
 		}
 		
-		
-		
 		for(DataReader<?> dr : mainReaders.values()) {
-			dr.close();
+			try { dr.close(); } catch(DataException e) { e.printStackTrace();}
 		}
 	}
 

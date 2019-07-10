@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.exa.data.config.utils.DMutils;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.XPEvaluator;
@@ -44,8 +45,8 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 	private int rowIndex = -1;
 	
 	
-	public XLiteralDataReader(String name, XPEvaluator evaluator, VariableContext variableContext, ObjectValue<XPOperand<?>> config) {
-		super(name, evaluator, variableContext);
+	public XLiteralDataReader(String name, XPEvaluator evaluator, VariableContext variableContext, ObjectValue<XPOperand<?>> config, DMutils dmu) {
+		super(name, evaluator, variableContext, dmu);
 		this.config = config;
 	}
 
@@ -157,7 +158,9 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 		 	ArrayValue<XPOperand<?>> avRows = config.getAttributAsArrayValue("rows");
 		 	if(avRows == null) return true;
 		 	
-		 	
+		 	for(DataReader<?> dr : dmu.getReaders().values()) {
+				dr.open();
+			}
 		 	List<Value<?, XPOperand<?>>> lstRows = avRows.getValue();
 		 	int nb = lstRows.size();
 		 	
@@ -188,6 +191,7 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 		 		
 		 	}
 
+		 	
 		} catch (ManagedException e) {
 			throw new DataException(e);
 		}
@@ -196,6 +200,9 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 
 	@Override
 	public void close() throws DataException {
+		for(DataReader<?> dr : dmu.getReaders().values()) {
+			try { dr.close(); } catch(DataException e) { e.printStackTrace();}
+		}
 		rowIndex = -1;
 		rows.clear();
 	}
@@ -212,7 +219,7 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 
 	@Override
 	public XLiteralDataReader cloneDM() throws DataException {
-		return new XLiteralDataReader(name, evaluator, variableContext, config);
+		return new XLiteralDataReader(name, evaluator, variableContext, config, dmu);
 	}
 
 }

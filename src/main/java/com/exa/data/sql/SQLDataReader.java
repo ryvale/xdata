@@ -11,8 +11,10 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import com.exa.data.DataException;
+import com.exa.data.DataReader;
 import com.exa.data.Field;
 import com.exa.data.StandardDataReaderBase;
+import com.exa.data.config.utils.DMutils;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.XPEvaluator;
@@ -42,8 +44,8 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 	
 	protected int _lineVisited = 0;
 	
-	public SQLDataReader(String name, DataSource dataSource, XPEvaluator evaluator, VariableContext variableContext, ObjectValue<XPOperand<?>> config) throws DataException {
-		super(name, evaluator, variableContext);
+	public SQLDataReader(String name, DataSource dataSource, XPEvaluator evaluator, VariableContext variableContext, ObjectValue<XPOperand<?>> config, DMutils dmu) throws DataException {
+		super(name, evaluator, variableContext, dmu);
 		this.dataSource = dataSource;
 		this.config = config;
 		
@@ -175,6 +177,10 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 			orderBy  = config.getAttributAsString("orderBy");
 			groupBy  = config.getAttributAsString("groupBy");
 			
+			for(DataReader<?> dr : dmu.getReaders().values()) {
+				dr.open();
+			}
+			
 			connection = dataSource.getConnection();
 			System.out.println("connexion open for Data reader" + this.hashCode());
 			String sql = getSQL();
@@ -194,11 +200,14 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 
 	@Override
 	public void close() throws DataException {
+		for(DataReader<?> dr : dmu.getReaders().values()) {
+			try { dr.close(); } catch(DataException e) { e.printStackTrace();}
+		}
 		try {
 			connection.close();
 			System.out.println("connexion closed for Data reader" + this.hashCode());
 		} catch (SQLException e) {
-			throw new  DataException(e);
+			e.printStackTrace();
 		}
 		
 	}
@@ -229,7 +238,7 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 
 	@Override
 	public SQLDataReader cloneDM() throws DataException {
-		SQLDataReader res = new SQLDataReader(name, dataSource, evaluator, variableContext, config);
+		SQLDataReader res = new SQLDataReader(name, dataSource, evaluator, variableContext, config, dmu);
 		if(isOpen()) res.open();
 		return res;
 		

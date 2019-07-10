@@ -2,6 +2,7 @@ package com.exa.data;
 
 import java.util.Date;
 
+import com.exa.data.config.utils.DMutils;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 
@@ -16,11 +17,11 @@ public class LibreDataReader extends StandardDataReaderBase<Field> {
 	
 	protected Integer _lineVisited = 0;
 	
-	private Value<?, ?> vlEOF;
+	private Value<?, ?> vlEOF = null;
 	
 	
-	public LibreDataReader(String name, ObjectValue<XPOperand<?>> config, XPEvaluator evaluator, VariableContext variableContext) {
-		super(name, evaluator, variableContext);
+	public LibreDataReader(String name, ObjectValue<XPOperand<?>> config, XPEvaluator evaluator, VariableContext variableContext, DMutils dmu) {
+		super(name, evaluator, variableContext, dmu);
 		this.config = config;
 	}
 
@@ -70,6 +71,9 @@ public class LibreDataReader extends StandardDataReaderBase<Field> {
 				cl.setEvaluator(evaluator);
 			}
 			
+			for(DataReader<?> dr : dmu.getReaders().values()) {
+				dr.open();
+			}
 			
 			return true;
 		} catch (ManagedException e) {
@@ -80,14 +84,17 @@ public class LibreDataReader extends StandardDataReaderBase<Field> {
 
 	@Override
 	public void close() throws DataException {
-		// TODO Auto-generated method stub
+		for(DataReader<?> dr : dmu.getReaders().values()) {
+			try { dr.close(); } catch (Exception e) { e.printStackTrace(); }
+		}
+		
+		vlEOF = null;
 		
 	}
 
 	@Override
 	public boolean isOpen() {
-		// TODO Auto-generated method stub
-		return false;
+		return vlEOF != null;
 	}
 
 	@Override

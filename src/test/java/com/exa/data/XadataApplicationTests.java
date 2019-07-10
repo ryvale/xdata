@@ -41,10 +41,11 @@ public class XadataApplicationTests extends TestCase {
         dataSources.put("default", new XASQLDataSource(ds));
         
         DataManFactory dmf = new DMFSmart(filesRepo, dataSources, "default");
+        dmf.initialize();
         
         DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
         
-        DataReader<?> dr = dmf.getDataReader("default:/test1", evSetup);
+        DataReader<?> dr = dmf.getDataReader("default:/smart1", evSetup);
         
         dr.open();
         
@@ -72,13 +73,14 @@ public class XadataApplicationTests extends TestCase {
         dataSources.put("default", new XASQLDataSource(ds));
         
         DataManFactory dmf = new DMFSmart(filesRepo, dataSources, "default");
+        dmf.initialize();
         
         DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
         
         evSetup.addVaraiable("start", String.class, "01/02/2016");
         evSetup.addVaraiable("end", String.class, "17/08/2018");
         
-        DataReader<?> dr = dmf.getDataReader("default:/test2#entity2", evSetup);
+        DataReader<?> dr = dmf.getDataReader("default:/smart2#entity2", evSetup);
         
         dr.open();
         
@@ -116,17 +118,23 @@ public class XadataApplicationTests extends TestCase {
         	
         	if("updateMode".equals(id)) return "string";
         	
+        	if("dmu".equals(id)) return "DMUtils";
+        	
         	return null;
         });//new DMFSmart(filesRepo, dataSources, "default");
-        DataManFactory dmfXL = new DMFXLiteral(filesRepo, (id, context) -> {
+        dmfSQL.initialize();
+        DataManFactory dmfXL = new DMFXLiteral(filesRepo, dataSources, "default", (id, context) -> {
         	if("updateMode".equals(id)) return "string";
+        	
+        	if("dmu".equals(id)) return "DMUtils";
         	
         	return null;
         });
+        dmfXL.initialize();
         
-        DataReader<?> drSource = dmfXL.getDataReader("default:/test4#testData", evSetup);
+        DataReader<?> drSource = dmfXL.getDataReader("default:/sql-w#testData", evSetup);
         
-        DataWriter<?> dw = dmfSQL.getDataWriter("default:/test4#r5uoms", evSetup, drSource);
+        DataWriter<?> dw = dmfSQL.getDataWriter("default:/sql-w#r5uoms", evSetup, drSource);
         
         dw.open();
         
@@ -139,6 +147,61 @@ public class XadataApplicationTests extends TestCase {
         drSource.close();
         
 		dw.close();
+	}
+	
+	public void testDwSQL2() throws ManagedException {
+		FilesRepositories filesRepo = new FilesRepositories();
+		
+		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
+		filesRepo.addRepoPart("data-config", new OSFileRepoPart("C:/Users/leader/Desktop/travaux"));
+		
+		SQLServerDataSource ds = new SQLServerDataSource();
+		ds.setUser("sa");  
+        ds.setPassword("e@mP0wer");  
+        ds.setServerName("192.168.23.129");  
+        ds.setPortNumber(1433);
+        ds.setDatabaseName("EAMPROD");
+        
+        Map<String, XADataSource> dataSources = new HashMap<>();
+        dataSources.put("default", new XASQLDataSource(ds));
+        
+        DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
+        
+        DataManFactory dmfSQL = new DMFSql(filesRepo, dataSources, "default", (id, context) -> {
+        	if("rootOv".equals(id)) return "ObjectValue";
+        	
+        	if("updateMode".equals(id)) return "string";
+        	
+        	return null;
+        });//new DMFSmart(filesRepo, dataSources, "default");
+        dmfSQL.initialize();
+        
+        
+        DataManFactory dmfXL = new DMFXLiteral(filesRepo, dataSources, "default", (id, context) -> {
+        	if("updateMode".equals(id)) return "string";
+        	
+        	if("dmu".equals(id)) return "DMUtils";
+        	
+        	return null;
+        });
+        dmfXL.initialize();
+        DataReader<?> drSource = dmfXL.getDataReader("default:/sql-w#testData", evSetup);
+        
+        /*DataWriter<?> dw = dmfSQL.getDataWriter("default:/sql-w#udm", evSetup, drSource);
+        
+        dw.open();
+        
+        drSource.open();
+        
+        while(drSource.next()) {
+        	dw.execute();
+        }
+        
+        drSource.close();
+        
+        dw.execute();
+        
+		dw.close();*/
 	}
 	
 	public void testStoredProcSQL() throws ManagedException {
@@ -158,10 +221,11 @@ public class XadataApplicationTests extends TestCase {
         dataSources.put("default", new XASQLDataSource(ds));
         
         DataManFactory dmf = new DMFSpSql(filesRepo, dataSources, "default");
+        dmf.initialize();
         
         DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
         
-        DataReader<?> dr = dmf.getDataReader("default:/sp#newWOCode", evSetup);
+        DataReader<?> dr = dmf.getDataReader("default:/sp-sql#newWOCode", evSetup);
         
         dr.open();
         
@@ -218,6 +282,7 @@ public class XadataApplicationTests extends TestCase {
         dataSources.put("default", new MapDataSource(() -> mp));
 		
 		DataManFactory dmf =  new DMFMap(filesRepo, dataSources, "default");
+		dmf.initialize();
 		
 		DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
 		

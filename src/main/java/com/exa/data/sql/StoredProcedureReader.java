@@ -14,9 +14,10 @@ import java.util.Set;
 import javax.sql.DataSource;
 
 import com.exa.data.DataException;
-
+import com.exa.data.DataReader;
 import com.exa.data.DynamicField;
 import com.exa.data.StandardDataReaderBase;
+import com.exa.data.config.utils.DMutils;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.XPEvaluator;
@@ -90,8 +91,8 @@ public class StoredProcedureReader  extends StandardDataReaderBase<DynamicField>
 	
 	private CallableStatement spStatement;
 
-	public StoredProcedureReader(String name, DataSource dataSource, XPEvaluator evaluator, VariableContext variableContext, ObjectValue<XPOperand<?>> config) {
-		super(name, evaluator, variableContext);
+	public StoredProcedureReader(String name, DataSource dataSource, XPEvaluator evaluator, VariableContext variableContext, ObjectValue<XPOperand<?>> config, DMutils dmu) {
+		super(name, evaluator, variableContext, dmu);
 		this.dataSource = dataSource;
 		
 		this.config = config;
@@ -317,6 +318,10 @@ public class StoredProcedureReader  extends StandardDataReaderBase<DynamicField>
 			}
 			if(sbSql.length() > 0) sbSql.delete(0, 2);
 			
+			for(DataReader<?> dr : dmu.getReaders().values()) {
+				dr.open();
+			}
+			
 			connection = dataSource.getConnection();
 			String sql = "{call " + vlTable.asRequiredString() + "(" + sbSql + ")}";
 			System.out.println(sql);
@@ -351,6 +356,9 @@ public class StoredProcedureReader  extends StandardDataReaderBase<DynamicField>
 		params.clear();
 		if(connection != null)
 			try {
+				for(DataReader<?> dr : dmu.getReaders().values()) {
+					dr.close();
+				}
 				connection.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -369,7 +377,7 @@ public class StoredProcedureReader  extends StandardDataReaderBase<DynamicField>
 
 	@Override
 	public StoredProcedureReader cloneDM() throws DataException {
-		return new StoredProcedureReader(name, dataSource, evaluator, variableContext, config);
+		return new StoredProcedureReader(name, dataSource, evaluator, variableContext, config, dmu);
 	}
 
 	

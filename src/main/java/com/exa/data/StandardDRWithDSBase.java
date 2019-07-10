@@ -3,7 +3,6 @@ package com.exa.data;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.exa.data.MapReader.MapGetter;
 import com.exa.data.config.DMFLibre;
 import com.exa.data.config.DMFMap;
 import com.exa.data.config.DMFRowToField;
@@ -12,6 +11,7 @@ import com.exa.data.config.DMFSql;
 import com.exa.data.config.DMFWebService;
 import com.exa.data.config.DMFXLiteral;
 import com.exa.data.config.DataManFactory;
+import com.exa.data.config.utils.DMutils;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.XPEvaluator;
@@ -45,8 +45,8 @@ public abstract class StandardDRWithDSBase<_FIELD extends Field> extends Standar
 	
 	protected String defaultDataSource;
 	
-	public StandardDRWithDSBase(String name, ObjectValue<XPOperand<?>> config, XPEvaluator evaluator, VariableContext variableContext, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource) {
-		super(name, evaluator, variableContext);
+	public StandardDRWithDSBase(String name, ObjectValue<XPOperand<?>> config, XPEvaluator evaluator, VariableContext variableContext, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMutils dmu) {
+		super(name, evaluator, variableContext, dmu);
 		
 		this.config = config;
 		
@@ -54,9 +54,9 @@ public abstract class StandardDRWithDSBase<_FIELD extends Field> extends Standar
 		this.dataSources = dataSources;
 		this.defaultDataSource = defaultDataSource;
 		
-		dmFactories.put(DMFN_LIBRE, new DMFLibre(filesRepos));
+		dmFactories.put(DMFN_LIBRE, new DMFLibre(filesRepos, dataSources, defaultDataSource));
 		
-		dmFactories.put(DMFN_XLITERAL, new DMFXLiteral(filesRepos));
+		dmFactories.put(DMFN_XLITERAL, new DMFXLiteral(filesRepos, dataSources, defaultDataSource));
 		
 		dmFactories.put(DMFN_ROW_TO_FIELD, new DMFRowToField(filesRepos, dataSources, defaultDataSource));
 		
@@ -74,6 +74,8 @@ public abstract class StandardDRWithDSBase<_FIELD extends Field> extends Standar
 		dmFactories.put("sql-server", dmf);
 		dmFactories.put("sql-oracle", dmf);
 		dmFactories.put("oracle", dmf);
+		
+		for(DataManFactory dmFactory : dmFactories.values()) { dmFactory.initialize(); }
 	}
 
 	/*public StandardDRWithDSBase(String name, ObjectValue<XPOperand<?>> config, FilesRepositories filesRepos, Map<String, DataSource> dataSources, String defaultDataSource) {

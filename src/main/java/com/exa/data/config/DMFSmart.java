@@ -6,6 +6,7 @@ import java.util.Map;
 import com.exa.data.DataReader;
 import com.exa.data.DataWriter;
 import com.exa.data.MapReader.MapGetter;
+import com.exa.data.config.utils.DMutils;
 import com.exa.data.SmartDataReader;
 import com.exa.data.XADataSource;
 import com.exa.expression.VariableContext;
@@ -18,14 +19,11 @@ import com.exa.utils.values.ObjectValue;
 
 public class DMFSmart extends DataManFactory {
 	
-	private Map<String, XADataSource> dataSources;
-	private String defaultDataSource;
-	
 	private MapGetter mapGetter;
 
 	public DMFSmart(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, MapGetter mapGetter) {
 		
-		super(filesRepos, (id, context) -> {
+		super(filesRepos, dataSources, defaultDataSource, (id, context) -> {
 			if("rootDr".equals(id)) return "DataReader";
 			if("rootOv".equals(id)) return "ObjectValue";
 			String p[] = context.split("[.]");
@@ -44,19 +42,19 @@ public class DMFSmart extends DataManFactory {
 	}
 	
 	public DMFSmart(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, UnknownIdentifierValidation uiv) {
-		super(filesRepos, uiv);
+		super(filesRepos, dataSources, defaultDataSource, uiv);
 		this.dataSources = dataSources;
 		this.defaultDataSource = defaultDataSource;
 	}
 
 	@Override
-	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> config, XPEvaluator eval, VariableContext variableContext) throws ManagedException {
-		return new SmartDataReader(name, config, eval, variableContext, filesRepos, dataSources, defaultDataSource, mapGetter);
+	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> config, XPEvaluator eval, VariableContext variableContext, DMutils dmu) throws ManagedException {
+		return new SmartDataReader(name, config, eval, variableContext, filesRepos, dataSources, defaultDataSource, dmu, mapGetter);
 	}
 
 	@Override
 	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval,
-			VariableContext vc, DataReader<?> drSource, boolean preventInsertion, boolean preventUpdate) throws ManagedException {
+			VariableContext vc, DataReader<?> drSource, DMutils dmu, boolean preventInsertion, boolean preventUpdate) throws ManagedException {
 		// TODO Auto-generated method stub
 		return null;
 	}

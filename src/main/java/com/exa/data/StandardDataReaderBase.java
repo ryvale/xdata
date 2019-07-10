@@ -3,6 +3,7 @@ package com.exa.data;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.exa.data.config.utils.DMutils;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.XPEvaluator;
@@ -22,12 +23,15 @@ public abstract class StandardDataReaderBase<_FIELD extends Field> implements Da
 	
 	protected VariableContext variableContext;
 	
-	public StandardDataReaderBase(String name, XPEvaluator evaluator, VariableContext variableContext) {
+	protected DMutils dmu;
+	
+	public StandardDataReaderBase(String name, XPEvaluator evaluator, VariableContext variableContext, DMutils dmu) {
 		super();
 		this.name = name;
 		
 		this.evaluator = evaluator;
 		this.variableContext = variableContext;
+		this.dmu = dmu;
 	}
 	
 	/*public StandardDataReaderBase(String name, VariableContext variableContext) {

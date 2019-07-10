@@ -11,9 +11,11 @@ import java.util.Map;
 import java.util.Set;
 
 import com.exa.data.DataException;
+import com.exa.data.DataReader;
 import com.exa.data.DynamicField;
 
 import com.exa.data.StandardDataReaderBase;
+import com.exa.data.config.utils.DMutils;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.XPEvaluator;
@@ -69,8 +71,8 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 	
 	//private ArrayValue<XPOperand<?>> avFields;
 	
-	public WSDataReader(String name, XPEvaluator evaluator, VariableContext variableContext, ObjectValue<XPOperand<?>> config, WSDataSource wsDataSource) {
-		super(name, evaluator, variableContext);
+	public WSDataReader(String name, XPEvaluator evaluator, VariableContext variableContext, ObjectValue<XPOperand<?>> config, WSDataSource wsDataSource, DMutils dmu) {
+		super(name, evaluator, variableContext, dmu);
 		
 		this.config = config;
 		this.wsDataSource = wsDataSource;
@@ -234,10 +236,10 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 				if(body != null) rb.post(body);
 			}
 			
-			/*String rt = vlResponseType.asRequiredString();
-			RMFactory rf = respManagers.get(rt);
-			if(rf == null) throw new DataException(String.format("The response manager %s is unknown in entity", rt, name));*/
-			
+
+			for(DataReader<?> dr : dmu.getReaders().values()) {
+				dr.open();
+			}
 			responseMan = rf.create(fields, vlPath == null ? null : vlPath.asString());
 			
 			responseMan.manage(rb);
@@ -263,6 +265,9 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 
 	@Override
 	public void close() throws DataException {
+		for(DataReader<?> dr : dmu.getReaders().values()) {
+			try { dr.close(); } catch(DataException e) { e.printStackTrace();}
+		}
 		responseMan = null;
 		
 	}

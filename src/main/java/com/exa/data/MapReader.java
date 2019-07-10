@@ -3,6 +3,7 @@ package com.exa.data;
 import java.util.Date;
 import java.util.Map;
 
+import com.exa.data.config.utils.DMutils;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.XPEvaluator;
@@ -28,8 +29,8 @@ public class MapReader extends StandardDataReaderBase<Field> {
 	
 	private ObjectValue<XPOperand<?>> config;
 
-	public MapReader(String name, XPEvaluator evaluator, VariableContext variableContext, ObjectValue<XPOperand<?>> config, MapGetter mapGetter) {
-		super(name, evaluator, variableContext);
+	public MapReader(String name, XPEvaluator evaluator, VariableContext variableContext, ObjectValue<XPOperand<?>> config, DMutils dmu, MapGetter mapGetter) {
+		super(name, evaluator, variableContext, dmu);
 		this.config = config;
 		
 		this.mapGetter = mapGetter;
@@ -140,6 +141,10 @@ public class MapReader extends StandardDataReaderBase<Field> {
 		 	else {
 		 		
 		 	}
+		 	
+		 	for(DataReader<?> dr : dmu.getReaders().values()) {
+				dr.open();
+			}
 		} catch (ManagedException e) {
 			throw new DataException(e);
 		}
@@ -151,6 +156,9 @@ public class MapReader extends StandardDataReaderBase<Field> {
 	public void close() throws DataException {
 		data = null;
 		_lineVisited = 0;
+		for(DataReader<?> dr : dmu.getReaders().values()) {
+			try { dr.close(); } catch(DataException e) {}
+		}
 		
 	}
 
@@ -166,7 +174,7 @@ public class MapReader extends StandardDataReaderBase<Field> {
 
 	@Override
 	public MapReader cloneDM() throws DataException {
-		return new MapReader(name, evaluator, variableContext, config, mapGetter);
+		return new MapReader(name, evaluator, variableContext, config, dmu, mapGetter);
 	}
 
 	

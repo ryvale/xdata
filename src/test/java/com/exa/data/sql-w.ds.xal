@@ -18,6 +18,12 @@ entities {
 	r5uoms {
 		type "tsql",
 		
+		variables {
+			dr1 { type 'DataReader', ref 'testData'  }
+		},
+		
+		stop = dmu.reader('dr1').next() == false,
+		
 		fields {
 			manager exa { prefix "uom_" },
 			
@@ -33,5 +39,17 @@ entities {
 				updated { type "datetime", expType "sql", exp "GETDATE()"}
 			}
 		}
+	},
+	
+	udm {
+		type "tsql",
+		
+		table 'r5uoms',
+		
+		variables {
+			dr1 { type 'DataReader', ref 'testData', init { open }, terminate { close } }
+		},
+		
+		readernNext = dmu.reader('dr1').next()
 	}
 }
