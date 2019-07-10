@@ -116,12 +116,16 @@ public class StoredProcedureReader  extends StandardDataReaderBase<DynamicField>
 		try {
 			if("sp-out".equals(field.getExpType())) return spStatement.getString(field.getVlExp().asString());
 			
-			if("value".equals(field.getExpType())) return field.getVlExp().asString();
+			if("value".equals(field.getExpType())) { 
+				if(!"string".equals(field.getVlExp().typeName())) throw new DataException(String.format("The field %s is not a string in reader %s", fieldName, name));
+				return field.getVlExp().asString();
+			}
+			
 		} catch (ManagedException| SQLException e) {
 			throw new DataException(e);
 		}
 		
-		throw new DataException(String.format("The field expression type %s is not yet managed in reader", field.getExpType(), name));
+		throw new DataException(String.format("The field expression type %s for field %s is not yet managed in reader %s", field.getExpType(), fieldName, name));
 	}
 
 	@Override
@@ -130,13 +134,22 @@ public class StoredProcedureReader  extends StandardDataReaderBase<DynamicField>
 		
 		if(field == null) throw new DataException(String.format("No field named %s in reader %s", fieldName, name));
 		
-		if(!"int".equals(field.getType())) throw new DataException(String.format("The field %s is not an sint", name));
+		if(!"int".equals(field.getType())) throw new DataException(String.format("The field %s is not an int in reader %s", fieldName, name));
 		
 		try {
-			return spStatement.getInt(field.getName());
-		} catch (SQLException e) {
+			if("sp-out".equals(field.getExpType())) return spStatement.getInt(field.getVlExp().asString());
+			
+			if("value".equals(field.getExpType())) { 
+				if(!"int".equals(field.getVlExp().typeName())) throw new DataException(String.format("The field %s is not an int in reader %s", fieldName, name));
+				return field.getVlExp().asInteger();
+			}
+			
+			
+		} catch (SQLException | ManagedException e) {
 			throw new DataException(e);
 		}
+		
+		throw new DataException(String.format("The field expression type %s for field %s is not yet managed in reader %s", field.getExpType(), fieldName, name));
 	}
 
 	@Override
@@ -148,10 +161,18 @@ public class StoredProcedureReader  extends StandardDataReaderBase<DynamicField>
 		if(!("date".equals(field.getType()) || "datetime".equals(field.getType()) || "time".equals(field.getType()))) throw new DataException(String.format("The field %s is not a date", name));
 		
 		try {
-			return spStatement.getDate(field.getName());
+			if("sp-out".equals(field.getExpType())) return spStatement.getDate(field.getName());
+			
+			/*if("value".equals(field.getExpType())) { 
+				if(!"int".equals(field.getVlExp().typeName())) throw new DataException(String.format("The field %s is not an int in reader %s", fieldName, name));
+				return field.getVlExp().asDecimalValue();
+			}*/
+			
 		} catch (SQLException e) {
 			throw new DataException(e);
 		}
+		
+		throw new DataException(String.format("The field expression type %s for field %s is not yet managed in reader %s", field.getExpType(), fieldName, name));
 	}
 
 	@Override
@@ -163,10 +184,18 @@ public class StoredProcedureReader  extends StandardDataReaderBase<DynamicField>
 		if(!("float".equals(field.getType()) || "decimal".equals(field.getType()) || "double".equals(field.getType()))) throw new DataException(String.format("The field %s is not a float", name));
 		
 		try {
-			return spStatement.getDouble(field.getName());
+			if("sp-out".equals(field.getExpType())) return spStatement.getDouble(field.getName());
+			
+			if("value".equals(field.getExpType())) { 
+				if(!("decimal".equals(field.getVlExp().typeName()) || "float".equals(field.getVlExp().typeName()) || "double".equals(field.getVlExp().typeName()))) throw new DataException(String.format("The field %s is not a float in reader %s", fieldName, name));
+				return field.getVlExp().asDecimalValue().getValue();
+			}
+			
 		} catch (SQLException e) {
 			throw new DataException(e);
 		}
+		
+		throw new DataException(String.format("The field expression type %s for field %s is not yet managed in reader %s", field.getExpType(), fieldName, name));
 	}
 
 	@Override
