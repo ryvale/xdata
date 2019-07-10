@@ -3,8 +3,6 @@ package com.exa.data.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.sql.DataSource;
-
 import com.exa.data.DataReader;
 import com.exa.data.DataWriter;
 import com.exa.data.RowToFieldDataReader;
@@ -21,6 +19,7 @@ public class DMFRowToField extends DataManFactory {
 	
 	private String defaultDataSource;
 
+
 	public DMFRowToField(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource) {
 		super(filesRepos, (id, context) -> {
 			if(!"sourceDr".equals(id)) {
@@ -32,11 +31,11 @@ public class DMFRowToField extends DataManFactory {
 
 		this.dataSources = dataSources;
 		this.defaultDataSource = defaultDataSource;
+		
 	}
 
 	@Override
 	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator evaluator, VariableContext variableContext) throws ManagedException {
-	
 		return new RowToFieldDataReader(name, ovEntity, evaluator, variableContext, filesRepos, dataSources, defaultDataSource);
 	}
 

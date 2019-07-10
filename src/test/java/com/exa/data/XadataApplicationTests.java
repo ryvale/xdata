@@ -142,7 +142,7 @@ public class XadataApplicationTests extends TestCase {
 		dw.close();
 	}
 	
-	public void testWS() throws ManagedException {
+	/*public void testWS() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
 		
 		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
@@ -176,7 +176,7 @@ public class XadataApplicationTests extends TestCase {
 		System.out.println(dr.getString("token"));
 		
 		dr.close();
-	}
+	}*/
 	
 	public void testMapReader() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
@@ -187,7 +187,10 @@ public class XadataApplicationTests extends TestCase {
 		mp.put("f1", "a");
 		mp.put("f2", "b");
 		
-		DataManFactory dmf =  new DMFMap(filesRepo, () -> mp);
+        Map<String, XADataSource> dataSources = new HashMap<>();
+        dataSources.put("default", new MapDataSource(() -> mp));
+		
+		DataManFactory dmf =  new DMFMap(filesRepo, dataSources, "default");
 		
 		DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
 		

@@ -1,5 +1,6 @@
 package com.exa.data.web;
 
+import com.exa.data.MapDataSource;
 import com.exa.data.XADataSource;
 import com.exa.data.sql.XASQLDataSource;
 
@@ -41,6 +42,12 @@ public class WSDataSource implements XADataSource {
 		String url = (urlPrefix == null ? "" :  urlPrefix) + (resource == null ? "" : resource);
 		
 		return new Request.Builder().url(url);
+	}
+
+	@Override
+	public MapDataSource asMapDataSource() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.exa.data.MapReader.MapGetter;
 import com.exa.data.config.DataManFactory;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
@@ -38,9 +39,8 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 	protected Integer _lineVisited = 0;
 		
 	
-	public SmartDataReader(String name, ObjectValue<XPOperand<?>> config, XPEvaluator evaluator, VariableContext variableContext, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource) {
+	public SmartDataReader(String name, ObjectValue<XPOperand<?>> config, XPEvaluator evaluator, VariableContext variableContext, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, MapGetter mapGetter) {
 		super(name, config, evaluator, variableContext, filesRepos, dataSources, defaultDataSource);
-		
 	}
 	
 	public void addMainDataReader(String name, DataReader<?> dataReader) throws DataException {

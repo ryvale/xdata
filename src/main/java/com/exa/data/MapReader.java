@@ -17,12 +17,12 @@ public class MapReader extends StandardDataReaderBase<Field> {
 	//protected Map<String, Field> fields = new LinkedHashMap<>();
 
 	public static interface MapGetter {
-		Map<String, Object> get();
+		Map<String, ?> get();
 	}
 	
 	private MapGetter mapGetter;
 	
-	private Map<String, Object> data;
+	private Map<String, ?> data;
 	
 	protected int _lineVisited = 0;
 	

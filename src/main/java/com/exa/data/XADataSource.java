@@ -8,4 +8,6 @@ public interface XADataSource {
 	XASQLDataSource asXASQLDataSource();
 	
 	WSDataSource asXAWSDataSource();
+	
+	MapDataSource asMapDataSource();
 }

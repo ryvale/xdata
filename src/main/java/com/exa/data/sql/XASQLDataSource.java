@@ -2,6 +2,7 @@ package com.exa.data.sql;
 
 import javax.sql.DataSource;
 
+import com.exa.data.MapDataSource;
 import com.exa.data.XADataSource;
 import com.exa.data.web.WSDataSource;
 
@@ -25,5 +26,11 @@ public class XASQLDataSource implements XADataSource {
 	}
 	
 	public DataSource getDataSource() { return dataSource; }
+
+	@Override
+	public MapDataSource asMapDataSource() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

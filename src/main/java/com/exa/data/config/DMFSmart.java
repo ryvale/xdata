@@ -1,9 +1,11 @@
 package com.exa.data.config;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.exa.data.DataReader;
 import com.exa.data.DataWriter;
+import com.exa.data.MapReader.MapGetter;
 import com.exa.data.SmartDataReader;
 import com.exa.data.XADataSource;
 import com.exa.expression.VariableContext;
@@ -18,8 +20,10 @@ public class DMFSmart extends DataManFactory {
 	
 	private Map<String, XADataSource> dataSources;
 	private String defaultDataSource;
+	
+	private MapGetter mapGetter;
 
-	public DMFSmart(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource) {
+	public DMFSmart(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, MapGetter mapGetter) {
 		
 		super(filesRepos, (id, context) -> {
 			if("rootDr".equals(id)) return "DataReader";
@@ -32,6 +36,11 @@ public class DMFSmart extends DataManFactory {
 		
 		this.dataSources = dataSources;
 		this.defaultDataSource = defaultDataSource;
+		this.mapGetter = mapGetter;
+	}
+	
+	public DMFSmart(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource) {
+		this(filesRepos, dataSources, defaultDataSource, () -> new HashMap<>());
 	}
 	
 	public DMFSmart(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, UnknownIdentifierValidation uiv) {
@@ -42,7 +51,7 @@ public class DMFSmart extends DataManFactory {
 
 	@Override
 	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> config, XPEvaluator eval, VariableContext variableContext) throws ManagedException {
-		return new SmartDataReader(name, config, eval, variableContext, filesRepos, dataSources, defaultDataSource);
+		return new SmartDataReader(name, config, eval, variableContext, filesRepos, dataSources, defaultDataSource, mapGetter);
 	}
 
 	@Override
