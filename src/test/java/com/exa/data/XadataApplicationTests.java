@@ -3,6 +3,7 @@ package com.exa.data;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.exa.data.config.DMFGeneral;
 import com.exa.data.config.DMFMap;
 import com.exa.data.config.DMFSmart;
 import com.exa.data.config.DMFSpSql;
@@ -53,6 +54,46 @@ public class XadataApplicationTests extends TestCase {
         
         assertFalse(new Boolean(dr.next()));
         
+        dr.close();
+	}
+	
+	
+	public void testDMFGeneral() throws ManagedException {
+		FilesRepositories filesRepo = new FilesRepositories();
+		
+		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
+		filesRepo.addRepoPart("data-config", new OSFileRepoPart("C:/Users/leader/Desktop/travaux"));
+		
+		SQLServerDataSource ds = new SQLServerDataSource();
+		ds.setUser("sa");  
+        ds.setPassword("e@mP0wer");  
+        ds.setServerName("192.168.23.129");  
+        ds.setPortNumber(1433);
+        ds.setDatabaseName("EAMPROD");
+        
+        Map<String, XADataSource> dataSources = new HashMap<>();
+        dataSources.put("default", new XASQLDataSource(ds));
+        
+        DataManFactory dmf = new DMFGeneral(DataManFactory.DMFN_SMART, filesRepo, dataSources, "default");
+        dmf.initialize();
+        
+        DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
+        
+        DataReader<?> dr= dmf.getDataReader("default:/smart1", evSetup);
+        
+        dr.open();
+        
+        assertTrue(new Boolean(dr.next()));
+        
+        assertFalse(new Boolean(dr.next()));
+        
+        dr.close();
+        
+        dr = dmf.getDataReader("default:/sp-sql#newWOCode", evSetup);
+        
+        dr.open();
+        
+        System.out.println(dr.getString("value"));
         dr.close();
 	}
 	
@@ -286,7 +327,7 @@ public class XadataApplicationTests extends TestCase {
 		
 		DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
 		
-		DataReader<?> dr = dmf.getDataReader("default:/test6#test", evSetup);
+		DataReader<?> dr = dmf.getDataReader("default:/map#test", evSetup);
 		
 		dr.open();
 		

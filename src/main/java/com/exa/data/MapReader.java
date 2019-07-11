@@ -1,7 +1,9 @@
 package com.exa.data;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.exa.data.config.utils.DMutils;
 import com.exa.expression.VariableContext;
@@ -10,15 +12,21 @@ import com.exa.expression.eval.XPEvaluator;
 import com.exa.utils.ManagedException;
 import com.exa.utils.values.ArrayValue;
 import com.exa.utils.values.BooleanValue;
+import com.exa.utils.values.CalculableValue;
 import com.exa.utils.values.ObjectValue;
 import com.exa.utils.values.StringValue;
 import com.exa.utils.values.Value;
 
-public class MapReader extends StandardDataReaderBase<Field> {
-	//protected Map<String, Field> fields = new LinkedHashMap<>();
+public class MapReader extends StandardDataReaderBase<DynamicField> {
+	
+	protected final static Set<String> expTypes = new HashSet<>();
 
 	public static interface MapGetter {
 		Map<String, ?> get();
+	}
+	
+	static {
+		expTypes.add("default");expTypes.add("map");expTypes.add("value");
 	}
 	
 	private MapGetter mapGetter;
@@ -35,11 +43,6 @@ public class MapReader extends StandardDataReaderBase<Field> {
 		
 		this.mapGetter = mapGetter;
 	}
-	/*public MapReader(Map<String, Field> fields, MapGetter mapGetter) {
-		super();
-		this.fields = fields;
-		this.mapGetter = mapGetter;
-	}*/
 
 	@Override
 	public boolean next() throws DataException {
@@ -51,28 +54,60 @@ public class MapReader extends StandardDataReaderBase<Field> {
 
 	@Override
 	public String getString(String fieldName) throws DataException {
-		Field field = fields.get(fieldName);
+		DynamicField field = fields.get(fieldName);
 		if(field == null) return null;
 		
 		if(!"string".equals(field.getType())) throw new DataException(String.format("the field %s is not a string in the data reader %s", fieldName, name));
 		
-		Object v = data.get(fieldName);
-		if(v == null) return null;
+		String expType = field.getExpType();
 		
-		return v.toString();
+		try {
+			if("map".equals(expType)) {
+				Object v = data.get(field.getVlExp().asString());
+				if(v == null) return null;
+				
+				return v.toString();
+			}
+			
+			if("value".equals(expType)) {
+				if(!"string".equals(field.getVlExp().typeName())) throw new DataException(String.format("The field %s is not a string in reader %s", fieldName, name));
+				return field.getVlExp().asString();
+			}
+		}
+		catch (ManagedException e) {
+			throw new DataException(e);
+		}
+		
+		throw new DataException(String.format("The field expression type %s for field %s is not yet managed in reader %s", field.getExpType(), fieldName, name));
 	}
 
 	@Override
 	public Integer getInteger(String fieldName) throws DataException {
-		Field field = fields.get(fieldName);
+		DynamicField field = fields.get(fieldName);
+		
 		if(field == null) return null;
 		
 		if(!"int".equals(field.getType()) && !"integer".equals(field.getType())) throw new DataException(String.format("the field %s is not an integer in data reader %", fieldName, name));
+		String expType = field.getExpType();
 		
-		Object v = data.get(fieldName);
-		if(v == null) return null;
+		try {
+			if("map".equals(expType)) {
+				Object v = data.get(field.getVlExp().asString());
+				if(v == null) return null;
+				
+				return (Integer)v;
+			}
+			
+			if("value".equals(expType)) {
+				if(!("int".equals(field.getVlExp().typeName()) || "integer".equals(field.getVlExp().typeName()))) throw new DataException(String.format("The field %s is not an integer in reader %s", fieldName, name));
+				return field.getVlExp().asInteger();
+			}
+		}
+		catch (ManagedException e) {
+			throw new DataException(e);
+		}
 		
-		return (Integer)v;
+		throw new DataException(String.format("The field expression type %s for field %s is not yet managed in reader %s", field.getExpType(), fieldName, name));
 	}
 
 	@Override
@@ -90,17 +125,27 @@ public class MapReader extends StandardDataReaderBase<Field> {
 
 	@Override
 	public Double getDouble(String fieldName) throws DataException {
-		Field field = fields.get(fieldName);
+		DynamicField field = fields.get(fieldName);
 		if(field == null) return null;
 		
 		if(!"float".equals(field.getType()) && !"decimal".equals(field.getType()) && !"double".equals(field.getType())) throw new DataException(String.format("the field %s is not a float in data reader %s", fieldName, name));
 		
-		Object v = data.get(fieldName);
-		if(v == null) return null;
+		String expType = field.getExpType();
 		
-		Number n = (Number)v;
+		try {
+			if("map".equals(expType)) {
+				Object v = data.get(field.getVlExp().asString());
+				if(v == null) return null;
+				
+				Number n = (Number)v;
+				
+				return n.doubleValue();
+			}
+		} catch (ManagedException e) {
+			throw new DataException(e);
+		}
 		
-		return n.doubleValue();
+		throw new DataException(String.format("The field expression type %s for field %s is not yet managed in reader %s", field.getExpType(), fieldName, name));
 	}
 
 	@Override
@@ -116,27 +161,55 @@ public class MapReader extends StandardDataReaderBase<Field> {
 				for(String fname : mpFields.keySet()) {
 					Value<?, XPOperand<?>> vlField = mpFields.get(fname);
 					
-					String type;
+					Value<?, XPOperand<?>> vlExp, vlCondition;
+					String type, expType;
 					BooleanValue<?> blField = vlField.asBooleanValue();
 					if(blField == null) {
 						StringValue<XPOperand<?>> sv = vlField.asStringValue();
 						if(sv == null) {
 							ObjectValue<XPOperand<?>> ov = vlField.asRequiredObjectValue();
-
+							
+							vlExp = ov.getRequiredAttribut("exp");
 							type = ov.getAttributAsString("type", "string");
+							expType = ov.getAttributAsString("expType", "map");
+							vlCondition = ov.getAttribut("condition");
+							if(vlCondition == null) vlCondition = new BooleanValue<XPOperand<?>>(Boolean.TRUE);
+							else {
+								CalculableValue<?, XPOperand<?>> clCondition = vlCondition.asCalculableValue();
+								if(clCondition == null) {
+									if(vlCondition.asBooleanValue() == null) throw new ManagedException(String.format("Boolean expression expected as value of 'condition' propertu for the entity %s", name));
+								}
+								else {
+									if(!"boolean".equals(clCondition.typeName())) throw new ManagedException(String.format("Boolean expression expected as value of 'condition' propertu for the entity %s", name));
+								}
+								
+							}
 						}
 						else {
+							vlExp = sv;
+							expType = "map";
 							type = "string";
+							vlCondition = new BooleanValue<XPOperand<?>>(Boolean.TRUE);
 						}
 					}
 					else {
+						vlExp = new StringValue<>(fname);
+						expType = "map";
 						type = "string";
+						vlCondition = new BooleanValue<XPOperand<?>>(Boolean.TRUE);
 					}
 					
-					Field field = new Field(fname, type);
+					if(!expTypes.contains(expType)) throw new DataException(String.format("Invalid expresssion type '%' for field '%s'", expType, fname));
 					
-					fields.put(fname, field);
-				}
+					//if("value".equals(expType) && !"string".equals(type)) throw new DataException(String.format("For the expression type 'value' the field type should be instead of %s for field %s", type, fname));
+					
+					if("default".equals(expType)) expType = "map";
+					
+					DynamicField field = new DynamicField(fname, type, expType);
+					field.setVlExp(vlExp);
+					field.setVlCondition(vlCondition);
+					
+					fields.put(fname, field);				}
 		 	}
 		 	else {
 		 		

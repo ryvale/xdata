@@ -64,6 +64,8 @@ public abstract class DataManFactory {
 	public void initialize() {
 		dmFactories.put(DMFN_LIBRE, new DMFLibre(filesRepos, dataSources, defaultDataSource));
 		
+		dmFactories.put(DMFN_SMART, new DMFSmart(filesRepos, dataSources, defaultDataSource));
+		
 		dmFactories.put(DMFN_XLITERAL, new DMFXLiteral(filesRepos, dataSources, defaultDataSource));
 		
 		dmFactories.put(DMFN_ROW_TO_FIELD, new DMFRowToField(filesRepos, dataSources, defaultDataSource));

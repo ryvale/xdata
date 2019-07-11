@@ -76,7 +76,7 @@ public abstract class StandardDataReaderBase<_FIELD extends Field> implements Da
 		
 		if("int".equals(field.getType()) || "integer".equals(field.getType())) return getInteger(fieldName);
 		
-		if("date".equals(field.getType()) || "datetime".equals(field.getType())) return getDate(fieldName);
+		if("date".equals(field.getType()) || "datetime".equals(field.getType())  || "time".equals(field.getType())) return getDate(fieldName);
 		
 		if("double".equals(field.getType()) || "float".equals(field.getType()) || "decimal".equals(field.getType())) return getDouble(fieldName);
 		

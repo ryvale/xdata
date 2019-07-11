@@ -5,7 +5,11 @@ references {
 },
 
 entities {
+
 	test {
+	
+		type 'map',
+		
 		fields {
 			items {
 				f1,
