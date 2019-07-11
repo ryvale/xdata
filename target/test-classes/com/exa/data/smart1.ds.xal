@@ -1,0 +1,17 @@
+:smart,
+
+references {
+},
+
+entities {
+	entity1 {
+		type "smart",
+			
+		main {
+			type "libre",
+			
+			eof => this.lineVisited == 1
+		}
+		
+	}
+}

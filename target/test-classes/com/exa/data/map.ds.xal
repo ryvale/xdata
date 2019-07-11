@@ -1,0 +1,21 @@
+:map,
+
+references {
+
+},
+
+entities {
+
+	test {
+	
+		type 'map',
+		
+		fields {
+			items {
+				f1,
+				
+				f2
+			}
+		}
+	}
+}

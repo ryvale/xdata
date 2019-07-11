@@ -32,8 +32,6 @@ public class DMFSmart extends DataManFactory {
 			return null;
 		});
 		
-		this.dataSources = dataSources;
-		this.defaultDataSource = defaultDataSource;
 		this.mapGetter = mapGetter;
 	}
 	
@@ -43,8 +41,10 @@ public class DMFSmart extends DataManFactory {
 	
 	public DMFSmart(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, UnknownIdentifierValidation uiv) {
 		super(filesRepos, dataSources, defaultDataSource, uiv);
-		this.dataSources = dataSources;
-		this.defaultDataSource = defaultDataSource;
+	}
+	
+	public DMFSmart(DMFGeneral dmuDmf) {
+		super(dmuDmf);
 	}
 
 	@Override

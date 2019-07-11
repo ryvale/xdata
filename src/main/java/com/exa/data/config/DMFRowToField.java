@@ -25,6 +25,10 @@ public class DMFRowToField extends DataManFactory {
 			return "DataReader";
 		});
 	}
+	
+	public DMFRowToField(DMFGeneral dmuDmf) {
+		super(dmuDmf);
+	}
 
 	@Override
 	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator evaluator, VariableContext variableContext, DMutils dmu) throws ManagedException {

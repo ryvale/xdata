@@ -1,0 +1,53 @@
+:sql,
+
+references {
+	
+},
+
+entities {
+
+	loginParam(login, pwd, tokenRequired @boolean ) {
+		type 'ws',
+		
+		table 'user/check-access',
+		
+		requestType 'post',
+		
+		responseType 'json-object',
+		
+		headers [ 
+			{ name 'Content-Type', value 'application/json' } 
+		],
+		
+		params { 
+			type 'requestbody-json',
+			
+			items {
+				login = login,
+				
+				pwd = pwd,
+				
+				tokenRequired { name 'tokenRequired', exp true }
+
+			}
+		},
+		
+		fields {
+			
+			formatErrors {
+				e1 { 
+					valid=rootDr.getString("status") == "OK", 
+					message="Erreur innatendue " + rootDr.getString("status")  
+				}
+			},
+			
+			items {
+				status,
+				
+				token 'extended.token',
+				
+				profile 'extended.profile'
+			}
+		}
+	}
+}

@@ -31,6 +31,10 @@ public class DMFSql extends DataManFactory {
 		super(filesRepos, dataSources, defaultDataSource, uiv);
 	}
 
+	public DMFSql(DMFGeneral dmuDmf) {
+		super(dmuDmf);
+	}
+
 	@Override
 	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext variableContext, DMutils dmu) throws ManagedException {
 		

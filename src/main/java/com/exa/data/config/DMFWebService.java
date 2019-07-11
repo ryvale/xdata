@@ -25,7 +25,10 @@ public class DMFWebService extends DataManFactory {
 	
 	public DMFWebService(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, UnknownIdentifierValidation uiv) {
 		super(filesRepos, dataSources, defaultDataSource, uiv);
-		
+	}
+
+	public DMFWebService(DMFGeneral dmuDmf) {
+		super(dmuDmf);
 	}
 
 	@Override

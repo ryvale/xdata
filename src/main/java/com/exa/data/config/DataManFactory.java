@@ -22,11 +22,7 @@ import com.exa.utils.values.ObjectValue;
 import com.exa.utils.values.Value;
 
 public abstract class DataManFactory {
-	protected final static XALParser parser = new XALParser();
-	
-	protected final Map<String, DataManFactory> dmFactories = new HashMap<>();
-	
-	public static final String DMFN_SQL = "sql";
+public static final String DMFN_SQL = "sql";
 	
 	public static final String DMFN_SMART = "smart";
 	
@@ -42,6 +38,8 @@ public abstract class DataManFactory {
 	
 	public static final String DMFN_SP_SQL = "sp-sql";
 	
+	protected final static XALParser parser = new XALParser();
+	
 	protected FilesRepositories filesRepos;
 	
 	protected UnknownIdentifierValidation uiv;
@@ -49,6 +47,8 @@ public abstract class DataManFactory {
 	protected Map<String, XADataSource> dataSources = new HashMap<>();
 	
 	protected String defaultDataSource;
+	
+	protected DMFGeneral dmuDmf;
 
 	public DataManFactory(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, UnknownIdentifierValidation uiv) {
 		this.filesRepos=filesRepos;
@@ -56,34 +56,19 @@ public abstract class DataManFactory {
 		this.dataSources = dataSources;
 		this.defaultDataSource = defaultDataSource;
 		
-		
-		
 		this.uiv = uiv;
 	}
 	
-	public void initialize() {
-		dmFactories.put(DMFN_LIBRE, new DMFLibre(filesRepos, dataSources, defaultDataSource));
-		
-		dmFactories.put(DMFN_SMART, new DMFSmart(filesRepos, dataSources, defaultDataSource));
-		
-		dmFactories.put(DMFN_XLITERAL, new DMFXLiteral(filesRepos, dataSources, defaultDataSource));
-		
-		dmFactories.put(DMFN_ROW_TO_FIELD, new DMFRowToField(filesRepos, dataSources, defaultDataSource));
-		
-		dmFactories.put(DMFN_WS, new DMFWebService(filesRepos, dataSources, defaultDataSource));
-		
-		dmFactories.put(DMFN_MAP, new DMFMap(filesRepos, dataSources, defaultDataSource));
-		
-		dmFactories.put(DMFN_SP_SQL, new DMFSpSql(filesRepos, dataSources, defaultDataSource));
-		
-		DataManFactory dmf = new DMFSql(filesRepos, dataSources, defaultDataSource);
-		
-		dmFactories.put(DMFN_SQL, dmf);
-		dmFactories.put("tsql", dmf);
-		dmFactories.put("plsql", dmf);
-		dmFactories.put("sql-server", dmf);
-		dmFactories.put("sql-oracle", dmf);
-		dmFactories.put("oracle", dmf);
+	public DataManFactory(DMFGeneral dmuDmf) {
+		this(dmuDmf.getFilesRepos(), dmuDmf.getDataSources(), dmuDmf.getDefaultDataSource(), dmuDmf.getUiv());
+		this.dmuDmf = dmuDmf;
+	}
+	
+	public void initialize() { 
+		if(dmuDmf == null) {
+			dmuDmf = new DMFGeneral(DMFN_SMART, filesRepos, dataSources, defaultDataSource);
+			dmuDmf.initialize();
+		}
 	}
 	
 	public DataManFactory(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource) {
@@ -131,7 +116,7 @@ public abstract class DataManFactory {
 			name = mapEntities.keySet().iterator().next();
 		}
 		
-		DMutils dmu = new DMutils(filesRepos, dataSources, defaultDataSource, uiv, ovRoot);
+		DMutils dmu = new DMutils(dmuDmf, ovRoot);
 		
 		ObjectValue<XPOperand<?>> ovVariables = ovEntities.getPathAttributAsObjecValue(name + ".variables");
 		
@@ -150,10 +135,10 @@ public abstract class DataManFactory {
 					ObjectValue<XPOperand<?>> ovDr = ovEntities.getAttributAsObjectValue(drVarName);
 					
 					String dmfName = ovDr.getRequiredAttributAsString("type");
-					DataManFactory dmf = dmFactories.get(dmfName);
+					DataManFactory dmf = dmuDmf.getDMF(dmfName);
 					if(dmf == null) throw new ManagedException(String.format("Invalid data manager factory '%s'", dmfName)) ;
 					
-					DMutils varDmu = new DMutils(filesRepos, dataSources, defaultDataSource, uiv, ovRoot);
+					DMutils varDmu = new DMutils(dmuDmf, ovRoot);
 					VariableContext varVC = new MapVariableContext(vc);
 					varVC.addVariable("dmu", DMutils.class, varDmu);
 					DataReader<?> vdr = dmf.getDataReader(ovEntities, drVarName, evaluator, varVC, Computing.getDefaultObjectLib(ovRoot), varDmu);
@@ -202,7 +187,7 @@ public abstract class DataManFactory {
 			name = mapEntities.keySet().iterator().next();
 		}
 		VariableContext vc = new MapVariableContext(evaluator.getCurrentVariableContext());
-		DMutils dmu = new DMutils(filesRepos, dataSources, defaultDataSource, uiv, ovRoot);
+		DMutils dmu = new DMutils(dmuDmf, ovRoot);
 		
 		ObjectValue<XPOperand<?>> ovVariables = ovEntities.getPathAttributAsObjecValue(name + ".variables");
 		if(ovVariables != null) {
@@ -218,10 +203,10 @@ public abstract class DataManFactory {
 					ObjectValue<XPOperand<?>> ovDr = ovEntities.getAttributAsObjectValue(drVarName);
 					
 					String dmfName = ovDr.getRequiredAttributAsString("type");
-					DataManFactory dmf = dmFactories.get(dmfName);
+					DataManFactory dmf =  dmuDmf.getDMF(dmfName);
 					if(dmf == null) throw new ManagedException(String.format("Invalid data manager factory '%s'", dmfName)) ;
 					
-					DMutils varDmu = new DMutils(filesRepos, dataSources, defaultDataSource, uiv, ovRoot);
+					DMutils varDmu = new DMutils(dmuDmf, ovRoot);
 					VariableContext varVC = new MapVariableContext(vc);
 					varVC.addVariable("dmu", DMutils.class, varDmu);
 					DataReader<?> vdr = dmf.getDataReader(ovEntities, drVarName, evaluator, varVC, Computing.getDefaultObjectLib(ovRoot), varDmu);
@@ -273,7 +258,38 @@ public abstract class DataManFactory {
 		return res;
 	}
 	
-	
+	public FilesRepositories getFilesRepos() {
+		return filesRepos;
+	}
+
+	public void setFilesRepos(FilesRepositories filesRepos) {
+		this.filesRepos = filesRepos;
+	}
+
+	public UnknownIdentifierValidation getUiv() {
+		return uiv;
+	}
+
+	public void setUiv(UnknownIdentifierValidation uiv) {
+		this.uiv = uiv;
+	}
+
+	public Map<String, XADataSource> getDataSources() {
+		return dataSources;
+	}
+
+	public void setDataSources(Map<String, XADataSource> dataSources) {
+		this.dataSources = dataSources;
+	}
+
+	public String getDefaultDataSource() {
+		return defaultDataSource;
+	}
+
+	public void setDefaultDataSource(String defaultDataSource) {
+		this.defaultDataSource = defaultDataSource;
+	}
+
 	public abstract DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext vc, DMutils dmu) throws ManagedException;
 	
 	public abstract DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext vc, DataReader<?> drSource, DMutils dmu, boolean preventInsertion, boolean preventUpdate) throws ManagedException;

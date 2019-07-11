@@ -25,6 +25,10 @@ public class DMFMap  extends DataManFactory {
 	public DMFMap(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, UnknownIdentifierValidation uiv) {
 		super(filesRepos, dataSources, defaultDataSource, uiv);
 	}
+	
+	public DMFMap(DMFGeneral dmuDmf) {
+		super(dmuDmf);
+	}
 
 	@Override
 	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext vc, DMutils dmu) throws ManagedException {

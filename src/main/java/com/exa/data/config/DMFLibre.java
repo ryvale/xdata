@@ -18,6 +18,10 @@ import com.exa.utils.values.ObjectValue;
 
 public class DMFLibre extends DataManFactory {
 	
+	public DMFLibre(DMFGeneral dmuDmf) {
+		super(dmuDmf);
+	}
+
 	public DMFLibre(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource) {
 		super(filesRepos, dataSources, defaultDataSource);
 	}

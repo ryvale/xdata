@@ -25,6 +25,10 @@ public class DMFXLiteral extends DataManFactory {
 		super(filesRepos, dataSources, defaultDataSource);
 	}
 
+	public DMFXLiteral(DMFGeneral dmuDmf) {
+		super(dmuDmf);
+	}
+
 	@Override
 	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext vc, DMutils dmu) throws ManagedException {
 		return new XLiteralDataReader(name, eval, vc, ovEntity, dmu);
@@ -32,7 +36,6 @@ public class DMFXLiteral extends DataManFactory {
 
 	@Override
 	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext vc, DataReader<?> drSource, DMutils dmu, boolean preventInsertion, boolean preventUpdate) throws ManagedException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

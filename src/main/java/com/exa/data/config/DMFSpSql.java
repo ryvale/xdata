@@ -22,9 +22,12 @@ public class DMFSpSql extends DataManFactory {
 	
 	public DMFSpSql(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource) {
 		super(filesRepos, dataSources, defaultDataSource);
-
 	}
 
+	public DMFSpSql(DMFGeneral dmuDmf) {
+		super(dmuDmf);
+	}
+	
 	@Override
 	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext vc, DMutils dmu) throws ManagedException {
 		String dsName = ovEntity.getAttributAsString("dataSource");
