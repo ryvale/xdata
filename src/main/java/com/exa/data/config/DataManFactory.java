@@ -115,11 +115,11 @@ public abstract class DataManFactory {
 		
 		XPEvaluator evaluator = computing.getXPEvaluator();
 		
-		ObjectValue<XPOperand<?>> rootOV = computing.execute();
+		ObjectValue<XPOperand<?>> ovRoot = computing.execute();
 		
 		try { computing.closeCharReader(); } catch (IOException e) { e.printStackTrace(); }
 		
-		ObjectValue<XPOperand<?>> ovEntities = rootOV.getAttributAsObjectValue("entities");
+		ObjectValue<XPOperand<?>> ovEntities = ovRoot.getAttributAsObjectValue("entities");
 		
 		String name;
 		if(parts.length>1) {
@@ -131,7 +131,7 @@ public abstract class DataManFactory {
 			name = mapEntities.keySet().iterator().next();
 		}
 		
-		DMutils dmu = new DMutils();
+		DMutils dmu = new DMutils(filesRepos, dataSources, defaultDataSource, uiv, ovRoot);
 		
 		ObjectValue<XPOperand<?>> ovVariables = ovEntities.getPathAttributAsObjecValue(name + ".variables");
 		
@@ -153,21 +153,21 @@ public abstract class DataManFactory {
 					DataManFactory dmf = dmFactories.get(dmfName);
 					if(dmf == null) throw new ManagedException(String.format("Invalid data manager factory '%s'", dmfName)) ;
 					
-					DMutils varDmu = new DMutils();
+					DMutils varDmu = new DMutils(filesRepos, dataSources, defaultDataSource, uiv, ovRoot);
 					VariableContext varVC = new MapVariableContext(vc);
 					varVC.addVariable("dmu", DMutils.class, varDmu);
-					DataReader<?> vdr = dmf.getDataReader(ovEntities, drVarName, evaluator, varVC, Computing.getDefaultObjectLib(rootOV), varDmu);
+					DataReader<?> vdr = dmf.getDataReader(ovEntities, drVarName, evaluator, varVC, Computing.getDefaultObjectLib(ovRoot), varDmu);
 					dmu.register(varName, vdr);
 					continue;
 				}
 			}
 		}
 		
-		evaluator.addVariable("rootOv", ObjectValue.class, rootOV);
+		evaluator.addVariable("rootOv", ObjectValue.class, ovRoot);
 		
 		evaluator.pushVariableContext(vc);
 		
-		DataReader<?> dr = getDataReader(ovEntities, name, evaluator, vc, Computing.getDefaultObjectLib(rootOV), dmu);
+		DataReader<?> dr = getDataReader(ovEntities, name, evaluator, vc, Computing.getDefaultObjectLib(ovRoot), dmu);
 		
 		vc.addVariable("rootDr", DataReader.class, dr);
 		
@@ -186,11 +186,11 @@ public abstract class DataManFactory {
 		
 		XPEvaluator evaluator = computing.getXPEvaluator();
 		
-		ObjectValue<XPOperand<?>> rootOV = computing.execute();
+		ObjectValue<XPOperand<?>> ovRoot = computing.execute();
 		
 		try { computing.closeCharReader();	} catch (IOException e) { e.printStackTrace();	}
 		
-		ObjectValue<XPOperand<?>> ovEntities = rootOV.getAttributAsObjectValue("entities");
+		ObjectValue<XPOperand<?>> ovEntities = ovRoot.getAttributAsObjectValue("entities");
 		
 		String name;
 		if(parts.length>1) {
@@ -202,7 +202,7 @@ public abstract class DataManFactory {
 			name = mapEntities.keySet().iterator().next();
 		}
 		VariableContext vc = new MapVariableContext(evaluator.getCurrentVariableContext());
-		DMutils dmu = new DMutils();
+		DMutils dmu = new DMutils(filesRepos, dataSources, defaultDataSource, uiv, ovRoot);
 		
 		ObjectValue<XPOperand<?>> ovVariables = ovEntities.getPathAttributAsObjecValue(name + ".variables");
 		if(ovVariables != null) {
@@ -221,22 +221,22 @@ public abstract class DataManFactory {
 					DataManFactory dmf = dmFactories.get(dmfName);
 					if(dmf == null) throw new ManagedException(String.format("Invalid data manager factory '%s'", dmfName)) ;
 					
-					DMutils varDmu = new DMutils();
+					DMutils varDmu = new DMutils(filesRepos, dataSources, defaultDataSource, uiv, ovRoot);
 					VariableContext varVC = new MapVariableContext(vc);
 					varVC.addVariable("dmu", DMutils.class, varDmu);
-					DataReader<?> vdr = dmf.getDataReader(ovEntities, drVarName, evaluator, varVC, Computing.getDefaultObjectLib(rootOV), varDmu);
+					DataReader<?> vdr = dmf.getDataReader(ovEntities, drVarName, evaluator, varVC, Computing.getDefaultObjectLib(ovRoot), varDmu);
 					dmu.register(varName, vdr);
 					continue;
 				}
 			}
 		}
 		
-		evaluator.addVariable("rootOv", ObjectValue.class, rootOV);
+		evaluator.addVariable("rootOv", ObjectValue.class, ovRoot);
 		
 		
 		evaluator.pushVariableContext(vc);
 		
-		DataWriter<?> dm = getDataWriter(ovEntities, name, evaluator, vc, drSource, Computing.getDefaultObjectLib(rootOV), dmu, preventInsertion, preventUpdate);
+		DataWriter<?> dm = getDataWriter(ovEntities, name, evaluator, vc, drSource, Computing.getDefaultObjectLib(ovRoot), dmu, preventInsertion, preventUpdate);
 		
 		vc.addVariable("sourceDr", DataReader.class, drSource);
 		
