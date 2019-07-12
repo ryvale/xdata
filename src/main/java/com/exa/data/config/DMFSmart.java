@@ -19,9 +19,9 @@ public class DMFSmart extends DataManFactory {
 	
 	private MapGetter mapGetter;
 
-	public DMFSmart(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, MapGetter mapGetter) {
+	public DMFSmart(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUSetup dmuSetup, MapGetter mapGetter) {
 		
-		super(filesRepos, dataSources, defaultDataSource, (id, context) -> {
+		super(filesRepos, dataSources, defaultDataSource, dmuSetup, (id, context) -> {
 			if("rootDr".equals(id)) return "DataReader";
 			if("rootOv".equals(id)) return "ObjectValue";
 			String p[] = context.split("[.]");
@@ -33,12 +33,12 @@ public class DMFSmart extends DataManFactory {
 		this.mapGetter = mapGetter;
 	}
 	
-	public DMFSmart(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource) {
-		this(filesRepos, dataSources, defaultDataSource, () -> new HashMap<>());
+	public DMFSmart(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUSetup dmuSetup) {
+		this(filesRepos, dataSources, defaultDataSource, dmuSetup, () -> new HashMap<>());
 	}
 	
-	public DMFSmart(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, UnknownIdentifierValidation uiv) {
-		super(filesRepos, dataSources, defaultDataSource, uiv);
+	public DMFSmart(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUSetup dmuSetup, UnknownIdentifierValidation uiv) {
+		super(filesRepos, dataSources, defaultDataSource, dmuSetup, uiv);
 	}
 	
 	public DMFSmart(DMFGeneral dmuDmf) {
@@ -46,8 +46,8 @@ public class DMFSmart extends DataManFactory {
 	}
 
 	@Override
-	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> config/*, XPEvaluator eval, VariableContext variableContext*/, DMutils dmu) throws ManagedException {
-		return new SmartDataReader(name, config/*, eval, variableContext*/, filesRepos, dataSources, defaultDataSource, dmu, mapGetter);
+	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> config, DMutils dmu) throws ManagedException {
+		return new SmartDataReader(name, config, filesRepos, dataSources, defaultDataSource, dmu, dmuSetup, mapGetter);
 	}
 
 	@Override

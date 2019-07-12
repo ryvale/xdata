@@ -20,8 +20,8 @@ import com.exa.utils.values.ObjectValue;
 public class DMFSpSql extends DataManFactory {
 
 	
-	public DMFSpSql(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource) {
-		super(filesRepos, dataSources, defaultDataSource);
+	public DMFSpSql(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUSetup dmuSetup) {
+		super(filesRepos, dataSources, defaultDataSource, dmuSetup);
 	}
 
 	public DMFSpSql(DMFGeneral dmuDmf) {

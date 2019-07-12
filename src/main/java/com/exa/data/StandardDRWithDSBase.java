@@ -11,6 +11,7 @@ import com.exa.data.config.DMFSql;
 import com.exa.data.config.DMFWebService;
 import com.exa.data.config.DMFXLiteral;
 import com.exa.data.config.DataManFactory;
+import com.exa.data.config.DataManFactory.DMUSetup;
 import com.exa.data.config.utils.DMutils;
 
 import com.exa.expression.XPOperand;
@@ -44,7 +45,9 @@ public abstract class StandardDRWithDSBase<_FIELD extends Field> extends Standar
 	
 	protected String defaultDataSource;
 	
-	public StandardDRWithDSBase(String name, ObjectValue<XPOperand<?>> config/*, XPEvaluator evaluator, VariableContext variableContext*/, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMutils dmu) {
+	protected DMUSetup dmuSetup;
+	
+	public StandardDRWithDSBase(String name, ObjectValue<XPOperand<?>> config, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMutils dmu, DMUSetup dmuSetup) {
 		super(name/*, evaluator, variableContext*/, dmu);
 		
 		this.config = config;
@@ -52,20 +55,21 @@ public abstract class StandardDRWithDSBase<_FIELD extends Field> extends Standar
 		this.filesRepos = filesRepos;
 		this.dataSources = dataSources;
 		this.defaultDataSource = defaultDataSource;
+		this.dmuSetup = dmuSetup;
 		
-		dmFactories.put(DMFN_LIBRE, new DMFLibre(filesRepos, dataSources, defaultDataSource));
+		dmFactories.put(DMFN_LIBRE, new DMFLibre(filesRepos, dataSources, defaultDataSource, dmuSetup));
 		
-		dmFactories.put(DMFN_XLITERAL, new DMFXLiteral(filesRepos, dataSources, defaultDataSource));
+		dmFactories.put(DMFN_XLITERAL, new DMFXLiteral(filesRepos, dataSources, defaultDataSource, dmuSetup));
 		
-		dmFactories.put(DMFN_ROW_TO_FIELD, new DMFRowToField(filesRepos, dataSources, defaultDataSource));
+		dmFactories.put(DMFN_ROW_TO_FIELD, new DMFRowToField(filesRepos, dataSources, defaultDataSource, dmuSetup));
 		
-		dmFactories.put(DMFN_WS, new DMFWebService(filesRepos, dataSources, defaultDataSource));
+		dmFactories.put(DMFN_WS, new DMFWebService(filesRepos, dataSources, defaultDataSource, dmuSetup));
 		
-		dmFactories.put(DMFN_MAP, new DMFMap(filesRepos, dataSources, defaultDataSource));
+		dmFactories.put(DMFN_MAP, new DMFMap(filesRepos, dataSources, defaultDataSource, dmuSetup));
 		
-		dmFactories.put(DMFN_SP_SQL, new DMFSpSql(filesRepos, dataSources, defaultDataSource));
+		dmFactories.put(DMFN_SP_SQL, new DMFSpSql(filesRepos, dataSources, defaultDataSource, dmuSetup));
 		
-		DataManFactory dmf = new DMFSql(filesRepos, dataSources, defaultDataSource);
+		DataManFactory dmf = new DMFSql(filesRepos, dataSources, defaultDataSource, dmuSetup);
 		
 		dmFactories.put(DMFN_SQL, dmf);
 		dmFactories.put("tsql", dmf);

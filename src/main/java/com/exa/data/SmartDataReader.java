@@ -8,11 +8,11 @@ import java.util.Map;
 
 import com.exa.data.MapReader.MapGetter;
 import com.exa.data.config.DataManFactory;
+import com.exa.data.config.DataManFactory.DMUSetup;
 import com.exa.data.config.utils.DMutils;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.MapVariableContext;
-import com.exa.expression.eval.XPEvaluator;
 import com.exa.utils.ManagedException;
 import com.exa.utils.io.FilesRepositories;
 import com.exa.utils.values.ObjectValue;
@@ -40,8 +40,8 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 	protected Integer _lineVisited = 0;
 		
 	
-	public SmartDataReader(String name, ObjectValue<XPOperand<?>> config/*, XPEvaluator evaluator, VariableContext variableContext*/, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMutils dmu, MapGetter mapGetter) {
-		super(name, config/*, evaluator, variableContext*/, filesRepos, dataSources, defaultDataSource, dmu);
+	public SmartDataReader(String name, ObjectValue<XPOperand<?>> config, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMutils dmu, DMUSetup dmuSetup, MapGetter mapGetter) {
+		super(name, config/*, evaluator, variableContext*/, filesRepos, dataSources, defaultDataSource, dmu, dmuSetup);
 	}
 	
 	public void addMainDataReader(String name, DataReader<?> dataReader) throws DataException {
@@ -101,7 +101,7 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		
 		try {
 			
-			XPEvaluator evaluator = dmu.getEvaluator();
+			//XPEvaluator evaluator = dmu.getEvaluator();
 			
 			for(String drName :  mpConfig.keySet()) {
 				if("type".equals(drName) || drName.startsWith("_")) continue;

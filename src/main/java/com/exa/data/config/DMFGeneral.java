@@ -21,15 +21,16 @@ public class DMFGeneral extends DataManFactory {
 	
 	protected String defaultType;
 
-	public DMFGeneral(String defaultType, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource) {
-		super(filesRepos, dataSources, defaultDataSource);
+	public DMFGeneral(String defaultType, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUSetup dmuSetup) {
+		super(filesRepos, dataSources, defaultDataSource, dmuSetup);
 		this.defaultType = defaultType;
 		
 		dmuDmf = this;
 		
 	}
-	public DMFGeneral(String defaultType, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, UnknownIdentifierValidation uiv) {
-		super(filesRepos, dataSources, defaultDataSource, uiv);
+	
+	public DMFGeneral(String defaultType, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUSetup dmuSetup, UnknownIdentifierValidation uiv) {
+		super(filesRepos, dataSources, defaultDataSource, dmuSetup, uiv);
 		
 		this.defaultType = defaultType;
 		

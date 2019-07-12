@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.exa.data.config.DataManFactory;
+import com.exa.data.config.DataManFactory.DMUSetup;
 import com.exa.data.config.utils.DMutils;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
@@ -48,8 +49,8 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 	
 	protected Map<String, Object> values = new LinkedHashMap<>();
 	
-	public RowToFieldDataReader(String name, ObjectValue<XPOperand<?>> config/*, XPEvaluator evaluator, VariableContext variableContext*/, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMutils dmu) {
-		super(name, config/*, evaluator, variableContext*/, filesRepos, dataSources, defaultDataSource, dmu);
+	public RowToFieldDataReader(String name, ObjectValue<XPOperand<?>> config, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMutils dmu, DMUSetup dmuSetup) {
+		super(name, config, filesRepos, dataSources, defaultDataSource, dmu, dmuSetup);
 	}
 
 	@Override
@@ -207,13 +208,11 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 
 	@Override
 	public RowToFieldDataReader cloneDM() throws DataException {
-		return new RowToFieldDataReader(name, config/*, evaluator, variableContext*/, filesRepos, dataSources, defaultDataSource, dmu);
+		return new RowToFieldDataReader(name, config/*, evaluator, variableContext*/, filesRepos, dataSources, defaultDataSource, dmu, dmuSetup);
 	}
 
 	@Override
-	public int lineVisited() {
-		return drSource.lineVisited();
-	}
+	public int lineVisited() { return drSource.lineVisited(); }
 
 	@Override
 	public Integer getInteger(String fieldName) throws DataException {

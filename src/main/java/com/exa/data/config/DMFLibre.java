@@ -22,8 +22,8 @@ public class DMFLibre extends DataManFactory {
 		super(dmuDmf);
 	}
 
-	public DMFLibre(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource) {
-		super(filesRepos, dataSources, defaultDataSource);
+	public DMFLibre(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUSetup dmuSetup) {
+		super(filesRepos, dataSources, defaultDataSource, dmuSetup);
 	}
 
 	@Override

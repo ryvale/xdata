@@ -22,6 +22,9 @@ import com.exa.utils.values.ObjectValue;
 import com.exa.utils.values.Value;
 
 public abstract class DataManFactory {
+	public static interface DMUSetup {
+		void setup(DMutils dmu);
+	}
 	public static final String DMFN_SQL = "sql";
 	
 	public static final String DMFN_SMART = "smart";
@@ -49,30 +52,35 @@ public abstract class DataManFactory {
 	protected String defaultDataSource;
 	
 	protected DMFGeneral dmuDmf;
+	
+	protected DMUSetup dmuSetup;
 
-	public DataManFactory(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, UnknownIdentifierValidation uiv) {
+	public DataManFactory(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUSetup dmuSetup, UnknownIdentifierValidation uiv) {
 		this.filesRepos=filesRepos;
 		
 		this.dataSources = dataSources;
 		this.defaultDataSource = defaultDataSource;
 		
+		this.dmuSetup = dmuSetup;
+		
 		this.uiv = uiv;
+		
 	}
 	
 	public DataManFactory(DMFGeneral dmuDmf) {
-		this(dmuDmf.getFilesRepos(), dmuDmf.getDataSources(), dmuDmf.getDefaultDataSource(), dmuDmf.getUiv());
+		this(dmuDmf.getFilesRepos(), dmuDmf.getDataSources(), dmuDmf.getDefaultDataSource(), dmuDmf.getDmuSetup(), dmuDmf.getUiv());
 		this.dmuDmf = dmuDmf;
 	}
 	
 	public void initialize() { 
 		if(dmuDmf == null) {
-			dmuDmf = new DMFGeneral(DMFN_SMART, filesRepos, dataSources, defaultDataSource);
+			dmuDmf = new DMFGeneral(DMFN_SMART, filesRepos, dataSources, defaultDataSource, dmuSetup);
 			dmuDmf.initialize();
 		}
 	}
 	
-	public DataManFactory(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource) {
-		this(filesRepos, dataSources, defaultDataSource, (id, context) -> {
+	public DataManFactory(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUSetup dmuSetup) {
+		this(filesRepos, dataSources, defaultDataSource, dmuSetup, (id, context) -> {
 			if("rootDr".equals(id) || "sourceDr".equals(id)) return "DataReader";
 			
 			if("rootDw".equals(id)) return "DataWriter";
@@ -295,6 +303,14 @@ public abstract class DataManFactory {
 
 	public void setDefaultDataSource(String defaultDataSource) {
 		this.defaultDataSource = defaultDataSource;
+	}
+	
+	public DMUSetup getDmuSetup() {
+		return dmuSetup;
+	}
+
+	public void setDmuSetup(DMUSetup dmuSetup) {
+		this.dmuSetup = dmuSetup;
 	}
 
 	public abstract DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator eval, VariableContext vc*/, DMutils dmu) throws ManagedException;

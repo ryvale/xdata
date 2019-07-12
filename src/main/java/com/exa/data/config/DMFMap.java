@@ -18,12 +18,12 @@ import com.exa.utils.values.ObjectValue;
 
 public class DMFMap  extends DataManFactory {
 	
-	public DMFMap(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource) {
-		super(filesRepos, dataSources, defaultDataSource);
+	public DMFMap(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUSetup dmuSetup) {
+		super(filesRepos, dataSources, defaultDataSource, dmuSetup);
 	}
 	
-	public DMFMap(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, UnknownIdentifierValidation uiv) {
-		super(filesRepos, dataSources, defaultDataSource, uiv);
+	public DMFMap(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUSetup dmuSetup, UnknownIdentifierValidation uiv) {
+		super(filesRepos, dataSources, defaultDataSource, dmuSetup, uiv);
 	}
 	
 	public DMFMap(DMFGeneral dmuDmf) {

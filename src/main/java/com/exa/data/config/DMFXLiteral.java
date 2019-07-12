@@ -7,9 +7,7 @@ import com.exa.data.DataWriter;
 import com.exa.data.XADataSource;
 import com.exa.data.XLiteralDataReader;
 import com.exa.data.config.utils.DMutils;
-import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
-import com.exa.expression.eval.XPEvaluator;
 import com.exa.expression.parsing.Parser.UnknownIdentifierValidation;
 import com.exa.utils.ManagedException;
 import com.exa.utils.io.FilesRepositories;
@@ -17,12 +15,12 @@ import com.exa.utils.values.ObjectValue;
 
 public class DMFXLiteral extends DataManFactory {
 
-	public DMFXLiteral(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, UnknownIdentifierValidation uiv) {
-		super(filesRepos, dataSources, defaultDataSource, uiv);
+	public DMFXLiteral(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUSetup dmuSetup, UnknownIdentifierValidation uiv) {
+		super(filesRepos, dataSources, defaultDataSource, dmuSetup, uiv);
 	}
 	
-	public DMFXLiteral(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource) {
-		super(filesRepos, dataSources, defaultDataSource);
+	public DMFXLiteral(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUSetup dmuSetup) {
+		super(filesRepos, dataSources, defaultDataSource, dmuSetup);
 	}
 
 	public DMFXLiteral(DMFGeneral dmuDmf) {

@@ -41,7 +41,7 @@ public class XadataApplicationTests extends TestCase {
         Map<String, XADataSource> dataSources = new HashMap<>();
         dataSources.put("default", new XASQLDataSource(ds));
         
-        DataManFactory dmf = new DMFSmart(filesRepo, dataSources, "default");
+        DataManFactory dmf = new DMFSmart(filesRepo, dataSources, "default", s -> {});
         dmf.initialize();
         
         DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
@@ -74,7 +74,7 @@ public class XadataApplicationTests extends TestCase {
         Map<String, XADataSource> dataSources = new HashMap<>();
         dataSources.put("default", new XASQLDataSource(ds));
         
-        DataManFactory dmf = new DMFGeneral(DataManFactory.DMFN_SMART, filesRepo, dataSources, "default");
+        DataManFactory dmf = new DMFGeneral(DataManFactory.DMFN_SMART, filesRepo, dataSources, "default", s -> {});
         dmf.initialize();
         
         DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
@@ -113,7 +113,7 @@ public class XadataApplicationTests extends TestCase {
         Map<String, XADataSource> dataSources = new HashMap<>();
         dataSources.put("default", new XASQLDataSource(ds));
         
-        DataManFactory dmf = new DMFSmart(filesRepo, dataSources, "default");
+        DataManFactory dmf = new DMFSmart(filesRepo, dataSources, "default", s -> {});
         dmf.initialize();
         
         DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
@@ -154,7 +154,7 @@ public class XadataApplicationTests extends TestCase {
         
         DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
         
-        DataManFactory dmfSQL = new DMFSql(filesRepo, dataSources, "default", (id, context) -> {
+        DataManFactory dmfSQL = new DMFSql(filesRepo, dataSources, "default", s -> {}, (id, context) -> {
         	if("rootOv".equals(id)) return "ObjectValue";
         	
         	if("updateMode".equals(id)) return "string";
@@ -164,7 +164,7 @@ public class XadataApplicationTests extends TestCase {
         	return null;
         });//new DMFSmart(filesRepo, dataSources, "default");
         dmfSQL.initialize();
-        DataManFactory dmfXL = new DMFXLiteral(filesRepo, dataSources, "default", (id, context) -> {
+        DataManFactory dmfXL = new DMFXLiteral(filesRepo, dataSources, "default", s -> {}, (id, context) -> {
         	if("updateMode".equals(id)) return "string";
         	
         	if("dmu".equals(id)) return "DMUtils";
@@ -208,7 +208,7 @@ public class XadataApplicationTests extends TestCase {
         
         DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
         
-        DataManFactory dmfSQL = new DMFSql(filesRepo, dataSources, "default", (id, context) -> {
+        DataManFactory dmfSQL = new DMFSql(filesRepo, dataSources, "default", s -> {}, (id, context) -> {
         	if("rootOv".equals(id)) return "ObjectValue";
         	
         	if("updateMode".equals(id)) return "string";
@@ -218,7 +218,7 @@ public class XadataApplicationTests extends TestCase {
         dmfSQL.initialize();
         
         
-        DataManFactory dmfXL = new DMFXLiteral(filesRepo, dataSources, "default", (id, context) -> {
+        DataManFactory dmfXL = new DMFXLiteral(filesRepo, dataSources, "default", s -> {}, (id, context) -> {
         	if("updateMode".equals(id)) return "string";
         	
         	if("dmu".equals(id)) return "DMUtils";
@@ -261,7 +261,7 @@ public class XadataApplicationTests extends TestCase {
         Map<String, XADataSource> dataSources = new HashMap<>();
         dataSources.put("default", new XASQLDataSource(ds));
         
-        DataManFactory dmf = new DMFSpSql(filesRepo, dataSources, "default");
+        DataManFactory dmf = new DMFSpSql(filesRepo, dataSources, "default", s -> {});
         dmf.initialize();
         
         DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
@@ -322,7 +322,7 @@ public class XadataApplicationTests extends TestCase {
         Map<String, XADataSource> dataSources = new HashMap<>();
         dataSources.put("default", new MapDataSource(() -> mp));
 		
-		DataManFactory dmf =  new DMFMap(filesRepo, dataSources, "default");
+		DataManFactory dmf =  new DMFMap(filesRepo, dataSources, "default", s -> {});
 		dmf.initialize();
 		
 		DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
@@ -358,7 +358,7 @@ public class XadataApplicationTests extends TestCase {
         
         DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
         
-        DataManFactory dmfGen = new DMFGeneral("smart", filesRepo, dataSources, "default");//new DMFSmart(filesRepo, dataSources, "default");
+        DataManFactory dmfGen = new DMFGeneral("smart", filesRepo, dataSources, "default", s -> {});//new DMFSmart(filesRepo, dataSources, "default");
         dmfGen.initialize();
         
         

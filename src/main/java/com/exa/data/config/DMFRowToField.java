@@ -16,8 +16,8 @@ import com.exa.utils.values.ObjectValue;
 
 public class DMFRowToField extends DataManFactory {
 
-	public DMFRowToField(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource) {
-		super(filesRepos, dataSources, defaultDataSource, (id, context) -> {
+	public DMFRowToField(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUSetup dmuSetup) {
+		super(filesRepos, dataSources, defaultDataSource, dmuSetup, (id, context) -> {
 			if(!"sourceDr".equals(id)) {
 				String p[] = context.split("[.]");
 				if(p.length<3 || !getDRVariableName(p[2]).equals(id)) return null;
@@ -31,8 +31,8 @@ public class DMFRowToField extends DataManFactory {
 	}
 
 	@Override
-	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator evaluator, VariableContext variableContext*/, DMutils dmu) throws ManagedException {
-		return new RowToFieldDataReader(name, ovEntity/*, evaluator, variableContext*/, filesRepos, dataSources, defaultDataSource, dmu);
+	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, DMutils dmu) throws ManagedException {
+		return new RowToFieldDataReader(name, ovEntity, filesRepos, dataSources, defaultDataSource, dmu, dmuSetup);
 	}
 
 	@Override
