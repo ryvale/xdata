@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.Set;
 
 import com.exa.data.config.utils.DMutils;
-import com.exa.expression.VariableContext;
+
 import com.exa.expression.XPOperand;
-import com.exa.expression.eval.XPEvaluator;
+
 import com.exa.utils.ManagedException;
 import com.exa.utils.values.ArrayValue;
 import com.exa.utils.values.BooleanValue;
@@ -37,8 +37,8 @@ public class MapReader extends StandardDataReaderBase<DynamicField> {
 	
 	private ObjectValue<XPOperand<?>> config;
 
-	public MapReader(String name, XPEvaluator evaluator, VariableContext variableContext, ObjectValue<XPOperand<?>> config, DMutils dmu, MapGetter mapGetter) {
-		super(name, evaluator, variableContext, dmu);
+	public MapReader(String name/*, XPEvaluator evaluator, VariableContext variableContext*/, ObjectValue<XPOperand<?>> config, DMutils dmu, MapGetter mapGetter) {
+		super(name/*, evaluator, variableContext*/, dmu);
 		this.config = config;
 		
 		this.mapGetter = mapGetter;
@@ -247,7 +247,7 @@ public class MapReader extends StandardDataReaderBase<DynamicField> {
 
 	@Override
 	public MapReader cloneDM() throws DataException {
-		return new MapReader(name, evaluator, variableContext, config, dmu, mapGetter);
+		return new MapReader(name/*, evaluator, variableContext*/, config, dmu, mapGetter);
 	}
 
 	

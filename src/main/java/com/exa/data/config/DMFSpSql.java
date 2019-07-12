@@ -10,9 +10,9 @@ import com.exa.data.XADataSource;
 import com.exa.data.config.utils.DMutils;
 import com.exa.data.sql.StoredProcedureReader;
 import com.exa.data.sql.XASQLDataSource;
-import com.exa.expression.VariableContext;
+
 import com.exa.expression.XPOperand;
-import com.exa.expression.eval.XPEvaluator;
+
 import com.exa.utils.ManagedException;
 import com.exa.utils.io.FilesRepositories;
 import com.exa.utils.values.ObjectValue;
@@ -29,7 +29,7 @@ public class DMFSpSql extends DataManFactory {
 	}
 	
 	@Override
-	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext vc, DMutils dmu) throws ManagedException {
+	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator eval, VariableContext vc*/, DMutils dmu) throws ManagedException {
 		String dsName = ovEntity.getAttributAsString("dataSource");
 		
 		if(dsName == null) dsName = defaultDataSource;
@@ -45,14 +45,14 @@ public class DMFSpSql extends DataManFactory {
 		DataSource ds = xasqlds.getDataSource();
 		if(ds == null) throw new ManagedException(String.format("The data source %s specified is not present.", dsName));
 		
-		DataReader<?> dr = new StoredProcedureReader(name, ds, eval, vc, ovEntity, dmu);
+		DataReader<?> dr = new StoredProcedureReader(name, ds/*, eval, vc*/, ovEntity, dmu);
 		
 		return dr;
 	}
 
 	@Override
-	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval,
-			VariableContext vc, DataReader<?> drSource, DMutils dmu, boolean preventInsertion, boolean preventUpdate)
+	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator eval,
+			VariableContext vc*/, DataReader<?> drSource, DMutils dmu, boolean preventInsertion, boolean preventUpdate)
 			throws ManagedException {
 		// TODO Auto-generated method stub
 		return null;

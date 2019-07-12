@@ -8,7 +8,7 @@ import com.exa.data.config.DataManFactory;
 import com.exa.data.config.utils.DMutils;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
-import com.exa.expression.eval.XPEvaluator;
+import com.exa.expression.eval.MapVariableContext;
 import com.exa.utils.ManagedException;
 import com.exa.utils.io.FilesRepositories;
 import com.exa.utils.values.BooleanValue;
@@ -48,8 +48,8 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 	
 	protected Map<String, Object> values = new LinkedHashMap<>();
 	
-	public RowToFieldDataReader(String name, ObjectValue<XPOperand<?>> config, XPEvaluator evaluator, VariableContext variableContext, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMutils dmu) {
-		super(name, config, evaluator, variableContext, filesRepos, dataSources, defaultDataSource, dmu);
+	public RowToFieldDataReader(String name, ObjectValue<XPOperand<?>> config/*, XPEvaluator evaluator, VariableContext variableContext*/, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMutils dmu) {
+		super(name, config/*, evaluator, variableContext*/, filesRepos, dataSources, defaultDataSource, dmu);
 	}
 
 	@Override
@@ -98,6 +98,8 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 			/*String drVariableName = DataManFactory.getDRVariableName(name);
 			evaluator.getCurrentVariableContext().addVariable(drVariableName, DataReader.class, this);*/
 			
+			VariableContext variableContext = dmu.getVc();
+			
 			ObjectValue<XPOperand<?>> ovSource = config.getRequiredAttributAsObjectValue("source");
 			
 			String type = ovSource.getRequiredAttributAsString("type");
@@ -106,7 +108,11 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 			
 			if(dmf == null) throw new ManagedException(String.format("the type %s is unknown", type));
 			
-			drSource = dmf.getDataReader("source", ovSource, evaluator, variableContext, dmu);
+			VariableContext sourceVc = new MapVariableContext(dmu.getVc());
+			
+			DMutils sourceDmu = dmu.newSubDmu(sourceVc);
+			
+			drSource = dmf.getDataReader("source", ovSource/*, evaluator, variableContext*/, sourceDmu);
 			
 			variableContext.addVariable("sourceDr", DataReader.class, drSource);
 			
@@ -201,7 +207,7 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 
 	@Override
 	public RowToFieldDataReader cloneDM() throws DataException {
-		return new RowToFieldDataReader(name, config, evaluator, variableContext, filesRepos, dataSources, defaultDataSource, dmu);
+		return new RowToFieldDataReader(name, config/*, evaluator, variableContext*/, filesRepos, dataSources, defaultDataSource, dmu);
 	}
 
 	@Override

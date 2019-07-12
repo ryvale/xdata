@@ -36,7 +36,7 @@ public class DMFSql extends DataManFactory {
 	}
 
 	@Override
-	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext variableContext, DMutils dmu) throws ManagedException {
+	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator eval, VariableContext variableContext*/, DMutils dmu) throws ManagedException {
 		
 		String dsName = ovEntity.getAttributAsString("dataSource");
 		
@@ -53,13 +53,13 @@ public class DMFSql extends DataManFactory {
 		DataSource ds = xasqlds.getDataSource();
 		if(ds == null) throw new ManagedException(String.format("The data source %s specified is not present.", dsName));
 		
-		DataReader<?> dr = new SQLDataReader(name, ds, eval, variableContext, ovEntity, dmu);
+		DataReader<?> dr = new SQLDataReader(name, ds/*, eval, variableContext*/, ovEntity, dmu);
 		
 		return dr;
 	}
 
 	@Override
-	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext vc, DataReader<?> drSource, DMutils dmu, boolean preventInsertion, boolean preventUpdate) throws ManagedException {
+	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator eval, VariableContext vc*/, DataReader<?> drSource, DMutils dmu, boolean preventInsertion, boolean preventUpdate) throws ManagedException {
 		String dsName = ovEntity.getAttributAsString("dataSource");
 		
 		if(dsName == null) dsName = defaultDataSource;
@@ -75,7 +75,7 @@ public class DMFSql extends DataManFactory {
 		DataSource ds = xasqlds.getDataSource();
 		if(ds == null) throw new ManagedException(String.format("The data source %s specified is not present.", dsName));
 		
-		DataWriter<?> dw = new SQLDataWriter(name, ds, drSource, eval, vc, ovEntity, dmu, preventInsertion, preventUpdate);
+		DataWriter<?> dw = new SQLDataWriter(name, ds, drSource/*, eval, vc*/, ovEntity, dmu, preventInsertion, preventUpdate);
 		
 		return dw;
 	}

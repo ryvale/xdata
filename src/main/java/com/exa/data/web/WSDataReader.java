@@ -16,9 +16,9 @@ import com.exa.data.DynamicField;
 
 import com.exa.data.StandardDataReaderBase;
 import com.exa.data.config.utils.DMutils;
-import com.exa.expression.VariableContext;
+
 import com.exa.expression.XPOperand;
-import com.exa.expression.eval.XPEvaluator;
+
 import com.exa.utils.ManagedException;
 import com.exa.utils.values.ArrayValue;
 import com.exa.utils.values.BooleanValue;
@@ -71,8 +71,8 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 	
 	//private ArrayValue<XPOperand<?>> avFields;
 	
-	public WSDataReader(String name, XPEvaluator evaluator, VariableContext variableContext, ObjectValue<XPOperand<?>> config, WSDataSource wsDataSource, DMutils dmu) {
-		super(name, evaluator, variableContext, dmu);
+	public WSDataReader(String name/*, XPEvaluator evaluator, VariableContext variableContext*/, ObjectValue<XPOperand<?>> config, WSDataSource wsDataSource, DMutils dmu) {
+		super(name/*, evaluator, variableContext*/, dmu);
 		
 		this.config = config;
 		this.wsDataSource = wsDataSource;

@@ -22,7 +22,6 @@ import com.exa.data.config.utils.DMutils;
 import com.exa.data.sql.oracle.PLSQLDateFormatter;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
-import com.exa.expression.eval.XPEvaluator;
 import com.exa.utils.ManagedException;
 import com.exa.utils.values.ArrayValue;
 import com.exa.utils.values.BooleanValue;
@@ -96,8 +95,8 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 	private Value<?, XPOperand<?>> vlStop;
 	private List<Value<?, XPOperand<?>>> lstKey = new ArrayList<>();
 
-	public SQLDataWriter(String name, DataSource dataSource, DataReader<?> drSource, XPEvaluator evaluator, VariableContext variableContext, ObjectValue<XPOperand<?>> config, DMutils dmu, boolean preventInsertion, boolean preventUpdate) {
-		super(name, drSource, evaluator, variableContext, dmu);
+	public SQLDataWriter(String name, DataSource dataSource, DataReader<?> drSource/*, XPEvaluator evaluator, VariableContext variableContext*/, ObjectValue<XPOperand<?>> config, DMutils dmu, boolean preventInsertion, boolean preventUpdate) {
+		super(name, drSource/*, evaluator, variableContext*/, dmu);
 		
 		this.preventInsertion = preventInsertion;
 		this.preventUpdate = preventUpdate;
@@ -121,6 +120,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 			
 			String table = vlTable.asRequiredString();
 			
+			VariableContext variableContext = dmu.getVc();
 			if(lstKey.size() == 0) {
 				if(preventInsertion) return 0;
 				variableContext.assignOrDeclareVariable("updateMode", String.class, "insert");

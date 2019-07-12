@@ -44,8 +44,8 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 	
 	protected int _lineVisited = 0;
 	
-	public SQLDataReader(String name, DataSource dataSource, XPEvaluator evaluator, VariableContext variableContext, ObjectValue<XPOperand<?>> config, DMutils dmu) throws DataException {
-		super(name, evaluator, variableContext, dmu);
+	public SQLDataReader(String name, DataSource dataSource/*, XPEvaluator evaluator, VariableContext variableContext*/, ObjectValue<XPOperand<?>> config, DMutils dmu) throws DataException {
+		super(name/*, evaluator, variableContext*/, dmu);
 		this.dataSource = dataSource;
 		this.config = config;
 		
@@ -238,7 +238,7 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 
 	@Override
 	public SQLDataReader cloneDM() throws DataException {
-		SQLDataReader res = new SQLDataReader(name, dataSource, evaluator, variableContext, config, dmu);
+		SQLDataReader res = new SQLDataReader(name, dataSource/*, evaluator, variableContext*/, config, dmu);
 		if(isOpen()) res.open();
 		return res;
 		

@@ -22,7 +22,7 @@ import com.exa.utils.values.ObjectValue;
 import com.exa.utils.values.Value;
 
 public abstract class DataManFactory {
-public static final String DMFN_SQL = "sql";
+	public static final String DMFN_SQL = "sql";
 	
 	public static final String DMFN_SMART = "smart";
 	
@@ -38,7 +38,7 @@ public static final String DMFN_SQL = "sql";
 	
 	public static final String DMFN_SP_SQL = "sp-sql";
 	
-	protected final static XALParser parser = new XALParser();
+	public final static XALParser parser = new XALParser();
 	
 	protected FilesRepositories filesRepos;
 	
@@ -121,8 +121,6 @@ public static final String DMFN_SQL = "sql";
 		
 		ObjectValue<XPOperand<?>> ovVariables = ovEntities.getPathAttributAsObjecValue(name + ".variables");
 		
-		
-		
 		if(ovVariables != null) {
 			Map<String, Value<?, XPOperand<?>>> mpVariables = ovVariables.getValue();
 			
@@ -144,7 +142,7 @@ public static final String DMFN_SQL = "sql";
 					DMutils varDmu = new DMutils(dmuDmf, parser, ovRoot, evaluator, varVC);
 					
 					varVC.addVariable("dmu", DMutils.class, varDmu);
-					DataReader<?> vdr = dmf.getDataReader(ovEntities, drVarName, evaluator, varVC, Computing.getDefaultObjectLib(ovRoot), varDmu);
+					DataReader<?> vdr = dmf.getDataReader(ovEntities, drVarName/*, evaluator, varVC*/, Computing.getDefaultObjectLib(ovRoot), varDmu);
 					dmu.register(varName, vdr);
 					continue;
 				}
@@ -155,7 +153,7 @@ public static final String DMFN_SQL = "sql";
 		
 		evaluator.pushVariableContext(vc);
 		
-		DataReader<?> dr = getDataReader(ovEntities, name, evaluator, vc, Computing.getDefaultObjectLib(ovRoot), dmu);
+		DataReader<?> dr = getDataReader(ovEntities, name/*, evaluator, vc*/, Computing.getDefaultObjectLib(ovRoot), dmu);
 		
 		vc.addVariable("rootDr", DataReader.class, dr);
 		
@@ -216,7 +214,7 @@ public static final String DMFN_SQL = "sql";
 					DMutils varDmu = new DMutils(dmuDmf, parser, ovRoot, evaluator, varVC);
 					
 					varVC.addVariable("dmu", DMutils.class, varDmu);
-					DataReader<?> vdr = dmf.getDataReader(ovEntities, drVarName, evaluator, varVC, Computing.getDefaultObjectLib(ovRoot), varDmu);
+					DataReader<?> vdr = dmf.getDataReader(ovEntities, drVarName/*, evaluator, varVC*/, Computing.getDefaultObjectLib(ovRoot), varDmu);
 					dmu.register(varName, vdr);
 					continue;
 				}
@@ -247,11 +245,13 @@ public static final String DMFN_SQL = "sql";
 		return entityName.substring(0, 1).toUpperCase()+entityName.substring(1)+"Dr";
 	}
 	
-	public DataReader<?> getDataReader(ObjectValue<XPOperand<?>> ovEntities, String name, XPEvaluator eval, VariableContext vc, Map<String, ObjectValue<XPOperand<?>>> libOV, DMutils dmu) throws ManagedException {
+	public DataReader<?> getDataReader(ObjectValue<XPOperand<?>> ovEntities, String name/*, XPEvaluator eval, VariableContext vc*/, Map<String, ObjectValue<XPOperand<?>>> libOV, DMutils dmu) throws ManagedException {
 		
-		ObjectValue<XPOperand<?>> ovEntity = parser.object(ovEntities, name, eval, vc, libOV);
+		//ObjectValue<XPOperand<?>> ovEntity = parser.object(ovEntities, name, eval, vc, libOV);
 		
-		DataReader<?> res = getDataReader(name, ovEntity, eval, vc, dmu);
+		ObjectValue<XPOperand<?>> ovEntity = parser.object(ovEntities, name, dmu.getEvaluator(), dmu.getVc(), libOV);
+		
+		DataReader<?> res = getDataReader(name, ovEntity/*, eval, vc*/, dmu);
 		
 		return res;
 	}
@@ -260,7 +260,7 @@ public static final String DMFN_SQL = "sql";
 		
 		ObjectValue<XPOperand<?>> ovEntity = parser.object(ovEntities, name, eval, vc, libOV);
 		
-		DataWriter<?> res = getDataWriter(name, ovEntity, eval, vc, drSource, dmu, preventInsertion, preventUpdate);
+		DataWriter<?> res = getDataWriter(name, ovEntity/*, eval, vc*/, drSource, dmu, preventInsertion, preventUpdate);
 		
 		return res;
 	}
@@ -297,7 +297,7 @@ public static final String DMFN_SQL = "sql";
 		this.defaultDataSource = defaultDataSource;
 	}
 
-	public abstract DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext vc, DMutils dmu) throws ManagedException;
+	public abstract DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator eval, VariableContext vc*/, DMutils dmu) throws ManagedException;
 	
-	public abstract DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity, XPEvaluator eval, VariableContext vc, DataReader<?> drSource, DMutils dmu, boolean preventInsertion, boolean preventUpdate) throws ManagedException;
+	public abstract DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator eval, VariableContext vc*/, DataReader<?> drSource, DMutils dmu, boolean preventInsertion, boolean preventUpdate) throws ManagedException;
 }

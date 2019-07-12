@@ -40,8 +40,8 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 	protected Integer _lineVisited = 0;
 		
 	
-	public SmartDataReader(String name, ObjectValue<XPOperand<?>> config, XPEvaluator evaluator, VariableContext variableContext, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMutils dmu, MapGetter mapGetter) {
-		super(name, config, evaluator, variableContext, filesRepos, dataSources, defaultDataSource, dmu);
+	public SmartDataReader(String name, ObjectValue<XPOperand<?>> config/*, XPEvaluator evaluator, VariableContext variableContext*/, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMutils dmu, MapGetter mapGetter) {
+		super(name, config/*, evaluator, variableContext*/, filesRepos, dataSources, defaultDataSource, dmu);
 	}
 	
 	public void addMainDataReader(String name, DataReader<?> dataReader) throws DataException {
@@ -101,17 +101,21 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		
 		try {
 			
+			XPEvaluator evaluator = dmu.getEvaluator();
+			
 			for(String drName :  mpConfig.keySet()) {
 				if("type".equals(drName) || drName.startsWith("_")) continue;
 				
-				VariableContext vc = new MapVariableContext(evaluator.getCurrentVariableContext());
+				VariableContext vc = new MapVariableContext(dmu.getVc()/*evaluator.getCurrentVariableContext()*/);
 				
 				ObjectValue<XPOperand<?>> ovDRConfig = config.getAttributAsObjectValue(drName); //Computing.object(config, drName, evaluator, vc);
-				updateVariableContext(ovDRConfig, vc, evaluator.getCurrentVariableContext());
+				updateVariableContext(ovDRConfig, vc, dmu.getVc() /*evaluator.getCurrentVariableContext()*/);
 				String flow  = ovDRConfig.getAttributAsString("flow");
 				if(flow == null) flow = FLW_MAIN;
 				
-				DataReader<?> dr = getDataReader(ovDRConfig, drName, vc);
+				DMutils subDmu = dmu.newSubDmu(vc);
+				
+				DataReader<?> dr = getDataReader(ovDRConfig, drName, subDmu);
 				
 				vc.addVariable("this", DataReader.class, dr);
 				
@@ -152,7 +156,7 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		
 	}
 	
-	private DataReader<?> getDataReader(ObjectValue<XPOperand<?>> ovDRConfig, String drName, VariableContext vc) throws ManagedException {
+	private DataReader<?> getDataReader(ObjectValue<XPOperand<?>> ovDRConfig, String drName, DMutils subDmu/*, VariableContext vc*/) throws ManagedException {
 		String type = ovDRConfig.getRequiredAttributAsString("type");
 		
 		DataManFactory dmf = dmFactories.get(type);
@@ -160,7 +164,7 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		if(dmf == null) throw new ManagedException(String.format("the type %s is unknown", type));
 		
 		
-		DataReader<?> res = dmf.getDataReader(drName, ovDRConfig, evaluator, vc, dmu);
+		DataReader<?> res = dmf.getDataReader(drName, ovDRConfig/*, evaluator, vc*/, subDmu);
 		
 		//res.setEvaluator(evaluator);
 		return res;

@@ -11,7 +11,7 @@ public interface DataMan {
 	
 	DataMan cloneDM() throws DataException;
 	
-	void setEvaluator(XPEvaluator evaluator);
+	//void setEvaluator(XPEvaluator evaluator);
 	
 	XPEvaluator getEvaluator();
 	

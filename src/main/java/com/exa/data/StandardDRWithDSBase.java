@@ -12,9 +12,8 @@ import com.exa.data.config.DMFWebService;
 import com.exa.data.config.DMFXLiteral;
 import com.exa.data.config.DataManFactory;
 import com.exa.data.config.utils.DMutils;
-import com.exa.expression.VariableContext;
+
 import com.exa.expression.XPOperand;
-import com.exa.expression.eval.XPEvaluator;
 import com.exa.utils.io.FilesRepositories;
 import com.exa.utils.values.ObjectValue;
 
@@ -45,8 +44,8 @@ public abstract class StandardDRWithDSBase<_FIELD extends Field> extends Standar
 	
 	protected String defaultDataSource;
 	
-	public StandardDRWithDSBase(String name, ObjectValue<XPOperand<?>> config, XPEvaluator evaluator, VariableContext variableContext, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMutils dmu) {
-		super(name, evaluator, variableContext, dmu);
+	public StandardDRWithDSBase(String name, ObjectValue<XPOperand<?>> config/*, XPEvaluator evaluator, VariableContext variableContext*/, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMutils dmu) {
+		super(name/*, evaluator, variableContext*/, dmu);
 		
 		this.config = config;
 		

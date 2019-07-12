@@ -15,22 +15,22 @@ import com.exa.utils.values.Value;
 public abstract class StandardDataReaderBase<_FIELD extends Field> implements DataReader<_FIELD> {
 	protected Map<String, _FIELD> fields = new LinkedHashMap<>();
 	
-	protected XPEvaluator evaluator = null;
+	//protected XPEvaluator evaluator = null;
 	
 	protected DataReader<?> parent;
 	
 	protected String name;
 	
-	protected VariableContext variableContext;
+	//protected VariableContext variableContext;
 	
 	protected DMutils dmu;
 	
-	public StandardDataReaderBase(String name, XPEvaluator evaluator, VariableContext variableContext, DMutils dmu) {
+	public StandardDataReaderBase(String name/*, XPEvaluator evaluator, VariableContext variableContext*/, DMutils dmu) {
 		super();
 		this.name = name;
 		
-		this.evaluator = evaluator;
-		this.variableContext = variableContext;
+		/*this.evaluator = evaluator;
+		this.variableContext = variableContext;*/
 		this.dmu = dmu;
 	}
 	
@@ -90,13 +90,13 @@ public abstract class StandardDataReaderBase<_FIELD extends Field> implements Da
 
 	@Override
 	public XPEvaluator getEvaluator() {
-		return evaluator;
+		return dmu.getEvaluator();
 	}
 
-	@Override
+	/*@Override
 	public void setEvaluator(XPEvaluator evaluator) {
 		this.evaluator = evaluator;
-	}
+	}*/
 
 	@Override
 	public DataReader<?> getParent() {
@@ -113,13 +113,13 @@ public abstract class StandardDataReaderBase<_FIELD extends Field> implements Da
 		return this;
 	}
 
-	public VariableContext getVariableContext() {
+	/*public VariableContext getVariableContext() {
 		return variableContext;
 	}
 
 	public void setVariableContext(VariableContext variableContext) {
 		this.variableContext = variableContext;
-	}
+	}*/
 	
 	@Override
 	public DataWriter<?> asDataWriter() {

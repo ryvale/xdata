@@ -11,9 +11,9 @@ import java.util.Map;
 import java.util.Set;
 
 import com.exa.data.config.utils.DMutils;
-import com.exa.expression.VariableContext;
+
 import com.exa.expression.XPOperand;
-import com.exa.expression.eval.XPEvaluator;
+
 import com.exa.utils.ManagedException;
 import com.exa.utils.values.ArrayValue;
 import com.exa.utils.values.BooleanValue;
@@ -45,8 +45,9 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 	private int rowIndex = -1;
 	
 	
-	public XLiteralDataReader(String name, XPEvaluator evaluator, VariableContext variableContext, ObjectValue<XPOperand<?>> config, DMutils dmu) {
-		super(name, evaluator, variableContext, dmu);
+	public XLiteralDataReader(String name/*, XPEvaluator evaluator, VariableContext variableContext*/, ObjectValue<XPOperand<?>> config, DMutils dmu) {
+		//super(name, evaluator, variableContext, dmu);
+		super(name, dmu);
 		this.config = config;
 	}
 
@@ -219,7 +220,7 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 
 	@Override
 	public XLiteralDataReader cloneDM() throws DataException {
-		return new XLiteralDataReader(name, evaluator, variableContext, config, dmu);
+		return new XLiteralDataReader(name/*, evaluator, variableContext*/, config, dmu);
 	}
 
 }

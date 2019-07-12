@@ -41,6 +41,7 @@ public class DMutils {
 		this.ovRoot = ovRoot;
 		this.dmf = dmf;
 		this.evaluator = evaluator;
+		this.vc = vc;
 		this.parser = parser;
 		
 		macros.put(MC_READER_STR_VALUE, new MCReaderStrValue(this));
@@ -77,5 +78,7 @@ public class DMutils {
 
 	public XALParser getParser() { return parser; }
 	
+	
+	public DMutils newSubDmu(VariableContext vc) { return new DMutils(dmf, parser, ovRoot, evaluator, vc); }
 	
 }
