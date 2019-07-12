@@ -1,4 +1,4 @@
-package com.exa.data.expression;
+package com.exa.data.expression.dataman;
 
 import java.util.Vector;
 
@@ -11,9 +11,9 @@ import com.exa.expression.eval.ClassesMan;
 import com.exa.expression.eval.XPEvaluator;
 import com.exa.utils.ManagedException;
 
-public class MethodExecute extends OMMethod.XPOrtMethod<DataMan, Boolean> {
+public class MtdExecute extends OMMethod.XPOrtMethod<DataMan, Boolean> {
 
-	public MethodExecute() {
+	public MtdExecute() {
 		super("execute", 1);
 	}
 

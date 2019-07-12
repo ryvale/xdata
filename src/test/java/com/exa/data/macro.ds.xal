@@ -1,0 +1,50 @@
+
+references {
+
+	seqNext(entity, sEcalc) {
+		type 'sp-sql',
+		
+		table 'R5O7_O7MAXSEQ',
+		
+		params { 
+			sCalc,
+			
+			sEtype = entity,
+			
+			sEcalc = sEcalc,
+			
+			sChk
+		},
+		
+		fields {
+		
+			items {
+				value "sCalc",
+				
+				status "sChk"
+			}
+		}
+	}
+
+},
+	
+macros {
+	newOTCode {
+		type 'reader-str-value',
+		
+		reader @seqNext("EVNT", "1"),
+		
+		field 'value'
+	}
+},
+
+entities {
+	
+	test {
+		type "x-literal",
+		
+		rows [
+			{ code = dmu.evalString("macros.newOTCode") }
+		]
+	}
+}

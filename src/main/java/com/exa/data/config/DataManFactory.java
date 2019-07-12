@@ -115,12 +115,13 @@ public static final String DMFN_SQL = "sql";
 			if(mapEntities.size() == 0) throw new ManagedException(String.format("No entity found while seeking %s", drName));
 			name = mapEntities.keySet().iterator().next();
 		}
+		VariableContext vc = new MapVariableContext(evaluator.getCurrentVariableContext());
 		
-		DMutils dmu = new DMutils(dmuDmf, ovRoot);
+		DMutils dmu = new DMutils(dmuDmf, parser, ovRoot, evaluator, vc);
 		
 		ObjectValue<XPOperand<?>> ovVariables = ovEntities.getPathAttributAsObjecValue(name + ".variables");
 		
-		VariableContext vc = new MapVariableContext(evaluator.getCurrentVariableContext());
+		
 		
 		if(ovVariables != null) {
 			Map<String, Value<?, XPOperand<?>>> mpVariables = ovVariables.getValue();
@@ -138,8 +139,10 @@ public static final String DMFN_SQL = "sql";
 					DataManFactory dmf = dmuDmf.getDMF(dmfName);
 					if(dmf == null) throw new ManagedException(String.format("Invalid data manager factory '%s'", dmfName)) ;
 					
-					DMutils varDmu = new DMutils(dmuDmf, ovRoot);
 					VariableContext varVC = new MapVariableContext(vc);
+					
+					DMutils varDmu = new DMutils(dmuDmf, parser, ovRoot, evaluator, varVC);
+					
 					varVC.addVariable("dmu", DMutils.class, varDmu);
 					DataReader<?> vdr = dmf.getDataReader(ovEntities, drVarName, evaluator, varVC, Computing.getDefaultObjectLib(ovRoot), varDmu);
 					dmu.register(varName, vdr);
@@ -186,8 +189,10 @@ public static final String DMFN_SQL = "sql";
 			if(mapEntities.size() == 0) throw new ManagedException(String.format("No entity found while seeking %s", drName));
 			name = mapEntities.keySet().iterator().next();
 		}
+		
+		
 		VariableContext vc = new MapVariableContext(evaluator.getCurrentVariableContext());
-		DMutils dmu = new DMutils(dmuDmf, ovRoot);
+		DMutils dmu = new DMutils(dmuDmf, parser, ovRoot, evaluator, vc);
 		
 		ObjectValue<XPOperand<?>> ovVariables = ovEntities.getPathAttributAsObjecValue(name + ".variables");
 		if(ovVariables != null) {
@@ -203,11 +208,13 @@ public static final String DMFN_SQL = "sql";
 					ObjectValue<XPOperand<?>> ovDr = ovEntities.getAttributAsObjectValue(drVarName);
 					
 					String dmfName = ovDr.getRequiredAttributAsString("type");
-					DataManFactory dmf =  dmuDmf.getDMF(dmfName);
+					DataManFactory dmf = dmuDmf.getDMF(dmfName);
 					if(dmf == null) throw new ManagedException(String.format("Invalid data manager factory '%s'", dmfName)) ;
 					
-					DMutils varDmu = new DMutils(dmuDmf, ovRoot);
 					VariableContext varVC = new MapVariableContext(vc);
+					
+					DMutils varDmu = new DMutils(dmuDmf, parser, ovRoot, evaluator, varVC);
+					
 					varVC.addVariable("dmu", DMutils.class, varDmu);
 					DataReader<?> vdr = dmf.getDataReader(ovEntities, drVarName, evaluator, varVC, Computing.getDefaultObjectLib(ovRoot), varDmu);
 					dmu.register(varName, vdr);

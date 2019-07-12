@@ -1,4 +1,4 @@
-package com.exa.data.expression;
+package com.exa.data.expression.dataman;
 
 import com.exa.data.DataMan;
 import com.exa.data.DataWriter;
@@ -16,7 +16,7 @@ public class TDataWriter extends TObjectClass<DataWriter<?>, DataMan> {
 	@Override
 	public void initialize() {
 		OMMethod<Boolean> omBl = new OMMethod<>("execute", 1, OMOperandType.POST_OPERAND);
-		omBl.addOperator(new MethodExecute());
+		omBl.addOperator(new MtdExecute());
 		methods.put("execute", new Method<>("execute", Boolean.class, omBl));
 	}
 	

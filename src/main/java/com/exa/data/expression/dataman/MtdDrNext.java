@@ -1,4 +1,4 @@
-package com.exa.data.expression;
+package com.exa.data.expression.dataman;
 
 import java.util.Vector;
 
@@ -11,9 +11,9 @@ import com.exa.expression.eval.ClassesMan;
 import com.exa.expression.eval.XPEvaluator;
 import com.exa.utils.ManagedException;
 
-public class DrMethodNext  extends OMMethod.XPOrtMethod<DataReader<?>, Boolean> {
+public class MtdDrNext  extends OMMethod.XPOrtMethod<DataReader<?>, Boolean> {
 
-	public DrMethodNext() {
+	public MtdDrNext() {
 		super("next", 1);
 	}
 

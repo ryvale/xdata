@@ -339,5 +339,38 @@ public class XadataApplicationTests extends TestCase {
 		
 		dr.close();
 	}
+	
+	public void testMacroSP() throws ManagedException {
+		FilesRepositories filesRepo = new FilesRepositories();
+		
+		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
+		filesRepo.addRepoPart("data-config", new OSFileRepoPart("C:/Users/leader/Desktop/travaux"));
+		
+		SQLServerDataSource ds = new SQLServerDataSource();
+		ds.setUser("sa");  
+        ds.setPassword("e@mP0wer");  
+        ds.setServerName("192.168.23.129");  
+        ds.setPortNumber(1433);
+        ds.setDatabaseName("EAMPROD");
+        
+        Map<String, XADataSource> dataSources = new HashMap<>();
+        dataSources.put("default", new XASQLDataSource(ds));
+        
+        DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
+        
+        DataManFactory dmfGen = new DMFGeneral("smart", filesRepo, dataSources, "default");//new DMFSmart(filesRepo, dataSources, "default");
+        dmfGen.initialize();
+        
+        
+        DataReader<?> dr = dmfGen.getDataReader("default:/macro", evSetup);
+        
+        dr.open();
+        
+        dr.next();
+        
+        System.out.println(dr.getString("code"));
+        
+		dr.close();
+	}
 }
  

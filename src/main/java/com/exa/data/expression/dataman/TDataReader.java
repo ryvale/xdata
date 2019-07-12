@@ -1,4 +1,4 @@
-package com.exa.data.expression;
+package com.exa.data.expression.dataman;
 
 import java.util.Date;
 
@@ -18,27 +18,27 @@ public class TDataReader extends TObjectClass<DataReader<?>, DataMan> {
 	@Override
 	public void initialize() {
 		OMMethod<String> omStr = new OMMethod<>("getString", 2, OMOperandType.POST_OPERAND);
-		omStr.addOperator(new MethodGetString());
+		omStr.addOperator(new MtdDrGetString());
 		methods.put("getString", new Method<>("getString", String.class, omStr));
 		
 		OMMethod<Date> omDate = new OMMethod<>("getDate", 2, OMOperandType.POST_OPERAND);
-		omDate.addOperator(new MethodGetDate());
+		omDate.addOperator(new MtdDrGetDate());
 		methods.put("getDate", new Method<>("getDate", Date.class, omDate));
 		
 		OMMethod<Double> omDbl = new OMMethod<>("getDouble", 2, OMOperandType.POST_OPERAND);
-		omDbl.addOperator(new MethodGetDouble());
+		omDbl.addOperator(new MtdDrGetDouble());
 		methods.put("getDouble", new Method<>("getDouble", Double.class, omDbl));
 		
 		OMMethod<Integer> omInt = new OMMethod<>("getInteger", 2, OMOperandType.POST_OPERAND);
-		omInt.addOperator(new MethodGetInteger());
+		omInt.addOperator(new MtdDrGetInteger());
 		methods.put("getInteger", new Method<>("getInteger", Integer.class, omInt));
 		
 		OMMethod<Boolean> omBl = new OMMethod<>("execute", 1, OMOperandType.POST_OPERAND);
-		omBl.addOperator(new MethodExecute());
+		omBl.addOperator(new MtdExecute());
 		methods.put("execute", new Method<>("execute", Boolean.class, omBl));
 		
 		omBl = new OMMethod<>("next", 1, OMOperandType.POST_OPERAND);
-		omBl.addOperator(new DrMethodNext());
+		omBl.addOperator(new MtdDrNext());
 		methods.put("next", new Method<>("next", Boolean.class, omBl));
 		
 		properties.put("lineVisited", new Property<>("lineVisited", Integer.class, object -> object.lineVisited()));

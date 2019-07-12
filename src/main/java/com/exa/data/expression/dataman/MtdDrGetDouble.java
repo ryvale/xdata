@@ -1,20 +1,20 @@
-package com.exa.data.expression;
+package com.exa.data.expression.dataman;
 
 import java.util.Vector;
 
 import com.exa.data.DataReader;
 import com.exa.expression.OMMethod;
+import com.exa.expression.OMMethod.XPOrtMethod;
 import com.exa.expression.Type;
 import com.exa.expression.XPOperand;
-import com.exa.expression.OMMethod.XPOrtMethod;
 import com.exa.expression.eval.ClassesMan;
 import com.exa.expression.eval.XPEvaluator;
 import com.exa.utils.ManagedException;
 
-public class MethodGetInteger extends OMMethod.XPOrtMethod<DataReader<?>, Integer> {
+public class MtdDrGetDouble extends OMMethod.XPOrtMethod<DataReader<?>, Double> {
 
-	public MethodGetInteger() {
-		super("getInteger", 1);
+	public MtdDrGetDouble() {
+		super("getDouble", 1);
 	}
 
 	@Override
@@ -24,20 +24,20 @@ public class MethodGetInteger extends OMMethod.XPOrtMethod<DataReader<?>, Intege
 
 	@Override
 	public Type<?> type() {
-		return ClassesMan.T_INTEGER;
+		return ClassesMan.T_DOUBLE;
 	}
 
 	@Override
-	protected XPOrtMethod<DataReader<?>, Integer>.XPMethodResult createResultOperand(XPOperand<DataReader<?>> xpDR, Vector<XPOperand<?>> xpFieldName) {
+	protected XPOrtMethod<DataReader<?>, Double>.XPMethodResult createResultOperand(XPOperand<DataReader<?>> xpDR, Vector<XPOperand<?>> xpFieldName) {
 		
 		return new XPMethodResult(xpDR, xpFieldName) {
 			
 			@Override
-			public Integer value(XPEvaluator eval) throws ManagedException {
+			public Double value(XPEvaluator eval) throws ManagedException {
 				String fieldName = xpFieldName.get(0).asOPString().value(eval);
 				DataReader<?> dr = xpDR.value(eval);
 				
-				return dr.getInteger(fieldName);
+				return dr.getDouble(fieldName);
 			}
 		};
 	}

@@ -1,9 +1,10 @@
-package com.exa.data.expression;
+package com.exa.data.expression.dmu;
 
 import java.util.Vector;
 
 import com.exa.data.DataReader;
 import com.exa.data.config.utils.DMutils;
+import com.exa.data.expression.DCEvaluatorSetup;
 import com.exa.expression.OMMethod;
 import com.exa.expression.OMMethod.XPOrtMethod;
 import com.exa.expression.Type;
@@ -12,9 +13,9 @@ import com.exa.expression.eval.XPEvaluator;
 import com.exa.utils.ManagedException;
 
 @SuppressWarnings("rawtypes")
-public class DMUReaderMethod extends OMMethod.XPOrtMethod<DMutils, DataReader> {
+public class MtdReader extends OMMethod.XPOrtMethod<DMutils, DataReader> {
 
-	public DMUReaderMethod() {
+	public MtdReader() {
 		super("reader", 2);
 	}
 

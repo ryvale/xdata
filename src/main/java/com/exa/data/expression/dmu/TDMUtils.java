@@ -1,4 +1,4 @@
-package com.exa.data.expression;
+package com.exa.data.expression.dmu;
 
 import com.exa.data.DataReader;
 import com.exa.data.config.utils.DMutils;
@@ -18,9 +18,13 @@ public class TDMUtils extends TObjectClass<DMutils, Object> {
 	public void initialize() {
 		@SuppressWarnings("rawtypes")
 		OMMethod<DataReader> omReader = new OMMethod<>("reader", 2, OMOperandType.POST_OPERAND);
-		omReader.addOperator(new DMUReaderMethod());
+		omReader.addOperator(new MtdReader());
 		
 		methods.put("reader", new Method<>("reader", DataReader.class, omReader));
+		
+		OMMethod<String> omStr = new OMMethod<>("evalString", 2, OMOperandType.POST_OPERAND);
+		omStr.addOperator(new MtdEvalString());
+		methods.put("evalString", new Method<>("evalString", String.class, omStr));
 	}
 
 
