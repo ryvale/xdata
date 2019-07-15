@@ -1,5 +1,6 @@
 package com.exa.data.expression.macro;
 
+import com.exa.data.DataReader;
 import com.exa.data.config.utils.DMutils;
 import com.exa.expression.XPOperand;
 import com.exa.utils.ManagedException;
@@ -15,6 +16,8 @@ public abstract class Macro<T> {
 	}
 
 	public Macro<String> asMacroString() { return null; }
+	
+	public Macro<DataReader<?>> asMacroDataReader() { return null; }
 	
 	public abstract T value(String macroName, ObjectValue<XPOperand<?>> ovMacro) throws ManagedException;
 

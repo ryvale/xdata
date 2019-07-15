@@ -1,6 +1,8 @@
 package com.exa.data;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.exa.data.config.utils.DMutils;
@@ -15,29 +17,22 @@ import com.exa.utils.values.Value;
 public abstract class StandardDataReaderBase<_FIELD extends Field> implements DataReader<_FIELD> {
 	protected Map<String, _FIELD> fields = new LinkedHashMap<>();
 	
-	//protected XPEvaluator evaluator = null;
-	
 	protected DataReader<?> parent;
 	
 	protected String name;
 	
-	//protected VariableContext variableContext;
-	
 	protected DMutils dmu;
 	
-	public StandardDataReaderBase(String name/*, XPEvaluator evaluator, VariableContext variableContext*/, DMutils dmu) {
+	
+	//protected List<?> beforeConnectionAction = new ArrayList<>();
+	
+	public StandardDataReaderBase(String name, DMutils dmu) {
 		super();
 		this.name = name;
 		
-		/*this.evaluator = evaluator;
-		this.variableContext = variableContext;*/
 		this.dmu = dmu;
 	}
 	
-	/*public StandardDataReaderBase(String name, VariableContext variableContext) {
-		this(name, null);
-	}*/
-
 	@Override
 	public boolean execute() throws DataException {
 		return next();
@@ -82,21 +77,11 @@ public abstract class StandardDataReaderBase<_FIELD extends Field> implements Da
 		
 		return getString(fieldName);
 	}
-	
-	/*@Override
-	public int lineVisited() {
-		return _lineVisited;
-	}*/
 
 	@Override
 	public XPEvaluator getEvaluator() {
 		return dmu.getEvaluator();
 	}
-
-	/*@Override
-	public void setEvaluator(XPEvaluator evaluator) {
-		this.evaluator = evaluator;
-	}*/
 
 	@Override
 	public DataReader<?> getParent() {
@@ -112,14 +97,6 @@ public abstract class StandardDataReaderBase<_FIELD extends Field> implements Da
 	public StandardDataReaderBase<_FIELD> asDataReader() {
 		return this;
 	}
-
-	/*public VariableContext getVariableContext() {
-		return variableContext;
-	}
-
-	public void setVariableContext(VariableContext variableContext) {
-		this.variableContext = variableContext;
-	}*/
 	
 	@Override
 	public DataWriter<?> asDataWriter() {

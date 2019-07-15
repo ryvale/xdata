@@ -159,9 +159,11 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 		 	ArrayValue<XPOperand<?>> avRows = config.getAttributAsArrayValue("rows");
 		 	if(avRows == null) return true;
 		 	
-		 	for(DataReader<?> dr : dmu.getReaders().values()) {
+		 	dmu.executeBeforeConnectionActions();
+		 	
+		 	/*for(DataReader<?> dr : dmu.getReaders().values()) {
 				dr.open();
-			}
+			}*/
 		 	List<Value<?, XPOperand<?>>> lstRows = avRows.getValue();
 		 	int nb = lstRows.size();
 		 	
@@ -201,9 +203,10 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 
 	@Override
 	public void close() throws DataException {
-		for(DataReader<?> dr : dmu.getReaders().values()) {
+		/*for(DataReader<?> dr : dmu.getReaders().values()) {
 			try { dr.close(); } catch(DataException e) { e.printStackTrace();}
-		}
+		}*/
+		dmu.clean();
 		rowIndex = -1;
 		rows.clear();
 	}

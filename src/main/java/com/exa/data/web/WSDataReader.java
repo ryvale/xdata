@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.exa.data.DataException;
-import com.exa.data.DataReader;
 import com.exa.data.DynamicField;
 
 import com.exa.data.StandardDataReaderBase;
@@ -237,9 +236,11 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 			}
 			
 
-			for(DataReader<?> dr : dmu.getReaders().values()) {
+			dmu.executeBeforeConnectionActions();
+			
+			/*for(DataReader<?> dr : dmu.getReaders().values()) {
 				dr.open();
-			}
+			}*/
 			responseMan = rf.create(fields, vlPath == null ? null : vlPath.asString());
 			
 			responseMan.manage(rb);
@@ -265,9 +266,11 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 
 	@Override
 	public void close() throws DataException {
-		for(DataReader<?> dr : dmu.getReaders().values()) {
+		/*for(DataReader<?> dr : dmu.getReaders().values()) {
 			try { dr.close(); } catch(DataException e) { e.printStackTrace();}
-		}
+		}*/
+		
+		dmu.clean();
 		responseMan = null;
 		
 	}

@@ -214,10 +214,10 @@ public class MapReader extends StandardDataReaderBase<DynamicField> {
 		 	else {
 		 		
 		 	}
-		 	
-		 	for(DataReader<?> dr : dmu.getReaders().values()) {
+		 	dmu.executeBeforeConnectionActions();
+		 	/*for(DataReader<?> dr : dmu.getReaders().values()) {
 				dr.open();
-			}
+			}*/
 		} catch (ManagedException e) {
 			throw new DataException(e);
 		}
@@ -229,10 +229,10 @@ public class MapReader extends StandardDataReaderBase<DynamicField> {
 	public void close() throws DataException {
 		data = null;
 		_lineVisited = 0;
-		for(DataReader<?> dr : dmu.getReaders().values()) {
+		/*for(DataReader<?> dr : dmu.getReaders().values()) {
 			try { dr.close(); } catch(DataException e) {}
-		}
-		
+		}*/
+		dmu.clean();
 	}
 
 	@Override

@@ -404,9 +404,11 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 		 	}
 			vlWhere = config.getAttribut("criteria");
 			
-			for(DataReader<?> dr : dmu.getReaders().values()) {
+			/*for(DataReader<?> dr : dmu.getReaders().values()) {
 				dr.open();
-			}
+			}*/
+			
+			dmu.executeBeforeConnectionActions();
 			
 			connection = dataSource.getConnection();
 		}
@@ -422,9 +424,10 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 
 	@Override
 	public void close() throws DataException {
-		for(DataReader<?> dr : dmu.getReaders().values()) {
+		/*for(DataReader<?> dr : dmu.getReaders().values()) {
 			try { dr.close(); } catch(DataException e) { e.printStackTrace();}
-		}
+		}*/
+		dmu.clean();
 		if(connection != null) {
 			try { connection.close(); } catch (SQLException e) { e.printStackTrace(); }
 			

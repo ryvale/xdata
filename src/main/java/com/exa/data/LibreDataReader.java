@@ -69,9 +69,11 @@ public class LibreDataReader extends StandardDataReaderBase<Field> {
 				cl.setEvaluator(dmu.getEvaluator());
 			}
 			
-			for(DataReader<?> dr : dmu.getReaders().values()) {
+			dmu.executeBeforeConnectionActions();
+			
+			/*for(DataReader<?> dr : dmu.getReaders().values()) {
 				dr.open();
-			}
+			}*/
 			
 			return true;
 		} catch (ManagedException e) {
@@ -82,10 +84,10 @@ public class LibreDataReader extends StandardDataReaderBase<Field> {
 
 	@Override
 	public void close() throws DataException {
-		for(DataReader<?> dr : dmu.getReaders().values()) {
+		/*for(DataReader<?> dr : dmu.getReaders().values()) {
 			try { dr.close(); } catch (Exception e) { e.printStackTrace(); }
-		}
-		
+		}*/
+		dmu.clean();
 		vlEOF = null;
 		
 	}

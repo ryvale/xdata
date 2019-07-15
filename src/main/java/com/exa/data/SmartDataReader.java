@@ -131,6 +131,7 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 				}
 				
 			}
+			dmu.executeBeforeConnectionActions();
 		} catch (ManagedException e) {
 			throw new DataException(e);
 		}
@@ -141,10 +142,10 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		currentMainReader = drIndex.next();
 		currentMainReader.open();
 		
-		for(DataReader<?> dr : dmu.getReaders().values()) {
+		/*for(DataReader<?> dr : dmu.getReaders().values()) {
 			dr.open();
-		}
-		
+		}*/
+
 		for(DataMan dm : afterMainActions.values()) {
 			DataReader<?> dr = dm.asDataReader();
 			if(dr == null) continue;
@@ -172,9 +173,11 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 
 	@Override
 	public void close() throws DataException {
-		for(DataReader<?> dr : dmu.getReaders().values()) {
+		/*for(DataReader<?> dr : dmu.getReaders().values()) {
 			try { dr.close(); } catch(DataException e) { e.printStackTrace();}
-		}
+		}*/
+		
+		dmu.clean();
 		
 		for(DataMan dm : afterMainActions.values()) {
 			DataReader<?> dr = dm.asDataReader();

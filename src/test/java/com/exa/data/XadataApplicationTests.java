@@ -190,61 +190,6 @@ public class XadataApplicationTests extends TestCase {
 		dw.close();
 	}
 	
-	public void testDwSQL2() throws ManagedException {
-		FilesRepositories filesRepo = new FilesRepositories();
-		
-		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
-		filesRepo.addRepoPart("data-config", new OSFileRepoPart("C:/Users/leader/Desktop/travaux"));
-		
-		SQLServerDataSource ds = new SQLServerDataSource();
-		ds.setUser("sa");  
-        ds.setPassword("e@mP0wer");  
-        ds.setServerName("192.168.23.129");  
-        ds.setPortNumber(1433);
-        ds.setDatabaseName("EAMPROD");
-        
-        Map<String, XADataSource> dataSources = new HashMap<>();
-        dataSources.put("default", new XASQLDataSource(ds));
-        
-        DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
-        
-        DataManFactory dmfSQL = new DMFSql(filesRepo, dataSources, "default", s -> {}, (id, context) -> {
-        	if("rootOv".equals(id)) return "ObjectValue";
-        	
-        	if("updateMode".equals(id)) return "string";
-        	
-        	return null;
-        });//new DMFSmart(filesRepo, dataSources, "default");
-        dmfSQL.initialize();
-        
-        
-        DataManFactory dmfXL = new DMFXLiteral(filesRepo, dataSources, "default", s -> {}, (id, context) -> {
-        	if("updateMode".equals(id)) return "string";
-        	
-        	if("dmu".equals(id)) return "DMUtils";
-        	
-        	return null;
-        });
-        dmfXL.initialize();
-        DataReader<?> drSource = dmfXL.getDataReader("default:/sql-w#testData", evSetup);
-        
-        /*DataWriter<?> dw = dmfSQL.getDataWriter("default:/sql-w#udm", evSetup, drSource);
-        
-        dw.open();
-        
-        drSource.open();
-        
-        while(drSource.next()) {
-        	dw.execute();
-        }
-        
-        drSource.close();
-        
-        dw.execute();
-        
-		dw.close();*/
-	}
-	
 	public void testStoredProcSQL() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
 		
@@ -363,6 +308,31 @@ public class XadataApplicationTests extends TestCase {
         
         
         DataReader<?> dr = dmfGen.getDataReader("default:/macro", evSetup);
+        
+        dr.open();
+        
+        dr.next();
+        
+        System.out.println(dr.getString("code"));
+        
+		dr.close();
+	}
+	
+	public void testBeforeConnectionActions() throws ManagedException {
+		FilesRepositories filesRepo = new FilesRepositories();
+		
+		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
+		filesRepo.addRepoPart("data-config", new OSFileRepoPart("C:/Users/leader/Desktop/travaux"));
+		
+		Map<String, XADataSource> dataSources = new HashMap<>();
+		
+		
+		DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
+		
+		DataManFactory dmfGen = new DMFGeneral("smart", filesRepo, dataSources, "default", s -> {});//new DMFSmart(filesRepo, dataSources, "default");
+	    dmfGen.initialize();
+	    
+	    DataReader<?> dr = dmfGen.getDataReader("default:/bca#entity1", evSetup);
         
         dr.open();
         

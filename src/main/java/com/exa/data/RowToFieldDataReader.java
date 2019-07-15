@@ -112,6 +112,7 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 			VariableContext sourceVc = new MapVariableContext(dmu.getVc());
 			
 			DMutils sourceDmu = dmu.newSubDmu(sourceVc);
+			dmuSetup.setup(dmu);
 			
 			drSource = dmf.getDataReader("source", ovSource/*, evaluator, variableContext*/, sourceDmu);
 			
@@ -181,9 +182,10 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 				values.put(field.name, field.defaultValueExp.getValue());
 			}
 			
-			for(DataReader<?> dr : dmu.getReaders().values()) {
+			dmu.executeBeforeConnectionActions();
+			/*for(DataReader<?> dr : dmu.getReaders().values()) {
 				dr.open();
-			}
+			}*/
 			return drSource.open();
 		} catch (ManagedException e) {
 			throw new DataException(e);
@@ -196,9 +198,11 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 	public void close() throws DataException {
 		if(drSource != null) try { drSource.close();} catch(DataException e) { e.printStackTrace();}
 		
-		for(DataReader<?> dr : dmu.getReaders().values()) {
+		/*for(DataReader<?> dr : dmu.getReaders().values()) {
 			try { dr.close(); } catch(DataException e) { e.printStackTrace();}
-		}
+		}*/
+		
+		dmu.clean();
 	}
 
 	@Override

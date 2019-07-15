@@ -15,14 +15,14 @@ entities {
 		]
 	},
 
-	r5uoms {
+	r5uoms(dr1 @DataReader) {
 		type "tsql",
 		
-		variables {
-			dr1 { type 'DataReader', ref 'testData'  }
+		beforeConnection {
+			dr1 = dmu.openReader("testData")
 		},
 		
-		stop = dmu.reader('dr1').next() == false,
+		stop = dr1.next() == false,
 		
 		fields {
 			manager exa { prefix "uom_" },
