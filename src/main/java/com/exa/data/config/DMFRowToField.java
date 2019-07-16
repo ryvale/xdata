@@ -6,7 +6,7 @@ import com.exa.data.DataReader;
 import com.exa.data.DataWriter;
 import com.exa.data.RowToFieldDataReader;
 import com.exa.data.XADataSource;
-import com.exa.data.config.utils.DMutils;
+import com.exa.data.config.utils.DMUtils;
 
 import com.exa.expression.XPOperand;
 
@@ -31,12 +31,12 @@ public class DMFRowToField extends DataManFactory {
 	}
 
 	@Override
-	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, DMutils dmu) throws ManagedException {
+	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, DMUtils dmu) throws ManagedException {
 		return new RowToFieldDataReader(name, ovEntity, filesRepos, dataSources, defaultDataSource, dmu, dmuSetup);
 	}
 
 	@Override
-	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator eval, VariableContext vc*/, DataReader<?> drSource, DMutils dmu, boolean preventInsertion, boolean preventUpdate) throws ManagedException {
+	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator eval, VariableContext vc*/, DataReader<?> drSource, DMUtils dmu, boolean preventInsertion, boolean preventUpdate) throws ManagedException {
 		// TODO Auto-generated method stub
 		return null;
 	}

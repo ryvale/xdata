@@ -1,7 +1,7 @@
 package com.exa.data.expression.macro;
 
 import com.exa.data.DataReader;
-import com.exa.data.config.utils.DMutils;
+import com.exa.data.config.utils.DMUtils;
 import com.exa.expression.XPOperand;
 import com.exa.lang.parsing.Computing;
 import com.exa.utils.ManagedException;
@@ -9,7 +9,7 @@ import com.exa.utils.values.ObjectValue;
 
 public class MCReaderStrValue extends Macro<String> {
 	
-	public MCReaderStrValue(DMutils dmu) {
+	public MCReaderStrValue(DMUtils dmu) {
 		super(dmu);
 	}
 	

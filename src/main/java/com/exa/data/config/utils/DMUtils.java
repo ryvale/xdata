@@ -23,7 +23,7 @@ import com.exa.utils.ManagedException;
 import com.exa.utils.values.ObjectValue;
 import com.exa.utils.values.Value;
 
-public class DMutils {
+public class DMUtils {
 	public static final String MC_READER_STR_VALUE = "reader-str-value";
 	
 	private Map<String, DataReader<?>> readers = new HashMap<>();
@@ -48,7 +48,7 @@ public class DMutils {
 	
 	private DMUSetup dmuSetup;
 	
-	public DMutils(DMFGeneral dmf, XALParser parser, ObjectValue<XPOperand<?>> ovRoot, XPEvaluator evaluator, VariableContext vc, DMUSetup dmuSetup) {
+	public DMUtils(DMFGeneral dmf, XALParser parser, ObjectValue<XPOperand<?>> ovRoot, XPEvaluator evaluator, VariableContext vc, DMUSetup dmuSetup) {
 		super();
 		this.ovRoot = ovRoot;
 		this.dmf = dmf;
@@ -64,6 +64,10 @@ public class DMutils {
 	
 	public void register(String name, DataReader<?> dr) {
 		readers.put(name, dr);
+	}
+	
+	public void register(String type, Macro<?> macro) {
+		macros.put(type, macro);
 	}
 	
 	public void registerBeforeAction(Action action) {
@@ -132,7 +136,7 @@ public class DMutils {
 	public XALParser getParser() { return parser; }
 	
 	
-	public DMutils newSubDmu(VariableContext vc) { return new DMutils(dmf, parser, ovRoot, evaluator, vc, dmuSetup); }
+	public DMUtils newSubDmu(VariableContext vc) { return new DMUtils(dmf, parser, ovRoot, evaluator, vc, dmuSetup); }
 	
 	
 	public DataReader<?> loadReader(String readerRef) throws ManagedException {
@@ -140,7 +144,7 @@ public class DMutils {
 		if(ovEntity == null) throw new ManagedException(String.format("The path '%s' could be found", readerRef));
 		ObjectValue<XPOperand<?>> ovReader = Computing.object(parser, ovEntity, evaluator, vc, Computing.getDefaultObjectLib(ovRoot));
 		 
-		DMutils dmu = newSubDmu(new MapVariableContext(vc));
+		DMUtils dmu = newSubDmu(new MapVariableContext(vc));
 		dmuSetup.setup(dmu);
 		
 		DataReader<?> res = dmf.getDataReader(readerRef, ovReader, dmu);
@@ -157,7 +161,7 @@ public class DMutils {
 		if(ovEntity == null) throw new ManagedException(String.format("The path '%s' could be found", readerRef));
 		ObjectValue<XPOperand<?>> ovReader = Computing.object(parser, ovEntity, evaluator, vc, Computing.getDefaultObjectLib(ovRoot));
 		 
-		DMutils dmu = newSubDmu(new MapVariableContext(vc));
+		DMUtils dmu = newSubDmu(new MapVariableContext(vc));
 		DataReader<?> res = dmf.getDataReader(readerRef, ovReader, dmu);
 		
 		res.open();

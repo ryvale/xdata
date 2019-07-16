@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.exa.data.config.utils.DMutils;
+import com.exa.data.config.utils.DMUtils;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.XPEvaluator;
@@ -21,12 +21,12 @@ public abstract class StandardDataReaderBase<_FIELD extends Field> implements Da
 	
 	protected String name;
 	
-	protected DMutils dmu;
+	protected DMUtils dmu;
 	
 	
 	//protected List<?> beforeConnectionAction = new ArrayList<>();
 	
-	public StandardDataReaderBase(String name, DMutils dmu) {
+	public StandardDataReaderBase(String name, DMUtils dmu) {
 		super();
 		this.name = name;
 		

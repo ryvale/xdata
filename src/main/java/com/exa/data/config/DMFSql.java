@@ -7,7 +7,7 @@ import javax.sql.DataSource;
 import com.exa.data.DataReader;
 import com.exa.data.DataWriter;
 import com.exa.data.XADataSource;
-import com.exa.data.config.utils.DMutils;
+import com.exa.data.config.utils.DMUtils;
 import com.exa.data.sql.SQLDataReader;
 import com.exa.data.sql.SQLDataWriter;
 import com.exa.data.sql.XASQLDataSource;
@@ -36,7 +36,7 @@ public class DMFSql extends DataManFactory {
 	}
 
 	@Override
-	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator eval, VariableContext variableContext*/, DMutils dmu) throws ManagedException {
+	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator eval, VariableContext variableContext*/, DMUtils dmu) throws ManagedException {
 		
 		String dsName = ovEntity.getAttributAsString("dataSource");
 		
@@ -59,7 +59,7 @@ public class DMFSql extends DataManFactory {
 	}
 
 	@Override
-	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator eval, VariableContext vc*/, DataReader<?> drSource, DMutils dmu, boolean preventInsertion, boolean preventUpdate) throws ManagedException {
+	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator eval, VariableContext vc*/, DataReader<?> drSource, DMUtils dmu, boolean preventInsertion, boolean preventUpdate) throws ManagedException {
 		String dsName = ovEntity.getAttributAsString("dataSource");
 		
 		if(dsName == null) dsName = defaultDataSource;

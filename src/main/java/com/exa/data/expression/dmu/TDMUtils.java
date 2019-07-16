@@ -1,7 +1,7 @@
 package com.exa.data.expression.dmu;
 
 import com.exa.data.DataReader;
-import com.exa.data.config.utils.DMutils;
+import com.exa.data.config.utils.DMUtils;
 
 import com.exa.eva.OperatorManager.OMOperandType;
 import com.exa.expression.OMMethod;
@@ -9,10 +9,10 @@ import com.exa.expression.Type;
 
 import com.exa.expression.types.TObjectClass;
 
-public class TDMUtils extends TObjectClass<DMutils, Object> {
+public class TDMUtils extends TObjectClass<DMUtils, Object> {
 
 	public TDMUtils() {
-		super(null, DMutils.class, "DMUtils");
+		super(null, DMUtils.class, "DMUtils");
 	}
 	
 	@Override
@@ -39,7 +39,11 @@ public class TDMUtils extends TObjectClass<DMutils, Object> {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Type<DMutils> specificType() {
+	public Type<DMUtils> specificType() {
 		return this;
+	}
+	
+	public <T>void register(OMMethod<T> om, Class<T> cls) {
+		methods.put(om.symbol(), new Method<>(om.symbol(), cls, om));
 	}
 }

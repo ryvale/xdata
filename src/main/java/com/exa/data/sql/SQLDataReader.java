@@ -14,7 +14,7 @@ import com.exa.data.DataException;
 import com.exa.data.DataReader;
 import com.exa.data.Field;
 import com.exa.data.StandardDataReaderBase;
-import com.exa.data.config.utils.DMutils;
+import com.exa.data.config.utils.DMUtils;
 import com.exa.expression.XPOperand;
 import com.exa.utils.ManagedException;
 import com.exa.utils.values.ArrayValue;
@@ -42,7 +42,7 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 	
 	protected int _lineVisited = 0;
 	
-	public SQLDataReader(String name, DataSource dataSource/*, XPEvaluator evaluator, VariableContext variableContext*/, ObjectValue<XPOperand<?>> config, DMutils dmu) throws DataException {
+	public SQLDataReader(String name, DataSource dataSource/*, XPEvaluator evaluator, VariableContext variableContext*/, ObjectValue<XPOperand<?>> config, DMUtils dmu) throws DataException {
 		super(name/*, evaluator, variableContext*/, dmu);
 		this.dataSource = dataSource;
 		this.config = config;

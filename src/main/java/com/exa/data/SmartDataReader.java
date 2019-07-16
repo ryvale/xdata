@@ -9,7 +9,7 @@ import java.util.Map;
 import com.exa.data.MapReader.MapGetter;
 import com.exa.data.config.DataManFactory;
 import com.exa.data.config.DataManFactory.DMUSetup;
-import com.exa.data.config.utils.DMutils;
+import com.exa.data.config.utils.DMUtils;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.MapVariableContext;
@@ -40,7 +40,7 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 	protected Integer _lineVisited = 0;
 		
 	
-	public SmartDataReader(String name, ObjectValue<XPOperand<?>> config, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMutils dmu, DMUSetup dmuSetup, MapGetter mapGetter) {
+	public SmartDataReader(String name, ObjectValue<XPOperand<?>> config, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUtils dmu, DMUSetup dmuSetup, MapGetter mapGetter) {
 		super(name, config/*, evaluator, variableContext*/, filesRepos, dataSources, defaultDataSource, dmu, dmuSetup);
 	}
 	
@@ -113,7 +113,7 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 				String flow  = ovDRConfig.getAttributAsString("flow");
 				if(flow == null) flow = FLW_MAIN;
 				
-				DMutils subDmu = dmu.newSubDmu(vc);
+				DMUtils subDmu = dmu.newSubDmu(vc);
 				
 				DataReader<?> dr = getDataReader(ovDRConfig, drName, subDmu);
 				
@@ -157,7 +157,7 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		
 	}
 	
-	private DataReader<?> getDataReader(ObjectValue<XPOperand<?>> ovDRConfig, String drName, DMutils subDmu/*, VariableContext vc*/) throws ManagedException {
+	private DataReader<?> getDataReader(ObjectValue<XPOperand<?>> ovDRConfig, String drName, DMUtils subDmu/*, VariableContext vc*/) throws ManagedException {
 		String type = ovDRConfig.getRequiredAttributAsString("type");
 		
 		DataManFactory dmf = dmFactories.get(type);

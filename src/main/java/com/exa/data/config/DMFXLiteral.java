@@ -6,7 +6,7 @@ import com.exa.data.DataReader;
 import com.exa.data.DataWriter;
 import com.exa.data.XADataSource;
 import com.exa.data.XLiteralDataReader;
-import com.exa.data.config.utils.DMutils;
+import com.exa.data.config.utils.DMUtils;
 import com.exa.expression.XPOperand;
 import com.exa.expression.parsing.Parser.UnknownIdentifierValidation;
 import com.exa.utils.ManagedException;
@@ -28,12 +28,12 @@ public class DMFXLiteral extends DataManFactory {
 	}
 
 	@Override
-	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator eval, VariableContext vc*/, DMutils dmu) throws ManagedException {
+	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator eval, VariableContext vc*/, DMUtils dmu) throws ManagedException {
 		return new XLiteralDataReader(name, /*eval, vc,*/ ovEntity, dmu);
 	}
 
 	@Override
-	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator eval, VariableContext vc*/, DataReader<?> drSource, DMutils dmu, boolean preventInsertion, boolean preventUpdate) throws ManagedException {
+	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator eval, VariableContext vc*/, DataReader<?> drSource, DMUtils dmu, boolean preventInsertion, boolean preventUpdate) throws ManagedException {
 		return null;
 	}
 

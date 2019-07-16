@@ -1,21 +1,21 @@
-package com.exa.data.expression.dmu;
+package com.exa.data;
 
 import java.util.Vector;
 
 import com.exa.data.config.utils.DMUtils;
 import com.exa.expression.OMMethod;
 import com.exa.expression.OMMethod.XPOrtMethod;
-
+import com.exa.expression.OMMethod.XPOrtMethod.XPMethodResult;
 import com.exa.expression.Type;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.ClassesMan;
 import com.exa.expression.eval.XPEvaluator;
 import com.exa.utils.ManagedException;
 
-public class MtdEvalString extends OMMethod.XPOrtMethod<DMUtils, String> {
+public class MtdExecuteFlow extends OMMethod.XPOrtMethod<DMUtils, String> {
 
-	public MtdEvalString() {
-		super("evalString", 2);
+	public MtdExecuteFlow() {
+		super("executeFlow", 2);
 	}
 
 	@Override
@@ -38,7 +38,7 @@ public class MtdEvalString extends OMMethod.XPOrtMethod<DMUtils, String> {
 				
 				DMUtils v = object.value(evaluator);
 				
-				return v.evalString(macroRef);
+				return "OK:" + macroRef;
 			}
 		};
 	}

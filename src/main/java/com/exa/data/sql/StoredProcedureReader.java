@@ -17,7 +17,7 @@ import com.exa.data.DataException;
 import com.exa.data.DataReader;
 import com.exa.data.DynamicField;
 import com.exa.data.StandardDataReaderBase;
-import com.exa.data.config.utils.DMutils;
+import com.exa.data.config.utils.DMUtils;
 import com.exa.expression.XPOperand;
 import com.exa.utils.ManagedException;
 import com.exa.utils.values.ArrayValue;
@@ -89,7 +89,7 @@ public class StoredProcedureReader  extends StandardDataReaderBase<DynamicField>
 	
 	private CallableStatement spStatement;
 
-	public StoredProcedureReader(String name, DataSource dataSource/*, XPEvaluator evaluator, VariableContext variableContext*/, ObjectValue<XPOperand<?>> config, DMutils dmu) {
+	public StoredProcedureReader(String name, DataSource dataSource/*, XPEvaluator evaluator, VariableContext variableContext*/, ObjectValue<XPOperand<?>> config, DMUtils dmu) {
 		super(name/*, evaluator, variableContext*/, dmu);
 		this.dataSource = dataSource;
 		

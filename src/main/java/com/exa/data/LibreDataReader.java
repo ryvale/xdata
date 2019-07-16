@@ -2,7 +2,7 @@ package com.exa.data;
 
 import java.util.Date;
 
-import com.exa.data.config.utils.DMutils;
+import com.exa.data.config.utils.DMUtils;
 import com.exa.expression.XPOperand;
 
 import com.exa.lang.expression.XALCalculabeValue;
@@ -18,7 +18,7 @@ public class LibreDataReader extends StandardDataReaderBase<Field> {
 	private Value<?, ?> vlEOF = null;
 	
 	
-	public LibreDataReader(String name, ObjectValue<XPOperand<?>> config/*, XPEvaluator evaluator, VariableContext variableContext*/, DMutils dmu) {
+	public LibreDataReader(String name, ObjectValue<XPOperand<?>> config/*, XPEvaluator evaluator, VariableContext variableContext*/, DMUtils dmu) {
 		super(name/*, evaluator, variableContext*/, dmu);
 		this.config = config;
 	}

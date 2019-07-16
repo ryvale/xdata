@@ -6,7 +6,7 @@ import java.util.Map;
 
 import com.exa.data.config.DataManFactory;
 import com.exa.data.config.DataManFactory.DMUSetup;
-import com.exa.data.config.utils.DMutils;
+import com.exa.data.config.utils.DMUtils;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.MapVariableContext;
@@ -49,7 +49,7 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 	
 	protected Map<String, Object> values = new LinkedHashMap<>();
 	
-	public RowToFieldDataReader(String name, ObjectValue<XPOperand<?>> config, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMutils dmu, DMUSetup dmuSetup) {
+	public RowToFieldDataReader(String name, ObjectValue<XPOperand<?>> config, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUtils dmu, DMUSetup dmuSetup) {
 		super(name, config, filesRepos, dataSources, defaultDataSource, dmu, dmuSetup);
 	}
 
@@ -111,7 +111,7 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 			
 			VariableContext sourceVc = new MapVariableContext(dmu.getVc());
 			
-			DMutils sourceDmu = dmu.newSubDmu(sourceVc);
+			DMUtils sourceDmu = dmu.newSubDmu(sourceVc);
 			dmuSetup.setup(dmu);
 			
 			drSource = dmf.getDataReader("source", ovSource/*, evaluator, variableContext*/, sourceDmu);

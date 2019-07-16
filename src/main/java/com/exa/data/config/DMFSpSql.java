@@ -7,7 +7,7 @@ import javax.sql.DataSource;
 import com.exa.data.DataReader;
 import com.exa.data.DataWriter;
 import com.exa.data.XADataSource;
-import com.exa.data.config.utils.DMutils;
+import com.exa.data.config.utils.DMUtils;
 import com.exa.data.sql.StoredProcedureReader;
 import com.exa.data.sql.XASQLDataSource;
 
@@ -29,7 +29,7 @@ public class DMFSpSql extends DataManFactory {
 	}
 	
 	@Override
-	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator eval, VariableContext vc*/, DMutils dmu) throws ManagedException {
+	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator eval, VariableContext vc*/, DMUtils dmu) throws ManagedException {
 		String dsName = ovEntity.getAttributAsString("dataSource");
 		
 		if(dsName == null) dsName = defaultDataSource;
@@ -52,7 +52,7 @@ public class DMFSpSql extends DataManFactory {
 
 	@Override
 	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator eval,
-			VariableContext vc*/, DataReader<?> drSource, DMutils dmu, boolean preventInsertion, boolean preventUpdate)
+			VariableContext vc*/, DataReader<?> drSource, DMUtils dmu, boolean preventInsertion, boolean preventUpdate)
 			throws ManagedException {
 		// TODO Auto-generated method stub
 		return null;

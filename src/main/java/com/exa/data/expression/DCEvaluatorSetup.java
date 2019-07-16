@@ -13,6 +13,8 @@ public class DCEvaluatorSetup extends VIEvaluatorSetup {
 	public final static TDataReader T_DATA_READER = new TDataReader();
 	
 	public final static TDataWriter T_DATA_WRITER = new TDataWriter();
+	
+	public final static TDMUtils T_DMU = new TDMUtils();
 
 	@Override
 	public void setup(XPEvaluator evaluator) throws ManagedException {
@@ -20,11 +22,7 @@ public class DCEvaluatorSetup extends VIEvaluatorSetup {
 		
 		cm.registerClass(T_DATA_READER);
 		cm.registerClass(T_DATA_WRITER);
-		cm.registerClass(new TDMUtils());
-		
-		//new XPOprtMemberAccess<>(".", T_DATA_READER);
-		
-		//evaluator.addMemberAccessOprt(new XPOprtMemberAccess<>(".", T_DATA_READER));
+		cm.registerClass(T_DMU);
 		
 		super.setup(evaluator);
 	}

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.exa.data.config.utils.DMutils;
+import com.exa.data.config.utils.DMUtils;
 
 import com.exa.expression.XPOperand;
 
@@ -45,7 +45,7 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 	private int rowIndex = -1;
 	
 	
-	public XLiteralDataReader(String name/*, XPEvaluator evaluator, VariableContext variableContext*/, ObjectValue<XPOperand<?>> config, DMutils dmu) {
+	public XLiteralDataReader(String name/*, XPEvaluator evaluator, VariableContext variableContext*/, ObjectValue<XPOperand<?>> config, DMUtils dmu) {
 		//super(name, evaluator, variableContext, dmu);
 		super(name, dmu);
 		this.config = config;

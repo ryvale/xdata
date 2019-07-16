@@ -18,7 +18,7 @@ import com.exa.data.DataReader;
 import com.exa.data.DataWriter;
 import com.exa.data.DynamicField;
 import com.exa.data.StandardDataWriterBase;
-import com.exa.data.config.utils.DMutils;
+import com.exa.data.config.utils.DMUtils;
 import com.exa.data.sql.oracle.PLSQLDateFormatter;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
@@ -95,7 +95,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 	private Value<?, XPOperand<?>> vlStop;
 	private List<Value<?, XPOperand<?>>> lstKey = new ArrayList<>();
 
-	public SQLDataWriter(String name, DataSource dataSource, DataReader<?> drSource/*, XPEvaluator evaluator, VariableContext variableContext*/, ObjectValue<XPOperand<?>> config, DMutils dmu, boolean preventInsertion, boolean preventUpdate) {
+	public SQLDataWriter(String name, DataSource dataSource, DataReader<?> drSource/*, XPEvaluator evaluator, VariableContext variableContext*/, ObjectValue<XPOperand<?>> config, DMUtils dmu, boolean preventInsertion, boolean preventUpdate) {
 		super(name, drSource/*, evaluator, variableContext*/, dmu);
 		
 		this.preventInsertion = preventInsertion;

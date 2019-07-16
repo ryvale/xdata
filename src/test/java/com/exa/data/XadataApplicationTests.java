@@ -11,7 +11,11 @@ import com.exa.data.config.DMFSql;
 import com.exa.data.config.DMFXLiteral;
 import com.exa.data.config.DataManFactory;
 import com.exa.data.expression.DCEvaluatorSetup;
+import com.exa.data.expression.dmu.MtdEvalString;
 import com.exa.data.sql.XASQLDataSource;
+import com.exa.eva.OperatorManager.OMOperandType;
+import com.exa.expression.OMMethod;
+import com.exa.expression.eval.XPEvaluator;
 import com.exa.utils.ManagedException;
 import com.exa.utils.io.FilesRepositories;
 import com.exa.utils.io.OSFileRepoPart;
@@ -327,7 +331,19 @@ public class XadataApplicationTests extends TestCase {
 		Map<String, XADataSource> dataSources = new HashMap<>();
 		
 		
-		DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
+		DCEvaluatorSetup evSetup = new DCEvaluatorSetup() {
+
+			@Override
+			public void setup(XPEvaluator evaluator) throws ManagedException {
+				OMMethod<String> omStr = new OMMethod<>("executeFlow", 2, OMOperandType.POST_OPERAND);
+				omStr.addOperator(new MtdExecuteFlow());
+				
+				T_DMU.register(omStr, String.class);
+				super.setup(evaluator);
+			}
+			
+			
+		};
 		
 		DataManFactory dmfGen = new DMFGeneral("smart", filesRepo, dataSources, "default", s -> {});//new DMFSmart(filesRepo, dataSources, "default");
 	    dmfGen.initialize();
@@ -341,6 +357,43 @@ public class XadataApplicationTests extends TestCase {
         System.out.println(dr.getString("code"));
         
 		dr.close();
+	}
+	
+	public void testDMUNewMethod() throws ManagedException {
+		FilesRepositories filesRepo = new FilesRepositories();
+		
+		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
+		filesRepo.addRepoPart("data-config", new OSFileRepoPart("C:/Users/leader/Desktop/travaux"));
+		
+		DCEvaluatorSetup evSetup = new DCEvaluatorSetup() {
+
+			@Override
+			public void setup(XPEvaluator evaluator) throws ManagedException {
+				OMMethod<String> omStr = new OMMethod<>("executeFlow", 2, OMOperandType.POST_OPERAND);
+				omStr.addOperator(new MtdExecuteFlow());
+				
+				T_DMU.register(omStr, String.class);
+				super.setup(evaluator);
+			}
+			
+		};
+		
+		Map<String, XADataSource> dataSources = new HashMap<>();
+		DataManFactory dmfGen = new DMFGeneral("smart", filesRepo, dataSources, "default", s -> {});//new DMFSmart(filesRepo, dataSources, "default");
+	    dmfGen.initialize();
+	    
+	    
+	    DataReader<?> dr = dmfGen.getDataReader("default:/dmu-setup", evSetup);
+        
+        dr.open();
+        
+        dr.next();
+        
+        assertTrue("OK".equals(dr.getString("code")));
+        assertTrue("test".equals(dr.getString("message")));
+        
+		dr.close();
+		
 	}
 }
  

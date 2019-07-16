@@ -1,6 +1,6 @@
 package com.exa.data.action;
 
-import com.exa.data.config.utils.DMutils;
+import com.exa.data.config.utils.DMUtils;
 import com.exa.expression.Type;
 import com.exa.expression.Variable;
 import com.exa.expression.VariableContext;
@@ -11,7 +11,7 @@ import com.exa.utils.values.Value;
 
 public class ASAssignment implements ActionSeeker {
 	
-	private DMutils dmu;
+	private DMUtils dmu;
 	
 	class ACAssignment implements Action {
 		private String name;
@@ -47,7 +47,7 @@ public class ASAssignment implements ActionSeeker {
 		
 	}
 	
-	public ASAssignment(DMutils dmu) {
+	public ASAssignment(DMUtils dmu) {
 		super();
 		this.dmu = dmu;
 	}

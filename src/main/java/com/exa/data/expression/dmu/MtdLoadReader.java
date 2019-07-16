@@ -3,7 +3,7 @@ package com.exa.data.expression.dmu;
 import java.util.Vector;
 
 import com.exa.data.DataReader;
-import com.exa.data.config.utils.DMutils;
+import com.exa.data.config.utils.DMUtils;
 import com.exa.data.expression.DCEvaluatorSetup;
 import com.exa.expression.OMMethod;
 import com.exa.expression.OMMethod.XPOrtMethod;
@@ -14,7 +14,7 @@ import com.exa.expression.eval.XPEvaluator;
 import com.exa.utils.ManagedException;
 
 @SuppressWarnings("rawtypes")
-public class MtdLoadReader extends OMMethod.XPOrtMethod<DMutils, DataReader> {
+public class MtdLoadReader extends OMMethod.XPOrtMethod<DMUtils, DataReader> {
 
 	public MtdLoadReader() {
 		super("loadReader", 2);
@@ -31,14 +31,14 @@ public class MtdLoadReader extends OMMethod.XPOrtMethod<DMutils, DataReader> {
 	}
 
 	@Override
-	protected XPOrtMethod<DMutils, DataReader>.XPMethodResult createResultOperand(XPOperand<DMutils> object, Vector<XPOperand<?>> params) {
+	protected XPOrtMethod<DMUtils, DataReader>.XPMethodResult createResultOperand(XPOperand<DMUtils> object, Vector<XPOperand<?>> params) {
 		return new XPMethodResult(object, params) {
 			
 			@Override
 			public DataReader<?> value(XPEvaluator eval) throws ManagedException {
 				String name = params.get(0).asOPString().value(eval);
 				
-				DMutils v = object.value(eval);
+				DMUtils v = object.value(eval);
 				
 				return v.loadReader(name);
 			}

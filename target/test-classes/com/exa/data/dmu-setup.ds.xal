@@ -1,0 +1,19 @@
+references {},
+
+entities {
+
+	test(str) {
+		type 'x-literal',
+		
+		beforeConnection {
+			str = dmu.executeFlow('test')
+		},
+		
+		rows [
+			{ 
+				code = str.substr(0, str.indexOf(":")), 
+				message = str.substr(str.indexOf(":")+1, str.length-str.indexOf(":")-1) 
+			}
+		]
+	}
+}

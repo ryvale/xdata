@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.exa.data.config.utils.DMutils;
+import com.exa.data.config.utils.DMUtils;
 
 import com.exa.expression.XPOperand;
 
@@ -37,7 +37,7 @@ public class MapReader extends StandardDataReaderBase<DynamicField> {
 	
 	private ObjectValue<XPOperand<?>> config;
 
-	public MapReader(String name/*, XPEvaluator evaluator, VariableContext variableContext*/, ObjectValue<XPOperand<?>> config, DMutils dmu, MapGetter mapGetter) {
+	public MapReader(String name/*, XPEvaluator evaluator, VariableContext variableContext*/, ObjectValue<XPOperand<?>> config, DMUtils dmu, MapGetter mapGetter) {
 		super(name/*, evaluator, variableContext*/, dmu);
 		this.config = config;
 		

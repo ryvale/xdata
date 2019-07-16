@@ -12,7 +12,7 @@ import com.exa.data.config.DMFWebService;
 import com.exa.data.config.DMFXLiteral;
 import com.exa.data.config.DataManFactory;
 import com.exa.data.config.DataManFactory.DMUSetup;
-import com.exa.data.config.utils.DMutils;
+import com.exa.data.config.utils.DMUtils;
 
 import com.exa.expression.XPOperand;
 import com.exa.utils.io.FilesRepositories;
@@ -47,7 +47,7 @@ public abstract class StandardDRWithDSBase<_FIELD extends Field> extends Standar
 	
 	protected DMUSetup dmuSetup;
 	
-	public StandardDRWithDSBase(String name, ObjectValue<XPOperand<?>> config, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMutils dmu, DMUSetup dmuSetup) {
+	public StandardDRWithDSBase(String name, ObjectValue<XPOperand<?>> config, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUtils dmu, DMUSetup dmuSetup) {
 		super(name/*, evaluator, variableContext*/, dmu);
 		
 		this.config = config;

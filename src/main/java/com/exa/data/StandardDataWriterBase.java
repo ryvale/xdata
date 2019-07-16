@@ -3,7 +3,7 @@ package com.exa.data;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.exa.data.config.utils.DMutils;
+import com.exa.data.config.utils.DMUtils;
 import com.exa.expression.eval.XPEvaluator;
 
 public abstract class StandardDataWriterBase<_FIELD extends Field> implements DataWriter<_FIELD> {
@@ -19,9 +19,9 @@ public abstract class StandardDataWriterBase<_FIELD extends Field> implements Da
 	
 	protected DataReader<?> drSource;
 	
-	protected DMutils dmu;
+	protected DMUtils dmu;
 	
-	public StandardDataWriterBase(String name, DataReader<?> drSource/*, XPEvaluator evaluator, VariableContext variableContext*/, DMutils dmu) {
+	public StandardDataWriterBase(String name, DataReader<?> drSource/*, XPEvaluator evaluator, VariableContext variableContext*/, DMUtils dmu) {
 		super();
 		this.name = name;
 		
