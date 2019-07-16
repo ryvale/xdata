@@ -28,6 +28,8 @@ public class DMUtils {
 	
 	private Map<String, DataReader<?>> readers = new HashMap<>();
 	
+	protected Map<String, ?> params = new HashMap<>();
+	
 	private List<DataReader<?>> drToClose = new ArrayList<>();
 	
 	private List<Action> beforeConnectionActions = new ArrayList<>();
@@ -125,6 +127,14 @@ public class DMUtils {
 		Macro<DataReader<?>> typMacro = macro.asMacroDataReader();
 		
 		return typMacro.value(macroRef, ovMacro);
+	}
+
+	public Map<String, ?> getParams() {
+		return params;
+	}
+
+	public void setParams(Map<String, ?> params) {
+		this.params = params;
 	}
 
 	public DMFGeneral getDmf() { return dmf; }

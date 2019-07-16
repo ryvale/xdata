@@ -5,7 +5,6 @@ import java.util.Vector;
 import com.exa.data.config.utils.DMUtils;
 import com.exa.expression.OMMethod;
 import com.exa.expression.OMMethod.XPOrtMethod;
-import com.exa.expression.OMMethod.XPOrtMethod.XPMethodResult;
 import com.exa.expression.Type;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.ClassesMan;

@@ -37,8 +37,8 @@ public class MapReader extends StandardDataReaderBase<DynamicField> {
 	
 	private ObjectValue<XPOperand<?>> config;
 
-	public MapReader(String name/*, XPEvaluator evaluator, VariableContext variableContext*/, ObjectValue<XPOperand<?>> config, DMUtils dmu, MapGetter mapGetter) {
-		super(name/*, evaluator, variableContext*/, dmu);
+	public MapReader(String name, ObjectValue<XPOperand<?>> config, DMUtils dmu, MapGetter mapGetter) {
+		super(name, dmu);
 		this.config = config;
 		
 		this.mapGetter = mapGetter;
