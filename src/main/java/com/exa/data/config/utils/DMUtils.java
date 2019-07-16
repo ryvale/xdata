@@ -10,6 +10,7 @@ import com.exa.data.action.ASAssignment;
 import com.exa.data.action.Action;
 import com.exa.data.action.ActionSeeker;
 import com.exa.data.config.DMFGeneral;
+import com.exa.data.config.DataManFactory;
 import com.exa.data.config.DataManFactory.DMUSetup;
 import com.exa.data.expression.macro.MCReaderStrValue;
 import com.exa.data.expression.macro.Macro;
@@ -18,7 +19,7 @@ import com.exa.expression.XPOperand;
 import com.exa.expression.eval.MapVariableContext;
 import com.exa.expression.eval.XPEvaluator;
 import com.exa.lang.parsing.Computing;
-import com.exa.lang.parsing.XALParser;
+
 import com.exa.utils.ManagedException;
 import com.exa.utils.values.ObjectValue;
 import com.exa.utils.values.Value;
@@ -44,19 +45,19 @@ public class DMUtils {
 	
 	private VariableContext vc;
 	
-	private XALParser parser;
+	//private XALParser parser;
 	
 	private XPEvaluator evaluator;
 	
 	private DMUSetup dmuSetup;
 	
-	public DMUtils(DMFGeneral dmf, XALParser parser, ObjectValue<XPOperand<?>> ovRoot, XPEvaluator evaluator, VariableContext vc, DMUSetup dmuSetup) {
+	public DMUtils(DMFGeneral dmf/*, XALParser parser*/, ObjectValue<XPOperand<?>> ovRoot, XPEvaluator evaluator, VariableContext vc, DMUSetup dmuSetup) {
 		super();
 		this.ovRoot = ovRoot;
 		this.dmf = dmf;
 		this.evaluator = evaluator;
 		this.vc = vc;
-		this.parser = parser;
+		//this.parser = parser;
 		this.dmuSetup = dmuSetup;
 		
 		macros.put(MC_READER_STR_VALUE, new MCReaderStrValue(this));
@@ -143,16 +144,16 @@ public class DMUtils {
 
 	public XPEvaluator getEvaluator() {	return evaluator; }
 
-	public XALParser getParser() { return parser; }
+	//public XALParser getParser() { return parser; }
 	
 	
-	public DMUtils newSubDmu(VariableContext vc) { return new DMUtils(dmf, parser, ovRoot, evaluator, vc, dmuSetup); }
+	public DMUtils newSubDmu(VariableContext vc) { return new DMUtils(dmf/*, parser*/, ovRoot, evaluator, vc, dmuSetup); }
 	
 	
 	public DataReader<?> loadReader(String readerRef) throws ManagedException {
 		ObjectValue<XPOperand<?>> ovEntity = ovRoot.getPathAttributAsObjecValue(String.format("entities.%s", readerRef));
 		if(ovEntity == null) throw new ManagedException(String.format("The path '%s' could be found", readerRef));
-		ObjectValue<XPOperand<?>> ovReader = Computing.object(parser, ovEntity, evaluator, vc, Computing.getDefaultObjectLib(ovRoot));
+		ObjectValue<XPOperand<?>> ovReader = Computing.object(DataManFactory.parser, ovEntity, evaluator, vc, Computing.getDefaultObjectLib(ovRoot));
 		 
 		DMUtils dmu = newSubDmu(new MapVariableContext(vc));
 		dmuSetup.setup(dmu);
@@ -169,7 +170,7 @@ public class DMUtils {
 	public DataReader<?> openReader(String readerRef) throws ManagedException {
 		ObjectValue<XPOperand<?>> ovEntity = ovRoot.getPathAttributAsObjecValue(String.format("entities.%s", readerRef));
 		if(ovEntity == null) throw new ManagedException(String.format("The path '%s' could be found", readerRef));
-		ObjectValue<XPOperand<?>> ovReader = Computing.object(parser, ovEntity, evaluator, vc, Computing.getDefaultObjectLib(ovRoot));
+		ObjectValue<XPOperand<?>> ovReader = Computing.object(DataManFactory.parser, ovEntity, evaluator, vc, Computing.getDefaultObjectLib(ovRoot));
 		 
 		DMUtils dmu = newSubDmu(new MapVariableContext(vc));
 		DataReader<?> res = dmf.getDataReader(readerRef, ovReader, dmu);

@@ -5,6 +5,7 @@ import com.exa.utils.values.Value;
 
 public class DynamicField extends Field {
 	
+	private Value<?, XPOperand<?>> vlName;
 	private String expType;
 	private Value<?, XPOperand<?>> vlCondition;
 	
@@ -41,6 +42,14 @@ public class DynamicField extends Field {
 
 	public void setVlCondition(Value<?, XPOperand<?>> vlCondition) {
 		this.vlCondition = vlCondition;
+	}
+
+	public Value<?, XPOperand<?>> getVlName() {
+		return vlName;
+	}
+
+	public void setVlName(Value<?, XPOperand<?>> vlName) {
+		this.vlName = vlName;
 	}
 	
 	

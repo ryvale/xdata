@@ -11,7 +11,6 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import com.exa.data.DataException;
-import com.exa.data.DataReader;
 import com.exa.data.Field;
 import com.exa.data.StandardDataReaderBase;
 import com.exa.data.config.utils.DMUtils;
@@ -24,6 +23,8 @@ import com.exa.utils.values.StringValue;
 import com.exa.utils.values.Value;
 
 public class SQLDataReader extends StandardDataReaderBase<Field> {
+	
+	public static boolean debugOn = false;
 	
 	protected String from = null;
 	protected String criteria = null;
@@ -185,7 +186,7 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 			System.out.println("connexion open for Data reader" + this.hashCode());
 			String sql = getSQL();
 			
-			System.out.println(sql);
+			if(debugOn) System.out.println(sql);
 			
 			Statement stmt = connection.createStatement();
 			rs = stmt.executeQuery(sql);

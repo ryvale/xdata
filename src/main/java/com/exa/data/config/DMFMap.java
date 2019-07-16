@@ -31,7 +31,7 @@ public class DMFMap  extends DataManFactory {
 	}
 
 	@Override
-	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator eval, VariableContext vc*/, DMUtils dmu) throws ManagedException {
+	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, DMUtils dmu) throws ManagedException {
 		String dsName = ovEntity.getAttributAsString("dataSource");
 		
 		if(dsName == null) dsName = defaultDataSource;
@@ -39,11 +39,11 @@ public class DMFMap  extends DataManFactory {
 		if(dsName == null) throw new ManagedException(String.format("No data source provided."));
 		
 		XADataSource xaDS = dataSources.get(dsName);
-		if(xaDS == null) throw new ManagedException(String.format("The data source %s specified is not present.", dsName));
+		if(xaDS == null) throw new ManagedException(String.format("The data source '%s' specified is not present.", dsName));
 		
 		MapDataSource ds = xaDS.asMapDataSource();
 		
-		return new MapReader(name/*, eval, vc*/, ovEntity, dmu, ds.getMapGetter());
+		return new MapReader(name, ovEntity, dmu, ds.getMapGetter());
 	}
 
 	@Override

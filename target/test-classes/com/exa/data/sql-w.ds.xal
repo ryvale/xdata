@@ -10,7 +10,7 @@ entities {
 		type "x-literal",
 		
 		rows [
-			{ code "m", desc "mètre" },
+			{ code "zz", desc "mètre" },
 			{ code "m2", desc "mètre carré"}
 		]
 	},
@@ -32,7 +32,8 @@ entities {
 			items {
 				code "code",
 				
-				desc "desc",
+				desc1 { name 'uom_desc',  condition = updateMode == "insert", expType 'reader', exp "desc" },
+				desc2 { condition = updateMode == "update", expType 'entire-sql', exp "uom_desc = 'Test'" },
 
 				created { condition = updateMode == "insert", type "datetime", expType "sql", exp "GETDATE()"},
 				

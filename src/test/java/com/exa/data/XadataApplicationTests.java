@@ -11,7 +11,8 @@ import com.exa.data.config.DMFSql;
 import com.exa.data.config.DMFXLiteral;
 import com.exa.data.config.DataManFactory;
 import com.exa.data.expression.DCEvaluatorSetup;
-import com.exa.data.expression.dmu.MtdEvalString;
+import com.exa.data.sql.SQLDataReader;
+import com.exa.data.sql.SQLDataWriter;
 import com.exa.data.sql.XASQLDataSource;
 import com.exa.eva.OperatorManager.OMOperandType;
 import com.exa.expression.OMMethod;
@@ -24,6 +25,11 @@ import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
 import junit.framework.TestCase;
 
 public class XadataApplicationTests extends TestCase {
+	
+	static {
+		SQLDataReader.debugOn = true;
+		SQLDataWriter.debugOn = true;
+	}
 	
 	public XadataApplicationTests( String testName ) {
         super( testName );
@@ -179,7 +185,7 @@ public class XadataApplicationTests extends TestCase {
         
         DataReader<?> drSource = dmfXL.getDataReader("default:/sql-w#testData", evSetup);
         
-        DataWriter<?> dw = dmfSQL.getDataWriter("default:/sql-w#r5uoms", evSetup, drSource);
+        DataWriter<?> dw = dmfSQL.getDataWriter("default:/sql-w#r5uoms", evSetup, drSource, false, false);
         
         dw.open();
         

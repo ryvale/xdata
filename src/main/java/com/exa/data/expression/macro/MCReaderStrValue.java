@@ -1,6 +1,7 @@
 package com.exa.data.expression.macro;
 
 import com.exa.data.DataReader;
+import com.exa.data.config.DataManFactory;
 import com.exa.data.config.utils.DMUtils;
 import com.exa.expression.XPOperand;
 import com.exa.lang.parsing.Computing;
@@ -22,12 +23,12 @@ public class MCReaderStrValue extends Macro<String> {
 	public String value(String macroName, ObjectValue<XPOperand<?>> ovMacro) throws ManagedException {
 		String fieldName = ovMacro.getRequiredAttributAsString("field");
 		
-		ObjectValue<XPOperand<?>> ovReader = Computing.object(dmu.getParser(), ovMacro.getRequiredAttributAsObjectValue("reader"), dmu.getEvaluator(), dmu.getVc(), Computing.getDefaultObjectLib(dmu.getOvRoot()));
+		ObjectValue<XPOperand<?>> ovReader = Computing.object(DataManFactory.parser, ovMacro.getRequiredAttributAsObjectValue("reader"), dmu.getEvaluator(), dmu.getVc(), Computing.getDefaultObjectLib(dmu.getOvRoot()));
 		
 		DataReader<?> dr = dmu.getDmf().getDataReader("macro:" + macroName, ovReader/*, dmu.getEvaluator(), dmu.getVc()*/, dmu);
 		
 		try {
-			dr.open();
+			dr.open();dr.next();
 			return dr.getString(fieldName);
 		}
 		finally {

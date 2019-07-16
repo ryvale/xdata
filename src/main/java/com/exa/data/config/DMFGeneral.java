@@ -66,7 +66,10 @@ public class DMFGeneral extends DataManFactory {
 		
 		dmFactories.put(DMFN_SQL, dmf);
 		dmFactories.put("tsql", dmf);
+		dmFactories.put("transact-sql", dmf);
+		dmFactories.put("t-sql", dmf);
 		dmFactories.put("plsql", dmf);
+		dmFactories.put("pl-sql", dmf);
 		dmFactories.put("sql-server", dmf);
 		dmFactories.put("sql-oracle", dmf);
 		dmFactories.put("oracle", dmf);
