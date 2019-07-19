@@ -2,11 +2,11 @@ package com.exa.data.web;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+//import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+//import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -50,7 +50,7 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 	
 	private WSDataSource wsDataSource;
 	
-	private List<Value<?, XPOperand<?>>>  respFormatsValid = new ArrayList<>();
+	//private List<Value<?, XPOperand<?>>>  respFormatsValid = new ArrayList<>();
 	
 	private Value<?, XPOperand<?>> vlRequestType = null;
 	private Value<?, XPOperand<?>> vlResponseType;
@@ -70,21 +70,12 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 	
 	//private ArrayValue<XPOperand<?>> avFields;
 	
-	public WSDataReader(String name/*, XPEvaluator evaluator, VariableContext variableContext*/, ObjectValue<XPOperand<?>> config, WSDataSource wsDataSource, DMUtils dmu) {
-		super(name/*, evaluator, variableContext*/, dmu);
+	public WSDataReader(String name, ObjectValue<XPOperand<?>> config, WSDataSource wsDataSource, DMUtils dmu) {
+		super(name, dmu);
 		
 		this.config = config;
 		this.wsDataSource = wsDataSource;
 	}
-	
-	/*public RestWSDataReader(String name, ObjectValue<XPOperand<?>> config, XPEvaluator evaluator,
-			VariableContext variableContext, FilesRepositories filesRepos, Map<String, DataSource> dataSources,
-			String defaultDataSource, RestTemplate restTemplate) {
-		super(name, config, evaluator, variableContext, filesRepos, dataSources, defaultDataSource);
-		
-		this.config = config;
-		this.restTemplate = restTemplate;
-	}*/
 	
 	
 

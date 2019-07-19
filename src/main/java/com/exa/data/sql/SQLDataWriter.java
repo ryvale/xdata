@@ -116,6 +116,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 	public int update(DataReader<?> dr) throws DataException {
 		
 		try {
+			
 			boolean stop = vlStop.asBoolean();
 			if(stop) return 0;
 			

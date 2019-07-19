@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.exa.data.MapReader.MapGetter;
+import com.exa.data.action.Action;
 import com.exa.data.config.DataManFactory;
 import com.exa.data.config.DataManFactory.DMUSetup;
 import com.exa.data.config.utils.DMUtils;
@@ -164,6 +165,26 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		DataManFactory dmf = dmFactories.get(type);
 		
 		if(dmf == null) throw new ManagedException(String.format("the type %s is unknown", type));
+		
+		ObjectValue<XPOperand<?>> ovBeforeConnectionActions = ovDRConfig.getAttributAsObjectValue("beforeConnection");
+		if(ovBeforeConnectionActions != null) {
+			Map<String, Value<?, XPOperand<?>>> mpBCA = ovBeforeConnectionActions.getValue();
+			
+			for(String bcaName: mpBCA.keySet()) {
+				Action ac  = subDmu.registerBeforeConnectionAction(bcaName, mpBCA.get(bcaName));
+				if(ac == null) throw new ManagedException(String.format("the action %s in 'beforeConnection' for entity '%s' seem to be invalid", bcaName, name));
+			}
+		}
+		
+		ObjectValue<XPOperand<?>> ovOnExecutionStarted = ovDRConfig.getAttributAsObjectValue("onExecutionStarted");
+		if(ovOnExecutionStarted != null) {
+			Map<String, Value<?, XPOperand<?>>> mpBCA = ovOnExecutionStarted.getValue();
+			
+			for(String bcaName: mpBCA.keySet()) {
+				Action ac = subDmu.registerOnExecutionStartedAction(bcaName, mpBCA.get(bcaName));
+				if(ac == null) throw new ManagedException(String.format("the action %s in 'beforeExecution' for entity '%s' seem to be invalid", bcaName, name));
+			}
+		}
 		
 		
 		DataReader<?> res = dmf.getDataReader(drName, ovDRConfig/*, evaluator, vc*/, subDmu);

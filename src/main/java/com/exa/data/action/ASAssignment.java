@@ -5,7 +5,6 @@ import com.exa.expression.Type;
 import com.exa.expression.Variable;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
-import com.exa.utils.ManagedException;
 import com.exa.utils.values.CalculableValue;
 import com.exa.utils.values.Value;
 
@@ -25,7 +24,7 @@ public class ASAssignment implements ActionSeeker {
 		}
 		
 		@Override
-		public void execute() throws ManagedException {
+		public String execute() {
 			VariableContext vc = dmu.getVc();
 			do {
 				Variable<?> v = vc.getContextVariable(name);
@@ -38,10 +37,17 @@ public class ASAssignment implements ActionSeeker {
 			if(vc == null) {
 				String tn = value.typeName();
 				Type<?> t = dmu.getEvaluator().getClassesMan().getType(tn);
-				if(t == null) throw new ManagedException(String.format("The type '%s' is not managed", tn));
+				if(t == null) {
+					System.out.println(String.format("The action type '%s' is not managed", tn));
+					return "OPERATION_FAILED:"  + String.format("The type '%s' is not managed", tn);
+				}
 				
 				dmu.getVc().assignOrDeclareVariable(name, t.valueClass(), value.getValue());
+				
+				return "OK";
 			}
+			
+			return String.format("OPERATION_FAILED:No variable named '%s'", name);
 			
 		}
 		

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.exa.data.config.utils.DMUtils;
 import com.exa.expression.eval.XPEvaluator;
+import com.exa.utils.ManagedException;
 
 public abstract class StandardDataWriterBase<_FIELD extends Field> implements DataWriter<_FIELD> {
 	
@@ -51,6 +52,12 @@ public abstract class StandardDataWriterBase<_FIELD extends Field> implements Da
 
 	@Override
 	public boolean execute() throws DataException {
+		try {
+			dmu.executeOnExecutionStarted();
+		} catch (ManagedException e) {
+			if(e instanceof DataException) throw (DataException)e;
+			throw new DataException(e);
+		}
 		update(drSource);
 		
 		return true;

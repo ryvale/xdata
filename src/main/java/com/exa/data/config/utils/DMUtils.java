@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.exa.data.DataReader;
-import com.exa.data.XADataSource;
 import com.exa.data.action.ASAssignment;
 import com.exa.data.action.Action;
 import com.exa.data.action.ActionSeeker;
@@ -26,7 +25,7 @@ import com.exa.utils.values.ObjectValue;
 import com.exa.utils.values.Value;
 
 public class DMUtils {
-	private static final String DSN_PREFIX = "_ds";
+	//private static final String DSN_PREFIX = "_ds";
 	
 	public static final String MC_READER_STR_VALUE = "reader-str-value";
 	
@@ -37,6 +36,8 @@ public class DMUtils {
 	private List<DataReader<?>> drToClose = new ArrayList<>();
 	
 	private List<Action> beforeConnectionActions = new ArrayList<>();
+	
+	private List<Action> onExecutionStartedActions = new ArrayList<>();
 	
 	private List<ActionSeeker> actionSeekers = new ArrayList<>();
 	
@@ -78,13 +79,27 @@ public class DMUtils {
 		beforeConnectionActions.add(action);
 	}
 	
-	public Action registerBeforeAction(String name, Value<?, XPOperand<?>> value) {
+	public Action registerBeforeConnectionAction(String name, Value<?, XPOperand<?>> value) {
 		for(ActionSeeker as : actionSeekers) {
 			Action res = as.found(name, value);
 			
 			if(res == null) continue;
 			
 			beforeConnectionActions.add(res);
+			
+			return res;
+		}
+		
+		return null;
+	}
+	
+	public Action registerOnExecutionStartedAction(String name, Value<?, XPOperand<?>> value) {
+		for(ActionSeeker as : actionSeekers) {
+			Action res = as.found(name, value);
+			
+			if(res == null) continue;
+			
+			onExecutionStartedActions.add(res);
 			
 			return res;
 		}
@@ -192,7 +207,17 @@ public class DMUtils {
 
 	public void executeBeforeConnectionActions() throws ManagedException {
 		for(Action action : beforeConnectionActions) {
-			action.execute();
+			String res = action.execute();
+			if("OK".equals(res) || res.startsWith("OK:")) continue;
+			break;
+		}
+	}
+	
+	public void executeOnExecutionStarted() throws ManagedException {
+		for(Action action : onExecutionStartedActions) {
+			String res = action.execute();
+			if("OK".equals(res) || res.startsWith("OK:")) continue;
+			break;
 		}
 	}
 	

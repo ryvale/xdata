@@ -50,7 +50,7 @@ public class RMJSONObject extends ResponseManager {
 	}
 
 	
-	@SuppressWarnings("unchecked")
+	//@SuppressWarnings("unchecked")
 	@Override
 	public void manage(Response response) throws DataException {
 		String strResp;
@@ -91,7 +91,7 @@ public class RMJSONObject extends ResponseManager {
 		return this;
 	}
 	
-	@SuppressWarnings("unchecked")
+	//@SuppressWarnings("unchecked")
 	private Object browseCache(String path) throws JSONException  {
 		String[] parts = path.split("[.]");
 		

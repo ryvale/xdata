@@ -8,6 +8,7 @@ import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.XPEvaluator;
 import com.exa.lang.expression.XALCalculabeValue;
+import com.exa.utils.ManagedException;
 import com.exa.utils.values.CalculableValue;
 import com.exa.utils.values.ObjectValue;
 import com.exa.utils.values.Value;
@@ -30,6 +31,12 @@ public abstract class StandardDataReaderBase<_FIELD extends Field> implements Da
 	
 	@Override
 	public boolean execute() throws DataException {
+		try {
+			dmu.executeOnExecutionStarted();
+		} catch (ManagedException e) {
+			if(e instanceof DataException) throw (DataException)e;
+			throw new DataException(e);
+		}
 		return next();
 	}
 

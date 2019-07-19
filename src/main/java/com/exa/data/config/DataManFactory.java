@@ -205,8 +205,18 @@ public abstract class DataManFactory {
 			Map<String, Value<?, XPOperand<?>>> mpBCA = ovBeforeConnectionActions.getValue();
 			
 			for(String bcaName: mpBCA.keySet()) {
-				Action ac  = dmu.registerBeforeAction(bcaName, mpBCA.get(bcaName));
+				Action ac  = dmu.registerBeforeConnectionAction(bcaName, mpBCA.get(bcaName));
 				if(ac == null) throw new ManagedException(String.format("the action %s in 'beforeConnection' for entity '%s' seem to be invalid", bcaName, name));
+			}
+		}
+		
+		ObjectValue<XPOperand<?>> ovBeforeExecution = ovEntities.getPathAttributAsObjecValue(name + ".beforeExecution");
+		if(ovBeforeExecution != null) {
+			Map<String, Value<?, XPOperand<?>>> mpBCA = ovBeforeExecution.getValue();
+			
+			for(String bcaName: mpBCA.keySet()) {
+				Action ac = dmu.registerOnExecutionStartedAction(bcaName, mpBCA.get(bcaName));
+				if(ac == null) throw new ManagedException(String.format("the action %s in 'beforeExecution' for entity '%s' seem to be invalid", bcaName, name));
 			}
 		}
 		
@@ -219,13 +229,23 @@ public abstract class DataManFactory {
 		
 		ObjectValue<XPOperand<?>> ovEntity = parser.object(ovEntities, name, eval, vc, libOV);
 		
-		ObjectValue<XPOperand<?>> ovBeforeConnectionActions = ovEntities.getPathAttributAsObjecValue(name + ".beforeConnection");
+		ObjectValue<XPOperand<?>> ovBeforeConnectionActions = ovEntity.getAttributAsObjectValue("beforeConnection");
 		if(ovBeforeConnectionActions != null) {
 			Map<String, Value<?, XPOperand<?>>> mpBCA = ovBeforeConnectionActions.getValue();
 			
 			for(String bcaName: mpBCA.keySet()) {
-				Action ac  = dmu.registerBeforeAction(bcaName, mpBCA.get(bcaName));
+				Action ac  = dmu.registerBeforeConnectionAction(bcaName, mpBCA.get(bcaName));
 				if(ac == null) throw new ManagedException(String.format("the action %s in 'beforeConnection' for entity '%s' seem to be invalid", bcaName, name));
+			}
+		}
+		
+		ObjectValue<XPOperand<?>> ovOnExecutionStarted = ovEntity.getAttributAsObjectValue("onExecutionStarted");
+		if(ovOnExecutionStarted != null) {
+			Map<String, Value<?, XPOperand<?>>> mpBCA = ovOnExecutionStarted.getValue();
+			
+			for(String bcaName: mpBCA.keySet()) {
+				Action ac = dmu.registerOnExecutionStartedAction(bcaName, mpBCA.get(bcaName));
+				if(ac == null) throw new ManagedException(String.format("the action %s in 'beforeExecution' for entity '%s' seem to be invalid", bcaName, name));
 			}
 		}
 		
