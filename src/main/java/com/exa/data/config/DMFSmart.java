@@ -8,6 +8,7 @@ import com.exa.data.DataWriter;
 import com.exa.data.MapReader.MapGetter;
 import com.exa.data.config.utils.DMUtils;
 import com.exa.data.SmartDataReader;
+import com.exa.data.SmartDataWriter;
 import com.exa.data.XADataSource;
 import com.exa.expression.XPOperand;
 import com.exa.expression.parsing.Parser.UnknownIdentifierValidation;
@@ -51,10 +52,8 @@ public class DMFSmart extends DataManFactory {
 	}
 
 	@Override
-	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator eval,
-			VariableContext vc*/, DataReader<?> drSource, DMUtils dmu, boolean preventInsertion, boolean preventUpdate) throws ManagedException {
-		// TODO Auto-generated method stub
-		return null;
+	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity, DataReader<?> drSource, DMUtils dmu, boolean preventInsertion, boolean preventUpdate) throws ManagedException {
+		return new SmartDataWriter(name, ovEntity, filesRepos, dataSources, name, drSource, dmu, dmuSetup, mapGetter);
 	}
 
 }

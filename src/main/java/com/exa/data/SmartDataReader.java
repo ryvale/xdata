@@ -106,10 +106,10 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 			for(String drName :  mpConfig.keySet()) {
 				if("type".equals(drName) || drName.startsWith("_")) continue;
 				
-				VariableContext vc = new MapVariableContext(dmu.getVc()/*evaluator.getCurrentVariableContext()*/);
+				VariableContext vc = new MapVariableContext(dmu.getVc());
 				
-				ObjectValue<XPOperand<?>> ovDRConfig = config.getAttributAsObjectValue(drName); //Computing.object(config, drName, evaluator, vc);
-				updateVariableContext(ovDRConfig, vc, dmu.getVc() /*evaluator.getCurrentVariableContext()*/);
+				ObjectValue<XPOperand<?>> ovDRConfig = config.getAttributAsObjectValue(drName);
+				updateVariableContext(ovDRConfig, vc, dmu.getVc());
 				String flow  = ovDRConfig.getAttributAsString("flow");
 				if(flow == null) flow = FLW_MAIN;
 				
@@ -133,6 +133,7 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 			}
 			dmu.executeBeforeConnectionActions();
 		} catch (ManagedException e) {
+			if(e instanceof DataException) throw (DataException)e;
 			throw new DataException(e);
 		}
 		

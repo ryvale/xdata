@@ -77,7 +77,7 @@ public class XadataApplicationTests extends TestCase {
 		SQLServerDataSource ds = new SQLServerDataSource();
 		ds.setUser("sa");  
         ds.setPassword("e@mP0wer");  
-        ds.setServerName("192.168.23.129");  
+        ds.setServerName("192.168.79.132");  
         ds.setPortNumber(1433);
         ds.setDatabaseName("EAMPROD");
         
@@ -116,7 +116,7 @@ public class XadataApplicationTests extends TestCase {
 		SQLServerDataSource ds = new SQLServerDataSource();
 		ds.setUser("sa");  
         ds.setPassword("e@mP0wer");  
-        ds.setServerName("192.168.23.129");  
+        ds.setServerName("192.168.79.132");  
         ds.setPortNumber(1433);
         ds.setDatabaseName("EAMPROD");
         
@@ -155,7 +155,7 @@ public class XadataApplicationTests extends TestCase {
 		SQLServerDataSource ds = new SQLServerDataSource();
 		ds.setUser("sa");  
         ds.setPassword("e@mP0wer");  
-        ds.setServerName("192.168.23.129");  
+        ds.setServerName("192.168.79.132");  
         ds.setPortNumber(1433);
         ds.setDatabaseName("EAMPROD");
         
@@ -209,7 +209,7 @@ public class XadataApplicationTests extends TestCase {
 		SQLServerDataSource ds = new SQLServerDataSource();
 		ds.setUser("sa");  
         ds.setPassword("e@mP0wer");  
-        ds.setServerName("192.168.23.129");  
+        ds.setServerName("192.168.79.132");  
         ds.setPortNumber(1433);
         ds.setDatabaseName("EAMPROD");
         
@@ -304,7 +304,7 @@ public class XadataApplicationTests extends TestCase {
 		SQLServerDataSource ds = new SQLServerDataSource();
 		ds.setUser("sa");  
         ds.setPassword("e@mP0wer");  
-        ds.setServerName("192.168.23.129");  
+        ds.setServerName("192.168.79.132");  
         ds.setPortNumber(1433);
         ds.setDatabaseName("EAMPROD");
         

@@ -13,12 +13,11 @@ import com.exa.data.config.DMFXLiteral;
 import com.exa.data.config.DataManFactory;
 import com.exa.data.config.DataManFactory.DMUSetup;
 import com.exa.data.config.utils.DMUtils;
-
 import com.exa.expression.XPOperand;
 import com.exa.utils.io.FilesRepositories;
 import com.exa.utils.values.ObjectValue;
 
-public abstract class StandardDRWithDSBase<_FIELD extends Field> extends StandardDataReaderBase<_FIELD> {
+public abstract class StandardDWWithDSBase<_FIELD extends Field> extends StandardDataWriterBase<_FIELD> {
 	
 	protected Map<String, DataManFactory> dmFactories = new HashMap<>();
 	
@@ -31,9 +30,9 @@ public abstract class StandardDRWithDSBase<_FIELD extends Field> extends Standar
 	protected String defaultDataSource;
 	
 	protected DMUSetup dmuSetup;
-	
-	public StandardDRWithDSBase(String name, ObjectValue<XPOperand<?>> config, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUtils dmu, DMUSetup dmuSetup) {
-		super(name, dmu);
+
+	public StandardDWWithDSBase(String name, ObjectValue<XPOperand<?>> config, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DataReader<?> drSource, DMUtils dmu, DMUSetup dmuSetup) {
+		super(name, drSource, dmu);
 		
 		this.config = config;
 		
@@ -58,16 +57,12 @@ public abstract class StandardDRWithDSBase<_FIELD extends Field> extends Standar
 		
 		dmFactories.put(DataManFactory.DMFN_SQL, dmf);
 		dmFactories.put("tsql", dmf);
-		dmFactories.put("t-sql", dmf);
-		dmFactories.put("transact-sql", dmf);
 		dmFactories.put("plsql", dmf);
-		dmFactories.put("pl-sql", dmf);
 		dmFactories.put("sql-server", dmf);
 		dmFactories.put("sql-oracle", dmf);
 		dmFactories.put("oracle", dmf);
 		
 		for(DataManFactory dmFactory : dmFactories.values()) { dmFactory.initialize(); }
 	}
-
-
+	
 }

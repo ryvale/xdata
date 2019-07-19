@@ -126,24 +126,14 @@ public abstract class DataManFactory {
 		}
 		VariableContext vc = new MapVariableContext(evaluator.getCurrentVariableContext());
 		
-		DMUtils dmu = new DMUtils(dmuDmf/*, parser*/, ovRoot, evaluator, vc, dmuSetup);
+		DMUtils dmu = new DMUtils(dmuDmf, ovRoot, evaluator, vc, dmuSetup);
 		dmuSetup.setup(dmu);
-		
-		/*ObjectValue<XPOperand<?>> ovBeforeConnectionActions = ovEntities.getPathAttributAsObjecValue(name + ".beforeConnection");
-		if(ovBeforeConnectionActions != null) {
-			Map<String, Value<?, XPOperand<?>>> mpBCA = ovBeforeConnectionActions.getValue();
-			
-			for(String bcaName: mpBCA.keySet()) {
-				Action ac  = dmu.registerBeforeAction(bcaName, mpBCA.get(bcaName));
-				if(ac == null) throw new ManagedException(String.format("the action %s in 'beforeConnection' for entity '%s' seem to be invalid", bcaName, name));
-			}
-		}*/
-		
+				
 		evaluator.addVariable("rootOv", ObjectValue.class, ovRoot);
 		
 		evaluator.pushVariableContext(vc);
 		
-		DataReader<?> dr = getDataReader(ovEntities, name/*, evaluator, vc*/, Computing.getDefaultObjectLib(ovRoot), dmu);
+		DataReader<?> dr = getDataReader(ovEntities, name, Computing.getDefaultObjectLib(ovRoot), dmu);
 		
 		vc.addVariable("rootDr", DataReader.class, dr);
 		
@@ -206,9 +196,7 @@ public abstract class DataManFactory {
 		return entityName.substring(0, 1).toUpperCase()+entityName.substring(1)+"Dr";
 	}
 	
-	public DataReader<?> getDataReader(ObjectValue<XPOperand<?>> ovEntities, String name/*, XPEvaluator eval, VariableContext vc*/, Map<String, ObjectValue<XPOperand<?>>> libOV, DMUtils dmu) throws ManagedException {
-		
-		//ObjectValue<XPOperand<?>> ovEntity = parser.object(ovEntities, name, eval, vc, libOV);
+	public DataReader<?> getDataReader(ObjectValue<XPOperand<?>> ovEntities, String name, Map<String, ObjectValue<XPOperand<?>>> libOV, DMUtils dmu) throws ManagedException {
 		
 		ObjectValue<XPOperand<?>> ovEntity = parser.object(ovEntities, name, dmu.getEvaluator(), dmu.getVc(), libOV);
 		
@@ -222,7 +210,7 @@ public abstract class DataManFactory {
 			}
 		}
 		
-		DataReader<?> res = getDataReader(name, ovEntity/*, eval, vc*/, dmu);
+		DataReader<?> res = getDataReader(name, ovEntity, dmu);
 		
 		return res;
 	}
@@ -241,7 +229,7 @@ public abstract class DataManFactory {
 			}
 		}
 		
-		DataWriter<?> res = getDataWriter(name, ovEntity/*, eval, vc*/, drSource, dmu, preventInsertion, preventUpdate);
+		DataWriter<?> res = getDataWriter(name, ovEntity, drSource, dmu, preventInsertion, preventUpdate);
 		
 		return res;
 	}

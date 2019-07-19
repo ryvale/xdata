@@ -1,8 +1,6 @@
 package com.exa.data;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.exa.data.config.utils.DMUtils;
@@ -22,9 +20,6 @@ public abstract class StandardDataReaderBase<_FIELD extends Field> implements Da
 	protected String name;
 	
 	protected DMUtils dmu;
-	
-	
-	//protected List<?> beforeConnectionAction = new ArrayList<>();
 	
 	public StandardDataReaderBase(String name, DMUtils dmu) {
 		super();

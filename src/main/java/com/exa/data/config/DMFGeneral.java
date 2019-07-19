@@ -76,14 +76,14 @@ public class DMFGeneral extends DataManFactory {
 	}
 	
 	@Override
-	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator eval, VariableContext vc*/, DMUtils dmu) throws ManagedException {
+	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, DMUtils dmu) throws ManagedException {
 		String type = ovEntity.getAttributAsString("type", defaultType);
 		
 		DataManFactory dmf = dmFactories.get(type);
 		
 		if(dmf == null) throw new ManagedException(String.format("Invalid type '%s'", type));
 		
-		return dmf.getDataReader(name, ovEntity/*, eval, vc*/, dmu);
+		return dmf.getDataReader(name, ovEntity, dmu);
 	}
 
 	@Override

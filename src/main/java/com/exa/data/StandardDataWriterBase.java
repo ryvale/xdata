@@ -7,28 +7,24 @@ import com.exa.data.config.utils.DMUtils;
 import com.exa.expression.eval.XPEvaluator;
 
 public abstract class StandardDataWriterBase<_FIELD extends Field> implements DataWriter<_FIELD> {
-	protected Map<String, _FIELD> fields = new LinkedHashMap<>();
 	
-	//protected XPEvaluator evaluator = null;
+	
+	protected Map<String, _FIELD> fields = new LinkedHashMap<>();
 	
 	protected DataMan parent;
 	
 	protected String name;
 	
-	//protected VariableContext variableContext;
-	
 	protected DataReader<?> drSource;
 	
 	protected DMUtils dmu;
 	
-	public StandardDataWriterBase(String name, DataReader<?> drSource/*, XPEvaluator evaluator, VariableContext variableContext*/, DMUtils dmu) {
+	public StandardDataWriterBase(String name, DataReader<?> drSource, DMUtils dmu) {
 		super();
 		this.name = name;
 		
 		this.drSource = drSource;
 		
-		/*this.evaluator = evaluator;
-		this.variableContext = variableContext;*/
 		this.dmu = dmu;
 	}
 

@@ -183,7 +183,7 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 			dmu.executeBeforeConnectionActions();
 			
 			connection = dataSource.getConnection();
-			System.out.println("connexion open for Data reader" + this.hashCode());
+			if(debugOn) System.out.println("connexion open for Data reader" + this.hashCode());
 			String sql = getSQL();
 			
 			if(debugOn) System.out.println(sql);
@@ -208,7 +208,7 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 		dmu.clean();
 		try {
 			connection.close();
-			System.out.println("connexion closed for Data reader" + this.hashCode());
+			if(debugOn) System.out.println("connexion closed for Data reader" + this.hashCode());
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

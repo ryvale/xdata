@@ -268,8 +268,11 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 			}
 			
 			if("value".equals(field.getExpType())) {
+				String ft = field.getType() + "-" + type;
+				DataFormatter<?> dataf = formatters.get(ft);
+				
 				sbFields.append(", ").
-					append(field.getVlName().asRequiredString()).append(" = ").append(DF_STRING.toSQL(field.getVlExp().asRequiredString()));
+					append(field.getVlName().asRequiredString()).append(" = ").append(dataf.toSQLFormObject(field.getVlExp().getValue()));
 				continue;
 			}
 			
@@ -409,31 +412,14 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 				}
 		 	}
 		 	else {
-		 		/*for(Value<?,XPOperand<?>> av : avFields.getValue()) {
-					ObjectValue<XPOperand<?>> ov = av.asObjectValue();
-					if(ov == null) throw new DataException(String.format("The array property fields item should object value."));
-					
-					String fname = ov.getRequiredAttributAsString("_name");
-					
-					String exp = ov.getAttributAsString("exp");
-					
-					String type = ov.getAttributAsString("type", "string");
-					
-					Field field = new Field(fname, type);
-					field.setExp(exp == null ? fieldManager.toSQL(fname) : exp);
-					
-					fields.put(fname, field);
-				}*/
+		 		//TODO
 		 	}
 			vlWhere = config.getAttribut("criteria");
-			
-			/*for(DataReader<?> dr : dmu.getReaders().values()) {
-				dr.open();
-			}*/
 			
 			dmu.executeBeforeConnectionActions();
 			
 			connection = dataSource.getConnection();
+			if(debugOn) System.out.println("connexion open for Data writer" + this.hashCode());
 		}
 		catch(ManagedException|SQLException e) {
 			if(connection != null) try { connection.close(); } catch (Exception e2) { e2.printStackTrace(); }
@@ -447,12 +433,9 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 
 	@Override
 	public void close() throws DataException {
-		/*for(DataReader<?> dr : dmu.getReaders().values()) {
-			try { dr.close(); } catch(DataException e) { e.printStackTrace();}
-		}*/
 		dmu.clean();
 		if(connection != null) {
-			try { connection.close(); } catch (SQLException e) { e.printStackTrace(); }
+			try { connection.close(); if(debugOn) System.out.println("connexion close for Data writer" + this.hashCode()); } catch (SQLException e) { e.printStackTrace(); }
 			
 			connection = null;
 		}
