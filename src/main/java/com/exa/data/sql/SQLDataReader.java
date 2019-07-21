@@ -43,8 +43,8 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 	
 	protected int _lineVisited = 0;
 	
-	public SQLDataReader(String name, DataSource dataSource/*, XPEvaluator evaluator, VariableContext variableContext*/, ObjectValue<XPOperand<?>> config, DMUtils dmu) throws DataException {
-		super(name/*, evaluator, variableContext*/, dmu);
+	public SQLDataReader(String name, DataSource dataSource, ObjectValue<XPOperand<?>> config, DMUtils dmu) throws DataException {
+		super(name, dmu);
 		this.dataSource = dataSource;
 		this.config = config;
 		

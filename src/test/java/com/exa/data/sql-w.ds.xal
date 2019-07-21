@@ -22,7 +22,7 @@ entities {
 			dr1 = dmu.openReader("testData")
 		},
 		
-		stop = dr1.next() == false,
+		break = dr1.next() == false,
 		
 		fields {
 			manager exa { prefix "uom_" },

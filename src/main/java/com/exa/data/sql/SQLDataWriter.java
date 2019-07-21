@@ -19,6 +19,7 @@ import com.exa.data.DataWriter;
 import com.exa.data.DynamicField;
 import com.exa.data.StandardDataWriterBase;
 import com.exa.data.config.utils.DMUtils;
+import com.exa.data.config.utils.DataUserException;
 import com.exa.data.sql.oracle.PLSQLDateFormatter;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
@@ -94,7 +95,11 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 	private Value<?, XPOperand<?>> fieldsItems;
 	private Value<?, XPOperand<?>> vlWhere = null;
 	private Value<?, XPOperand<?>> vlType;
-	private Value<?, XPOperand<?>> vlStop;
+	
+	private Value<?, XPOperand<?>> vlBreak;
+	private Value<?, XPOperand<?>> vlBreakThrowError;
+	private Value<?, XPOperand<?>> vlBreakUserMessage;
+	
 	private List<Value<?, XPOperand<?>>> lstKey = new ArrayList<>();
 
 	public SQLDataWriter(String name, DataSource dataSource, DataReader<?> drSource, ObjectValue<XPOperand<?>> config, DMUtils dmu, boolean preventInsertion, boolean preventUpdate) {
@@ -117,9 +122,6 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 		
 		try {
 			
-			boolean stop = vlStop.asBoolean();
-			if(stop) return 0;
-			
 			String table = vlTable.asRequiredString();
 			
 			VariableContext variableContext = dmu.getVc();
@@ -134,7 +136,6 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 			StringBuilder sbWhere = new StringBuilder();
 			if(vlWhere != null) {
 				sbWhere.append(vlWhere.asRequiredString());
-
 			}
 			
 			String type = vlType.asRequiredString();
@@ -192,6 +193,21 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 				updateSQL = getInsertSQL(table);
 			}
 			ps.close();
+			
+			try {
+				if(vlBreak.asBoolean()) {
+					if(vlBreakThrowError == null) return 0;
+					String errMess = vlBreakThrowError.asString();
+					String userMessage = vlBreakUserMessage == null ? null : vlBreakUserMessage.asString();
+					
+					if(errMess == null) return 0;
+					
+					throw new  DataUserException(errMess, userMessage);
+				}
+			} catch (ManagedException e) {
+				if(e instanceof DataException) throw (DataException)e;
+				throw new DataException(e);
+			}
 			
 			if(debugOn) System.out.println(updateSQL);
 			ps = connection.prepareStatement(updateSQL);
@@ -303,10 +319,28 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 		try {
 			vlType = config.getRequiredAttribut("type");
 			
-			vlStop = config.getAttribut("stop");
-			if(vlStop == null) vlStop = new BooleanValue<>(Boolean.FALSE);
-			
-			if(!"boolean".equals(vlStop.typeName()) ) throw new DataException(String.format("The property stop should boolean in reader %s", name));
+			vlBreak = config.getAttribut("break");
+			if(vlBreak == null) vlBreak = new BooleanValue<>(Boolean.FALSE);
+			else {
+				ObjectValue<XPOperand<?>> ovBreak = vlBreak.asObjectValue();
+				if(ovBreak == null) {
+					if(!"boolean".equals(vlBreak.typeName())) throw new DataException(String.format("The property 'break' should be a boolean or an object in data reader named '%'", name));
+				} else {
+					vlBreak = ovBreak.getRequiredAttribut("condition");
+					if(!"boolean".equals(vlBreak.typeName())) throw new DataException(String.format("The property 'break.condtion' should be a boolean in data reader named '%'", name));
+					
+					vlBreakUserMessage = ovBreak.getAttribut("userMessage");
+					if(vlBreakUserMessage != null)
+						if(!"string".equals(vlBreakUserMessage.typeName())) throw new DataException(String.format("The property 'break.userMessage' should be a string in data reader named '%'", name));
+					
+					vlBreakThrowError = ovBreak.getAttribut("throwError");
+					if(vlBreakThrowError != null) {
+						if(!"string".equals(vlBreakThrowError.typeName())) throw new DataException(String.format("The property 'break.throwError' should be a string in data reader named '%'", name));
+					}
+					else vlBreakThrowError = vlBreakUserMessage;
+					
+				}
+			}
 			
 			ObjectValue<XPOperand<?>> fm = config.getAttributAsObjectValue("fields");
 			

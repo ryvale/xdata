@@ -183,9 +183,7 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 			}
 			
 			dmu.executeBeforeConnectionActions();
-			/*for(DataReader<?> dr : dmu.getReaders().values()) {
-				dr.open();
-			}*/
+			
 			return drSource.open();
 		} catch (ManagedException e) {
 			throw new DataException(e);

@@ -311,7 +311,7 @@ public class StoredProcedureReader  extends StandardDataReaderBase<DynamicField>
 			
 			StringBuilder sbSql = new StringBuilder();
 			
-			for(Param p : params) {
+			for (int i = 0; i < params.size(); i++) {
 				sbSql.append(", ?");
 			}
 			if(sbSql.length() > 0) sbSql.delete(0, 2);
@@ -322,7 +322,7 @@ public class StoredProcedureReader  extends StandardDataReaderBase<DynamicField>
 			
 			connection = dataSource.getConnection();
 			String sql = "{call " + vlTable.asRequiredString() + "(" + sbSql + ")}";
-			System.out.println(sql);
+			if(SQLDataReader.debugOn) System.out.println(sql);
 			spStatement = connection.prepareCall(sql);
 			
 			for(Param p : params) {

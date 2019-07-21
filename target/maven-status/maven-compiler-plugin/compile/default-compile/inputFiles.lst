@@ -58,6 +58,7 @@ D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\macro\Macro.j
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\dataman\MtdDrGetDouble.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\config\DMFRowToField.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\DataWriter.java
+D:\p-project\exa-data\xadata\src\main\java\com\exa\data\config\utils\DataUserException.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\dataman\TDataWriter.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\dataman\TDataReader.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\dmu\MtdReader.java
@@ -73,6 +74,7 @@ D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\dataman\MtdDr
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\web\WSDataReader.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\sql\XAFieldManagerFactory.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\MapReader.java
+D:\p-project\exa-data\xadata\src\main\java\com\exa\data\action\ASThrowError.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\sql\oracle\package-info.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\sql\FieldManagerFactory.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\DynamicField.java

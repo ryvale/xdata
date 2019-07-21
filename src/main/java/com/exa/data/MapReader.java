@@ -229,9 +229,7 @@ public class MapReader extends StandardDataReaderBase<DynamicField> {
 	public void close() throws DataException {
 		data = null;
 		_lineVisited = 0;
-		/*for(DataReader<?> dr : dmu.getReaders().values()) {
-			try { dr.close(); } catch(DataException e) {}
-		}*/
+		
 		dmu.clean();
 	}
 
@@ -247,7 +245,7 @@ public class MapReader extends StandardDataReaderBase<DynamicField> {
 
 	@Override
 	public MapReader cloneDM() throws DataException {
-		return new MapReader(name/*, evaluator, variableContext*/, config, dmu, mapGetter);
+		return new MapReader(name, config, dmu, mapGetter);
 	}
 
 	

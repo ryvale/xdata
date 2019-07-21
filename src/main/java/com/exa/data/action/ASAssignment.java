@@ -39,7 +39,7 @@ public class ASAssignment implements ActionSeeker {
 				Type<?> t = dmu.getEvaluator().getClassesMan().getType(tn);
 				if(t == null) {
 					System.out.println(String.format("The action type '%s' is not managed", tn));
-					return "OPERATION_FAILED:"  + String.format("The type '%s' is not managed", tn);
+					return "ERROR:"  + String.format("The type '%s' is not managed", tn);
 				}
 				
 				dmu.getVc().assignOrDeclareVariable(name, t.valueClass(), value.getValue());
@@ -47,7 +47,7 @@ public class ASAssignment implements ActionSeeker {
 				return "OK";
 			}
 			
-			return String.format("OPERATION_FAILED:No variable named '%s'", name);
+			return String.format("ERROR:No variable named '%s'", name);
 			
 		}
 		

@@ -209,6 +209,8 @@ public class DMUtils {
 		for(Action action : beforeConnectionActions) {
 			String res = action.execute();
 			if("OK".equals(res) || res.startsWith("OK:")) continue;
+			
+			if(res.startsWith("ERROR:")) throw new ManagedException(res.substring(6));
 			break;
 		}
 	}
@@ -217,6 +219,7 @@ public class DMUtils {
 		for(Action action : onExecutionStartedActions) {
 			String res = action.execute();
 			if("OK".equals(res) || res.startsWith("OK:")) continue;
+			if(res.startsWith("ERROR:")) throw new ManagedException(res.substring(6));
 			break;
 		}
 	}
