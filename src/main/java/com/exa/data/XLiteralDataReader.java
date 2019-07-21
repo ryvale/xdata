@@ -256,7 +256,7 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 
 	@Override
 	public XLiteralDataReader cloneDM() throws DataException {
-		return new XLiteralDataReader(name/*, evaluator, variableContext*/, config, dmu);
+		return new XLiteralDataReader(name, config, dmu);
 	}
 
 }

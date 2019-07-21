@@ -46,6 +46,8 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 		formatters.put("string-sql-oracle", DF_STRING);
 		formatters.put("string-plsql", DF_STRING);
 		formatters.put("string-tsql", DF_STRING);
+		formatters.put("string-t-sql", DF_STRING);
+		formatters.put("string-transact-sql", DF_STRING);
 		
 		DataFormatter<?> df = new SQLNumberFormatter();
 		formatters.put("int-sql", df);
@@ -54,6 +56,8 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 		formatters.put("int-sql-oracle", df);
 		formatters.put("int-plsql", df);
 		formatters.put("int-tsql", df);
+		formatters.put("int-t-sql", df);
+		formatters.put("int-transact-sql", df);
 		
 		formatters.put("float-sql", df);
 		formatters.put("float-sql-server", df);
@@ -61,6 +65,8 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 		formatters.put("float-sql-oracle", df);
 		formatters.put("float-plsql", df);
 		formatters.put("float-tsql", df);
+		formatters.put("float-t-sql", df);
+		formatters.put("float-transact-sql", df);
 		
 		df = new PLSQLDateFormatter();
 		formatters.put("datetime-oracle", df);
@@ -68,12 +74,14 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 		formatters.put("datetime-oracle", df);
 		formatters.put("datetime-sql-oracle", df);
 		formatters.put("datetime-plsql", df);
+		formatters.put("datetime-pl-sql", df);
 		
 		formatters.put("date-oracle", df);
 		formatters.put("date-sql-oracle", df);
 		formatters.put("date-oracle", df);
 		formatters.put("date-sql-oracle", df);
 		formatters.put("date-plsql", df);
+		formatters.put("date-pl-sql", df);
 		
 		expTypes.add("default");expTypes.add("reader");expTypes.add("value");expTypes.add("sql");expTypes.add("entire-sql");
 	}
@@ -183,31 +191,18 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 			
 			String updateSQL;
 			if(rs.next()) {
-				if(preventUpdate) return 0;
 				variableContext.assignOrDeclareVariable("updateMode", String.class, "update");
+				if(mustBreak()) return 0;
+				if(preventUpdate) return 0;
 				updateSQL = getUpdateSQL(table, sbWhere.toString());
 			}
 			else {
-				if(preventInsertion) return 0;
 				variableContext.assignOrDeclareVariable("updateMode", String.class, "insert");
+				if(mustBreak()) return 0;
+				if(preventInsertion) return 0;
 				updateSQL = getInsertSQL(table);
 			}
 			ps.close();
-			
-			try {
-				if(vlBreak.asBoolean()) {
-					if(vlBreakThrowError == null) return 0;
-					String errMess = vlBreakThrowError.asString();
-					String userMessage = vlBreakUserMessage == null ? null : vlBreakUserMessage.asString();
-					
-					if(errMess == null) return 0;
-					
-					throw new  DataUserException(errMess, userMessage);
-				}
-			} catch (ManagedException e) {
-				if(e instanceof DataException) throw (DataException)e;
-				throw new DataException(e);
-			}
 			
 			if(debugOn) System.out.println(updateSQL);
 			ps = connection.prepareStatement(updateSQL);
@@ -218,6 +213,25 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 			throw new DataException(e);
 		}
 		
+	}
+	
+	private boolean mustBreak() throws DataException {
+		try {
+			if(vlBreak.asBoolean()) {
+				if(vlBreakThrowError == null) return true;
+				String errMess = vlBreakThrowError.asString();
+				String userMessage = vlBreakUserMessage == null ? null : vlBreakUserMessage.asString();
+				
+				if(errMess == null) return true;
+				
+				throw new  DataUserException(errMess, userMessage);
+			}
+		} catch (ManagedException e) {
+			if(e instanceof DataException) throw (DataException)e;
+			throw new DataException(e);
+		}
+		
+		return false;
 	}
 
 	@Override

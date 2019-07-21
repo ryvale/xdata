@@ -175,11 +175,7 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 			criteria  = config.getAttributAsString("criteria");
 			orderBy  = config.getAttributAsString("orderBy");
 			groupBy  = config.getAttributAsString("groupBy");
-			
-			/*for(DataReader<?> dr : dmu.getReaders().values()) {
-				dr.open();
-			}*/
-			
+						
 			dmu.executeBeforeConnectionActions();
 			
 			connection = dataSource.getConnection();
@@ -201,10 +197,6 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 
 	@Override
 	public void close() throws DataException {
-		/*for(DataReader<?> dr : dmu.getReaders().values()) {
-			try { dr.close(); } catch(DataException e) { e.printStackTrace();}
-		}*/
-		
 		dmu.clean();
 		try {
 			connection.close();
