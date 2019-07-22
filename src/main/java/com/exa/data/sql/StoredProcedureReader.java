@@ -14,7 +14,6 @@ import java.util.Set;
 import javax.sql.DataSource;
 
 import com.exa.data.DataException;
-import com.exa.data.DataReader;
 import com.exa.data.DynamicField;
 import com.exa.data.StandardDataReaderBase;
 import com.exa.data.config.utils.DMUtils;
@@ -206,16 +205,11 @@ public class StoredProcedureReader  extends StandardDataReaderBase<DynamicField>
 			if(config.containsAttribut("params")) {
 				ObjectValue<XPOperand<?>> ovParams = config.getAttributAsObjectValue("params");
 				if(ovParams == null) throw new DataException(String.format("The property '%s' of the entity %s should be an object", "params", name));
-				
-				//vlParamsType  = ovParamsRoot.getAttribut("type");
-				
-				//ObjectValue<XPOperand<?>> ovParams = ovParamsRoot.getRequiredAttributAsObjectValue("items");
-				
+								
 				Map<String, Value<?, XPOperand<?>>> mpParams = ovParams.getValue();
 				for(String paramName : mpParams.keySet()) {
 					Value<?, XPOperand<?>> vlParam = mpParams.get(paramName);
 					String paramTypeName = vlParam.typeName();
-					//if(!("string".equals(paramTypeName) || "boolean".equals(paramTypeName) || "object".equals(paramTypeName))) throw new DataException(String.format("The param type %s is invalid for reader %s", paramTypeName, name));
 					
 					String name; String type; String ioType; Value<?, XPOperand<?>> value = null;
 					if("object".equals(paramTypeName)) {
@@ -316,11 +310,10 @@ public class StoredProcedureReader  extends StandardDataReaderBase<DynamicField>
 			}
 			if(sbSql.length() > 0) sbSql.delete(0, 2);
 			
-			for(DataReader<?> dr : dmu.getReaders().values()) {
-				dr.open();
-			}
+			dmu.executeBeforeConnectionActions();
 			
 			connection = dataSource.getConnection();
+			if(SQLDataReader.debugOn) System.out.println(String.format("connexion open for '%s' Data reader-", name)  + this.hashCode());
 			String sql = "{call " + vlTable.asRequiredString() + "(" + sbSql + ")}";
 			if(SQLDataReader.debugOn) System.out.println(sql);
 			spStatement = connection.prepareCall(sql);
@@ -351,13 +344,12 @@ public class StoredProcedureReader  extends StandardDataReaderBase<DynamicField>
 
 	@Override
 	public void close() throws DataException {
+		dmu.clean();
 		params.clear();
 		if(connection != null)
 			try {
-				for(DataReader<?> dr : dmu.getReaders().values()) {
-					dr.close();
-				}
 				connection.close();
+				if(SQLDataReader.debugOn) System.out.println(String.format("connexion close for '%s' Data reader-", name)  + this.hashCode());
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}

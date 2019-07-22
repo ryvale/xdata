@@ -13,11 +13,15 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exa.data.DataException;
 import com.exa.data.DataReader;
 import com.exa.data.DataWriter;
 import com.exa.data.DynamicField;
 import com.exa.data.StandardDataWriterBase;
+import com.exa.data.config.utils.BreakProperty;
 import com.exa.data.config.utils.DMUtils;
 import com.exa.data.config.utils.DataUserException;
 import com.exa.data.sql.oracle.PLSQLDateFormatter;
@@ -32,6 +36,8 @@ import com.exa.utils.values.StringValue;
 import com.exa.utils.values.Value;
 
 public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
+	public static final  Logger LOG = LoggerFactory.getLogger(SQLDataWriter.class);
+	
 	public static boolean debugOn = false;
 	
 	protected final static Map<String, DataFormatter<?>> formatters = new HashMap<>();
@@ -104,9 +110,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 	private Value<?, XPOperand<?>> vlWhere = null;
 	private Value<?, XPOperand<?>> vlType;
 	
-	private Value<?, XPOperand<?>> vlBreak;
-	private Value<?, XPOperand<?>> vlBreakThrowError;
-	private Value<?, XPOperand<?>> vlBreakUserMessage;
+	private List<BreakProperty> breakProperties = new ArrayList<>();
 	
 	private List<Value<?, XPOperand<?>>> lstKey = new ArrayList<>();
 
@@ -154,7 +158,9 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 			for(Value<?, XPOperand<?>> vl : lstKey) {
 				String keyField = vl.asRequiredString();
 				DynamicField field = fields.get(keyField);
-				if(fieldForSelection == null) fieldForSelection = fieldManager.toSQL(field.getName());
+				
+				String fieldName = field.getVlName().asRequiredString();
+				if(fieldForSelection == null) fieldForSelection = fieldName;
 				
 				if("reader".equals(field.getExpType())) {
 					String ft = field.getType() + "-" + type;
@@ -162,15 +168,16 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 					if(dataf == null) throw new ManagedException(String.format("No formatter provide for type '%s' for the field", ft, field.getName()));
 					
 					sbKeyFields.append("AND ").
-						append(fieldManager.toSQL(field.getName())).append(" = ").append(dataf.toSQLFormObject(drSource.getObject(field.getVlExp().asRequiredString())));
+						append(fieldName).append(" = ").append(dataf.toSQLFormObject(drSource.getObject(field.getVlExp().asRequiredString())));
 					continue;
 				}
 				
 				if("value".equals(field.getExpType())) {
-					
+					String ft = field.getType() + "-" + type;
+					DataFormatter<?> dataf = formatters.get(ft);
 					
 					sbKeyFields.append(", ").
-						append(fieldManager.toSQL(field.getName())).append(" = ").append(DF_STRING.toSQL(field.getVlExp().asRequiredString()));
+						append(fieldName).append(" = ").append(dataf.toSQLFormObject(field.getVlExp().getValue()));
 					continue;
 				}
 				
@@ -210,25 +217,25 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 			
 			
 		} catch (ManagedException|SQLException e) {
+			if(e instanceof DataException) throw (DataException)e;
 			throw new DataException(e);
 		}
 		
 	}
 	
-	private boolean mustBreak() throws DataException {
-		try {
-			if(vlBreak.asBoolean()) {
-				if(vlBreakThrowError == null) return true;
-				String errMess = vlBreakThrowError.asString();
-				String userMessage = vlBreakUserMessage == null ? null : vlBreakUserMessage.asString();
+	private boolean mustBreak() throws ManagedException {
+		for(BreakProperty bp : breakProperties) {
+			if(bp.getVlCondition().asBoolean()) {
+				if(bp.getVlThrowError() == null) return true;
 				
-				if(errMess == null) return true;
+				String errMess = bp.getVlThrowError().asString();
+				
+				String userMessage = bp.getVlUserMessage() == null ? null : bp.getVlUserMessage().asString();
+				
+				if(errMess == null) return false;
 				
 				throw new  DataUserException(errMess, userMessage);
 			}
-		} catch (ManagedException e) {
-			if(e instanceof DataException) throw (DataException)e;
-			throw new DataException(e);
 		}
 		
 		return false;
@@ -333,26 +340,23 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 		try {
 			vlType = config.getRequiredAttribut("type");
 			
-			vlBreak = config.getAttribut("break");
-			if(vlBreak == null) vlBreak = new BooleanValue<>(Boolean.FALSE);
+			Value<?, XPOperand<?>> vlBreak = config.getAttribut("break");
+			if(vlBreak == null) {
+				vlBreak = new BooleanValue<>(Boolean.FALSE);
+				breakProperties.add(new BreakProperty(new BooleanValue<>(Boolean.FALSE), null, null));
+			}
 			else {
-				ObjectValue<XPOperand<?>> ovBreak = vlBreak.asObjectValue();
-				if(ovBreak == null) {
-					if(!"boolean".equals(vlBreak.typeName())) throw new DataException(String.format("The property 'break' should be a boolean or an object in data reader named '%'", name));
-				} else {
-					vlBreak = ovBreak.getRequiredAttribut("condition");
-					if(!"boolean".equals(vlBreak.typeName())) throw new DataException(String.format("The property 'break.condtion' should be a boolean in data reader named '%'", name));
-					
-					vlBreakUserMessage = ovBreak.getAttribut("userMessage");
-					if(vlBreakUserMessage != null)
-						if(!"string".equals(vlBreakUserMessage.typeName())) throw new DataException(String.format("The property 'break.userMessage' should be a string in data reader named '%'", name));
-					
-					vlBreakThrowError = ovBreak.getAttribut("throwError");
-					if(vlBreakThrowError != null) {
-						if(!"string".equals(vlBreakThrowError.typeName())) throw new DataException(String.format("The property 'break.throwError' should be a string in data reader named '%'", name));
+				ArrayValue<XPOperand<?>> avBreak = vlBreak.asArrayValue();
+				if(avBreak == null) {
+					BreakProperty bp = BreakProperty.parseBreakItemConfig(vlBreak, name);
+					breakProperties.add(bp);
+				}
+				else {
+					List<Value<?, XPOperand<?>>> lstBreak = avBreak.getValue();
+					for(Value<?, XPOperand<?>> vlBreakItem : lstBreak) {
+						BreakProperty bp = BreakProperty.parseBreakItemConfig(vlBreakItem, name);
+						breakProperties.add(bp);
 					}
-					else vlBreakThrowError = vlBreakUserMessage;
-					
 				}
 			}
 			
@@ -468,7 +472,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 			dmu.executeBeforeConnectionActions();
 			
 			connection = dataSource.getConnection();
-			if(debugOn) System.out.println("connexion open for Data writer" + this.hashCode());
+			if(debugOn)  LOG.info(String.format("connexion open for '%s' Data writer-", name) + this.hashCode());
 		}
 		catch(ManagedException|SQLException e) {
 			if(connection != null) try { connection.close(); } catch (Exception e2) { e2.printStackTrace(); }
@@ -484,7 +488,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 	public void close() throws DataException {
 		dmu.clean();
 		if(connection != null) {
-			try { connection.close(); if(debugOn) System.out.println("connexion close for Data writer" + this.hashCode()); } catch (SQLException e) { e.printStackTrace(); }
+			try { connection.close(); if(debugOn) LOG.info(String.format("connexion closed for '%s' Data writer-", name)  + this.hashCode()); } catch (SQLException e) { e.printStackTrace(); }
 			
 			connection = null;
 		}

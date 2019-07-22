@@ -1,6 +1,7 @@
 package com.exa.data;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.exa.data.MapReader.MapGetter;
@@ -14,6 +15,7 @@ import com.exa.expression.eval.MapVariableContext;
 import com.exa.lang.expression.XALCalculabeValue;
 import com.exa.utils.ManagedException;
 import com.exa.utils.io.FilesRepositories;
+import com.exa.utils.values.ArrayValue;
 import com.exa.utils.values.CalculableValue;
 import com.exa.utils.values.ObjectValue;
 import com.exa.utils.values.Value;
@@ -133,6 +135,16 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 				continue;
 			}
 			
+			ArrayValue<XPOperand<?>> av = vl.asArrayValue();
+			if(av != null) {
+				List<Value<?, XPOperand<?>>> lst = av.getValue();
+				
+				for(Value<?, XPOperand<?>> vlItem : lst) {
+					updateVariableContext(vlItem, vc, prentVC);
+				}
+			}
+			
+			
 			CalculableValue<?, XPOperand<?>> cl = vl.asCalculableValue();
 			if(cl == null) continue;
 			
@@ -140,6 +152,29 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 			if(xalCL.getVariableContext() == prentVC) xalCL.setVariableContext(vc);
 			
 		}
+	}
+	
+	private static void updateVariableContext(Value<?, XPOperand<?>> vl, VariableContext vc, VariableContext prentVC) {
+		ObjectValue<XPOperand<?>> vov = vl.asObjectValue();
+		if(vov != null) {
+			updateVariableContext(vov, vc, prentVC);
+			return;
+		}
+		
+		ArrayValue<XPOperand<?>> av = vl.asArrayValue();
+		if(av != null) {
+			List<Value<?, XPOperand<?>>> lst = av.getValue();
+			
+			for(Value<?, XPOperand<?>> vlItem : lst) {
+				updateVariableContext(vlItem, vc, prentVC);
+			}
+		}
+		
+		CalculableValue<?, XPOperand<?>> cl = vl.asCalculableValue();
+		if(cl == null) return;
+		
+		XALCalculabeValue<?> xalCL = (XALCalculabeValue<?>) cl;
+		if(xalCL.getVariableContext() == prentVC) xalCL.setVariableContext(vc);
 	}
 	
 	private DataWriter<?> getDataWriter(ObjectValue<XPOperand<?>> ovDRConfig, String dwName, DMUtils subDmu) throws ManagedException {

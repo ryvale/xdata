@@ -24,7 +24,7 @@ public class DataUserException extends DataException {
 	@Override
 	public String getMessage() {
 		
-		return safeUserMessage + ":" + super.getMessage();
+		return getClass() + ": " + safeUserMessage + ":" + super.getMessage();
 	}
 	
 	

@@ -10,6 +10,9 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exa.data.DataException;
 import com.exa.data.Field;
 import com.exa.data.StandardDataReaderBase;
@@ -23,6 +26,8 @@ import com.exa.utils.values.StringValue;
 import com.exa.utils.values.Value;
 
 public class SQLDataReader extends StandardDataReaderBase<Field> {
+	
+	public static final  Logger LOG = LoggerFactory.getLogger(SQLDataReader.class);
 	
 	public static boolean debugOn = false;
 	
@@ -102,8 +107,6 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 	public boolean open() throws DataException {
 		
 		try {
-			//String drVariableName = DataManFactory.getDRVariableName(name);
-			//evaluator.getCurrentVariableContext().addVariable(drVariableName, DataReader.class, this);
 			
 			from = config.getRequiredAttributAsString("from");
 			
@@ -179,7 +182,7 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 			dmu.executeBeforeConnectionActions();
 			
 			connection = dataSource.getConnection();
-			if(debugOn) System.out.println("connexion open for Data reader" + this.hashCode());
+			if(debugOn) LOG.info(String.format("connexion open for '%s' Data reader-", name)  + this.hashCode());
 			String sql = getSQL();
 			
 			if(debugOn) System.out.println(sql);
@@ -200,7 +203,7 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 		dmu.clean();
 		try {
 			connection.close();
-			if(debugOn) System.out.println("connexion closed for Data reader" + this.hashCode());
+			if(debugOn)  LOG.info(String.format("connexion closed for '%s' Data reader-", name)  + this.hashCode());
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

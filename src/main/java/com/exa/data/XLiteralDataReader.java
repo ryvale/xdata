@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.exa.data.config.utils.BreakProperty;
 import com.exa.data.config.utils.DMUtils;
 import com.exa.data.config.utils.DataUserException;
 import com.exa.expression.XPOperand;
@@ -44,9 +45,7 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 	private List<Map<String, Value<?, XPOperand<?>>>> rows = new ArrayList<>();
 	private int rowIndex = -1;
 	
-	private Value<?, XPOperand<?>> vlBreak;
-	private Value<?, XPOperand<?>> vlBreakThrowError;
-	private Value<?, XPOperand<?>> vlBreakUserMessage;
+	private List<BreakProperty> breakProperties = new ArrayList<>();
 	
 	public XLiteralDataReader(String name, ObjectValue<XPOperand<?>> config, DMUtils dmu) {
 		super(name, dmu);
@@ -56,15 +55,21 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 	@Override
 	public boolean next() throws DataException {
 		try {
-			if(vlBreak.asBoolean()) {
-				if(vlBreakThrowError == null) return false;
-				String errMess = vlBreakThrowError.asString();
-				String userMessage = vlBreakUserMessage == null ? null : vlBreakUserMessage.asString();
-				
-				if(errMess == null) return false;
-				
-				throw new  DataUserException(errMess, userMessage);
+			
+			for(BreakProperty bp : breakProperties) {
+				if(bp.getVlCondition().asBoolean()) {
+					if(bp.getVlThrowError() == null) return false;
+					
+					String errMess = bp.getVlThrowError().asString();
+					
+					String userMessage = bp.getVlUserMessage() == null ? null : bp.getVlUserMessage().asString();
+					
+					if(errMess == null) return false;
+					
+					throw new  DataUserException(errMess, userMessage);
+				}
 			}
+			
 		} catch (ManagedException e) {
 			if(e instanceof DataException) throw (DataException)e;
 			throw new DataException(e);
@@ -133,26 +138,24 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 	@Override
 	public boolean open() throws DataException {
 		try {
-			vlBreak = config.getAttribut("break");
-			if(vlBreak == null) vlBreak = new BooleanValue<>(Boolean.FALSE);
+			
+			Value<?, XPOperand<?>> vlBreak = config.getAttribut("break");
+			if(vlBreak == null) {
+				vlBreak = new BooleanValue<>(Boolean.FALSE);
+				breakProperties.add(new BreakProperty(new BooleanValue<>(Boolean.FALSE), null, null));
+			}
 			else {
-				ObjectValue<XPOperand<?>> ovBreak = vlBreak.asObjectValue();
-				if(ovBreak == null) {
-					if(!"boolean".equals(vlBreak.typeName())) throw new DataException(String.format("The property 'break' should be a boolean or an object in data reader named '%'", name));
-				} else {
-					vlBreak = ovBreak.getRequiredAttribut("condition");
-					if(!"boolean".equals(vlBreak.typeName())) throw new DataException(String.format("The property 'break.condtion' should be a boolean in data reader named '%'", name));
-					
-					vlBreakUserMessage = ovBreak.getAttribut("userMessage");
-					if(vlBreakUserMessage != null)
-						if(!"string".equals(vlBreakUserMessage.typeName())) throw new DataException(String.format("The property 'break.userMessage' should be a string in data reader named '%'", name));
-					
-					vlBreakThrowError = ovBreak.getAttribut("throwError");
-					if(vlBreakThrowError != null) {
-						if(!"string".equals(vlBreakThrowError.typeName())) throw new DataException(String.format("The property 'break.throwError' should be a string in data reader named '%'", name));
+				ArrayValue<XPOperand<?>> avBreak = vlBreak.asArrayValue();
+				if(avBreak == null) {
+					BreakProperty bp = BreakProperty.parseBreakItemConfig(vlBreak, name);
+					breakProperties.add(bp);
+				}
+				else {
+					List<Value<?, XPOperand<?>>> lstBreak = avBreak.getValue();
+					for(Value<?, XPOperand<?>> vlBreakItem : lstBreak) {
+						BreakProperty bp = BreakProperty.parseBreakItemConfig(vlBreakItem, name);
+						breakProperties.add(bp);
 					}
-					else vlBreakThrowError = vlBreakUserMessage;
-					
 				}
 			}
 			
@@ -227,15 +230,39 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 		 		}
 		 		
 		 		rows.add(mpRow);
-		 		
 		 	}
 
 		 	
 		} catch (ManagedException e) {
+			if(e instanceof DataException) throw (DataException)e;
 			throw new DataException(e);
 		}
 		return true;
 	}
+	
+	/*private BreakProperty parseBreakItemConfig(Value<?, XPOperand<?>> vlBreak) throws ManagedException {
+		ObjectValue<XPOperand<?>> ovBreak = vlBreak.asObjectValue();
+		if(ovBreak != null) {
+			vlBreak = ovBreak.getRequiredAttribut("condition");
+			if(!"boolean".equals(vlBreak.typeName())) throw new DataException(String.format("The property 'break.condtion' should be a boolean in data reader named '%'", name));
+			
+			Value<?, XPOperand<?>> vlBreakUserMessage = ovBreak.getAttribut("userMessage");
+			if(vlBreakUserMessage != null)
+				if(!"string".equals(vlBreakUserMessage.typeName())) throw new DataException(String.format("The property 'break.userMessage' should be a string in data reader named '%'", name));
+			
+			Value<?, XPOperand<?>>vlBreakThrowError = ovBreak.getAttribut("throwError");
+			if(vlBreakThrowError != null) {
+				if(!"string".equals(vlBreakThrowError.typeName())) throw new DataException(String.format("The property 'break.throwError' should be a string in data reader named '%'", name));
+			}
+			else vlBreakThrowError = vlBreakUserMessage;
+			
+			return new BreakProperty(vlBreak, vlBreakThrowError, vlBreakUserMessage);
+		}
+		
+		if(!"boolean".equals(vlBreak.typeName())) throw new DataException(String.format("The break property should be a boolean or object in data reader named '%'", name));
+		
+		return new BreakProperty(vlBreak, null, null);
+	}*/
 
 	@Override
 	public void close() throws DataException {
