@@ -2,22 +2,18 @@ package com.exa.data.web;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-//import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-//import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.exa.data.DataException;
+import com.exa.data.DataReader;
+import com.exa.data.DataWriter;
 import com.exa.data.DynamicField;
-
-import com.exa.data.StandardDataReaderBase;
+import com.exa.data.StandardDataWriterBase;
 import com.exa.data.config.utils.DMUtils;
-
 import com.exa.expression.XPOperand;
-
 import com.exa.utils.ManagedException;
 import com.exa.utils.values.ArrayValue;
 import com.exa.utils.values.BooleanValue;
@@ -30,7 +26,7 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 
-public class WSDataReader extends StandardDataReaderBase<DynamicField> {
+public class WSDataWriter extends StandardDataWriterBase<DynamicField> {
 	static final SimpleDateFormat DF_ISO8061 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX") ;
 	protected final static Set<String> expTypes = new HashSet<>();
 	
@@ -46,9 +42,9 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 		respManagers.put("json-object", (fields, path) -> new RMJSONObject(fields, path) );
 	}
 	
-	private ObjectValue<XPOperand<?>> config;
-	
 	private WSDataSource wsDataSource;
+	
+	private ObjectValue<XPOperand<?>> config;
 	
 	private Value<?, XPOperand<?>> vlRequestType = null;
 	private Value<?, XPOperand<?>> vlResponseType;
@@ -62,50 +58,19 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 	private Value<?, XPOperand<?>> vlParamsType;
 	private ObjectValue<XPOperand<?>> ovParams;
 	
-	protected int _lineVisited = 0;
-	
 	private ResponseManager responseMan = null;
-	
-	public WSDataReader(String name, ObjectValue<XPOperand<?>> config, WSDataSource wsDataSource, DMUtils dmu) {
-		super(name, dmu);
+
+	public WSDataWriter(String name, ObjectValue<XPOperand<?>> config, WSDataSource wsDataSource, DataReader<?> drSource, DMUtils dmu) {
+		super(name, drSource, dmu);
 		
 		this.config = config;
 		this.wsDataSource = wsDataSource;
 	}
-	
-	
 
 	@Override
-	public boolean next() throws DataException {
-		return responseMan.next();
-	}
-
-	@Override
-	public String getString(String fieldName) throws DataException {
-		
-		try {
-			return responseMan.getString(fieldName);
-		} catch (ManagedException e) {
-			throw new DataException(e);
-		}
-	}
-
-	@Override
-	public Integer getInteger(String fieldName) throws DataException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Date getDate(String fieldName) throws DataException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Double getDouble(String fieldName) throws DataException {
-		// TODO Auto-generated method stub
-		return null;
+	public int update(DataReader<?> dr) throws DataException {
+		responseMan.next();
+		return 0;
 	}
 
 	@Override
@@ -222,12 +187,8 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 				if(body != null) rb.post(body);
 			}
 			
-
 			dmu.executeBeforeConnectionActions();
 			
-			/*for(DataReader<?> dr : dmu.getReaders().values()) {
-				dr.open();
-			}*/
 			responseMan = rf.create(fields, vlPath == null ? null : vlPath.asString());
 			
 			responseMan.manage(rb);
@@ -240,8 +201,6 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 			
 			responseMan.manage(response);
 			
-			//rm.close();
-			
 		} catch (ManagedException | IOException e) {
 			throw new DataException(e);
 		}
@@ -253,29 +212,20 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 
 	@Override
 	public void close() throws DataException {
-		/*for(DataReader<?> dr : dmu.getReaders().values()) {
-			try { dr.close(); } catch(DataException e) { e.printStackTrace();}
-		}*/
-		
-		dmu.clean();
-		responseMan = null;
+		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public int lineVisited() {
-		return _lineVisited;
+	public DataWriter<DynamicField> cloneDM() throws DataException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
 	public boolean isOpen() {
-		return responseMan != null;
-	}
-
-	@Override
-	public WSDataReader cloneDM() throws DataException {
 		// TODO Auto-generated method stub
-		return null;
+		return false;
 	}
 
 }

@@ -49,8 +49,6 @@ public class RMJSONObject extends ResponseManager {
 		return true;
 	}
 
-	
-	//@SuppressWarnings("unchecked")
 	@Override
 	public void manage(Response response) throws DataException {
 		String strResp;
@@ -69,21 +67,14 @@ public class RMJSONObject extends ResponseManager {
 			for(int i=0; i < parts.length;i++) {
 				JSONObject obj = mpValues.getJSONObject(parts[i]);
 				if(obj == null) read = true;
-				
-				//if(!(obj instanceof Map)) throw new DataException(String.format("Non json object met when following the path %", path));
 
 				mpValues = obj;
 			}
 			
 			valuesCache = mpValues;
 		} catch (IOException | JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-			
-		//System.out.println(strResp);
-
-		
 	}
 
 	@Override
@@ -100,8 +91,6 @@ public class RMJSONObject extends ResponseManager {
 		for(int i=0; i < parts.length-1; i++) {
 			JSONObject obj = mpValues.getJSONObject(parts[i]);
 			if(obj == null) read = true;
-			
-			//if(!(obj instanceof Map)) throw new ManagedException(String.format("Non json object met when following the path %", path));
 
 			mpValues = obj;
 		}

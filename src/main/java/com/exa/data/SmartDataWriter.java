@@ -1,5 +1,6 @@
 package com.exa.data;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +9,9 @@ import com.exa.data.MapReader.MapGetter;
 import com.exa.data.action.Action;
 import com.exa.data.config.DataManFactory;
 import com.exa.data.config.DataManFactory.DMUSetup;
+import com.exa.data.config.utils.BreakProperty;
 import com.exa.data.config.utils.DMUtils;
+import com.exa.data.config.utils.DataUserException;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.MapVariableContext;
@@ -16,6 +19,7 @@ import com.exa.lang.expression.XALCalculabeValue;
 import com.exa.utils.ManagedException;
 import com.exa.utils.io.FilesRepositories;
 import com.exa.utils.values.ArrayValue;
+import com.exa.utils.values.BooleanValue;
 import com.exa.utils.values.CalculableValue;
 import com.exa.utils.values.ObjectValue;
 import com.exa.utils.values.Value;
@@ -32,6 +36,8 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 	
 	private boolean opened = false;
 	
+	private List<BreakProperty> breakProperties = new ArrayList<>();
+	
 	public SmartDataWriter(String name, ObjectValue<XPOperand<?>> config, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DataReader<?> drSource, DMUtils dmu, DMUSetup dmuSetup, MapGetter mapGetter) {
 		super(name, config, filesRepos, dataSources, defaultDataSource, drSource, dmu, dmuSetup);
 	}
@@ -43,6 +49,7 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 	@Override
 	public int update(DataReader<?> dr) throws DataException {
 		try {
+			if(mustBreak()) return 0;
 			for(DataWriter<?> dw :  mainDataWriters.values()) {	dw.open();	}
 			
 			for(DataWriter<?> dw :  mainDataWriters.values()) {
@@ -51,11 +58,33 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 			
 			for(DataWriter<?> dw :  mainDataWriters.values()) {	dw.close();	}
 		}
+		catch(ManagedException e) {
+			if(e instanceof DataException) throw (DataException)e;
+			throw new DataException(e);
+		}
 		finally {
 			for(DataWriter<?> dw :  mainDataWriters.values()) {	try { dw.close(); } catch(Exception e) { e.printStackTrace(); }	}
 		}
 		
 		return 0;
+	}
+	
+	private boolean mustBreak() throws ManagedException {
+		for(BreakProperty bp : breakProperties) {
+			if(bp.getVlCondition().asBoolean()) {
+				if(bp.getVlThrowError() == null) return true;
+				
+				String errMess = bp.getVlThrowError().asString();
+				
+				String userMessage = bp.getVlUserMessage() == null ? null : bp.getVlUserMessage().asString();
+				
+				if(errMess == null) return false;
+				
+				throw new  DataUserException(errMess, userMessage);
+			}
+		}
+		
+		return false;
 	}
 
 	@Override
@@ -64,8 +93,28 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 		Map<String, Value<?, XPOperand<?>>> mpConfig = config.getValue();
 		
 		try {
+			Value<?, XPOperand<?>> vlBreak = config.getAttribut("break");
+			if(vlBreak == null) {
+				vlBreak = new BooleanValue<>(Boolean.FALSE);
+				breakProperties.add(new BreakProperty(new BooleanValue<>(Boolean.FALSE), null, null));
+			}
+			else {
+				ArrayValue<XPOperand<?>> avBreak = vlBreak.asArrayValue();
+				if(avBreak == null) {
+					BreakProperty bp = BreakProperty.parseBreakItemConfig(vlBreak, name);
+					breakProperties.add(bp);
+				}
+				else {
+					List<Value<?, XPOperand<?>>> lstBreak = avBreak.getValue();
+					for(Value<?, XPOperand<?>> vlBreakItem : lstBreak) {
+						BreakProperty bp = BreakProperty.parseBreakItemConfig(vlBreakItem, name);
+						breakProperties.add(bp);
+					}
+				}
+			}
+			
 			for(String drName :  mpConfig.keySet()) {
-				if("type".equals(drName) || "fields".equals(drName) || drName.startsWith("_")) continue;
+				if("type".equals(drName) || "fields".equals(drName)  || "beforeConnection".equals(drName) || "break".equals(drName)  || "onExecutionStarted".equals(drName) || drName.startsWith("_")) continue;
 				
 				VariableContext vc = new MapVariableContext(dmu.getVc());
 				ObjectValue<XPOperand<?>> ovDRConfig = config.getAttributAsObjectValue(drName);
