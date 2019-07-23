@@ -14,7 +14,7 @@ public class PLSQLDateFormatter extends DataFormatter<Date> {
 	public String toSQL(Date rawValue, String defaultValue) {
 		if(rawValue == null) return defaultValue;
 		
-		return "TO_DATE('" + DF.format(rawValue) + "', 'YYYY-MM-DD H24:MI:SS')";
+		return "TO_DATE('" + DF.format(rawValue) + "', 'YYYY-MM-DD HH24:MI:SS')";
 	}
 
 }

@@ -1,5 +1,8 @@
 package com.exa.data;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
@@ -18,6 +21,7 @@ import com.exa.utils.values.StringValue;
 import com.exa.utils.values.Value;
 
 public class MapReader extends StandardDataReaderBase<DynamicField> {
+	public static final DateFormat DF_STD = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	protected final static Set<String> expTypes = new HashSet<>();
 
@@ -26,7 +30,7 @@ public class MapReader extends StandardDataReaderBase<DynamicField> {
 	}
 	
 	static {
-		expTypes.add("default");expTypes.add("map");expTypes.add("value");
+		expTypes.add("default");expTypes.add("map");expTypes.add("value");expTypes.add("from-string");
 	}
 	
 	private MapGetter mapGetter;
@@ -112,13 +116,22 @@ public class MapReader extends StandardDataReaderBase<DynamicField> {
 
 	@Override
 	public Date getDate(String fieldName) throws DataException {
-		Field field = fields.get(fieldName);
+		DynamicField field = fields.get(fieldName);
 		if(field == null) return null;
 		
 		if(!"date".equals(field.getType()) && !"datetime".equals(field.getType())) throw new DataException(String.format("the field %s is not a date in a data reader %s", fieldName, name));
 
 		Object v = data.get(fieldName);
 		if(v == null) return null;
+		
+		if("from-string".equals(field.getExpType())) {
+			try {
+				return DF_STD.parse((String)v);
+			} catch (ParseException e) {
+				throw new DataException(e);
+			}
+		}
+		
 		
 		return (Date)v;
 	}
@@ -169,7 +182,7 @@ public class MapReader extends StandardDataReaderBase<DynamicField> {
 						if(sv == null) {
 							ObjectValue<XPOperand<?>> ov = vlField.asRequiredObjectValue();
 							
-							vlExp = ov.getRequiredAttribut("exp");
+							vlExp = ov.getAttribut("exp");
 							type = ov.getAttributAsString("type", "string");
 							expType = ov.getAttributAsString("expType", "map");
 							vlCondition = ov.getAttribut("condition");
@@ -200,8 +213,6 @@ public class MapReader extends StandardDataReaderBase<DynamicField> {
 					}
 					
 					if(!expTypes.contains(expType)) throw new DataException(String.format("Invalid expresssion type '%' for field '%s'", expType, fname));
-					
-					//if("value".equals(expType) && !"string".equals(type)) throw new DataException(String.format("For the expression type 'value' the field type should be instead of %s for field %s", type, fname));
 					
 					if("default".equals(expType)) expType = "map";
 					

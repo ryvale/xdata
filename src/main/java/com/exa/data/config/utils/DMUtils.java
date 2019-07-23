@@ -1,6 +1,10 @@
 package com.exa.data.config.utils;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +30,8 @@ import com.exa.utils.values.Value;
 
 public class DMUtils {
 	//private static final String DSN_PREFIX = "_ds";
+	
+	public static final DateFormat DF_STD = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	public static final String MC_READER_STR_VALUE = "reader-str-value";
 	
@@ -180,15 +186,14 @@ public class DMUtils {
 		return res;
 	}
 	
-	/*private String newDSName() {
-		String res = DSN_PREFIX;
-		int i = 0;
-		
-		Map<String, XADataSource> dataSources = dmf.getDataSources();
-		while(dataSources.containsKey(res)) res = res + i++;
-		
-		return res;
-	}*/
+	public static Date parseDate(String strDate) throws ParseException {
+		return DF_STD.parse(strDate);
+	}
+	
+	public static Date parseDateWithFormat(String strDate, String strDateFormat) throws ParseException {
+		DateFormat df = new SimpleDateFormat(strDateFormat);
+		return df.parse(strDate);
+	}
 	
 	public DataReader<?> openReader(String readerRef) throws ManagedException {
 		ObjectValue<XPOperand<?>> ovEntity = ovRoot.getPathAttributAsObjecValue(String.format("entities.%s", readerRef));
