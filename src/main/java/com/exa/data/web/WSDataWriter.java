@@ -27,6 +27,8 @@ import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 
 public class WSDataWriter extends StandardDataWriterBase<DynamicField> {
+	public static  boolean debugOn = false;
+	
 	static final SimpleDateFormat DF_ISO8061 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX") ;
 	protected final static Set<String> expTypes = new HashSet<>();
 	
@@ -37,7 +39,7 @@ public class WSDataWriter extends StandardDataWriterBase<DynamicField> {
 	static {
 		expTypes.add("default");expTypes.add("ws");expTypes.add("value");
 		
-		paramsTranslators.put("requestbody-json", new PTJSONRequestBody());
+		paramsTranslators.put("requestbody-json", new PTWriterJSONRequestBody());
 		
 		respManagers.put("json-object", (fields, path) -> new RMJSONObject(fields, path) );
 	}
@@ -80,11 +82,13 @@ public class WSDataWriter extends StandardDataWriterBase<DynamicField> {
 			if(vlTable == null) vlTable = new StringValue<>("");
 			else if(!"string".equals(vlTable.typeName())) throw new DataException(String.format("The property '%s' of the entity %s should be a string", "table", name));
 			
-			vlRequestType = config.getRequiredAttribut("requestType");
-			if(!"string".equals(vlRequestType.typeName())) throw new DataException(String.format("The property '%s' of the entity %s should be a string", "requestType", name));
+			vlRequestType = config.getAttribut("requestType");
+			if(vlRequestType == null) vlRequestType = new StringValue<>("post");
+			else if(!"string".equals(vlRequestType.typeName())) throw new DataException(String.format("The property '%s' of the entity %s should be a string", "requestType", name));
 			
-			vlResponseType = config.getRequiredAttribut("responseType");
-			if(!"string".equals(vlResponseType.typeName())) throw new DataException(String.format("The property '%s' of the entity %s should be a string", "responseType", name));
+			vlResponseType = config.getAttribut("responseType");
+			if(vlResponseType == null) vlResponseType = new StringValue<>("json-object");
+			else if(!"string".equals(vlResponseType.typeName())) throw new DataException(String.format("The property '%s' of the entity %s should be a string", "responseType", name));
 			
 			if(config.containsAttribut("headers")) {
 				avHeaders =  config.getAttributAsArrayValue("headers");
@@ -182,7 +186,7 @@ public class WSDataWriter extends StandardDataWriterBase<DynamicField> {
 				
 				if(pt == null) throw new DataException(String.format("The params type %s is unknown in entity %s", paramType, name));
 				
-				RequestBody body = pt.translate(rb, ovParams);
+				RequestBody body = pt.translate(rb, ovParams, drSource);
 				
 				if(body != null) rb.post(body);
 			}
@@ -197,6 +201,8 @@ public class WSDataWriter extends StandardDataWriterBase<DynamicField> {
 			
 			OkHttpClient httpClient = new OkHttpClient();
 			
+			
+			if(debugOn) System.out.println(request.urlString());
 			Response response = httpClient.newCall(request).execute();
 			
 			responseMan.manage(response);

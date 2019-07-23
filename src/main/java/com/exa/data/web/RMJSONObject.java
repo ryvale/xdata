@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import com.exa.data.DataException;
 import com.exa.data.DynamicField;
+import com.exa.data.config.utils.DataUserException;
 import com.exa.utils.ManagedException;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -54,11 +55,11 @@ public class RMJSONObject extends ResponseManager {
 		String strResp;
 		try {
 			strResp = response.body().string();
+			if(response.code() != 200) throw new DataUserException(strResp, "WEB_SERVICE_ERROR");
 			
 			valuesCache = new JSONObject(strResp);
 			
 			if(path == null) return;
-			
 			
 			String[] parts = path.split("[.]");
 			
@@ -74,6 +75,7 @@ public class RMJSONObject extends ResponseManager {
 			valuesCache = mpValues;
 		} catch (IOException | JSONException e) {
 			e.printStackTrace();
+			throw new DataException(e);
 		}
 	}
 

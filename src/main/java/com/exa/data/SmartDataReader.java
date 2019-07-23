@@ -144,15 +144,16 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		currentMainReader = drIndex.next();
 		currentMainReader.open();
 		
-		/*for(DataReader<?> dr : dmu.getReaders().values()) {
-			dr.open();
-		}*/
-
+		currentMainReader.executeFieldsAction(f -> {
+			if(!fields.containsKey(f.getName())) fields.put(f.getName(), f);
+		});
+		
 		for(DataMan dm : afterMainActions.values()) {
 			DataReader<?> dr = dm.asDataReader();
-			if(dr == null) continue;
 			
 			dr.open();
+		
+			
 		}
 		
 		return dataRead = true;

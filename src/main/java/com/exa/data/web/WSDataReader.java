@@ -31,7 +31,10 @@ import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 
 public class WSDataReader extends StandardDataReaderBase<DynamicField> {
+	public static  boolean debugOn = false;
+	
 	static final SimpleDateFormat DF_ISO8061 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX") ;
+	static final SimpleDateFormat DF_STD = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss") ;
 	protected final static Set<String> expTypes = new HashSet<>();
 	
 	protected final static Map<String, ParamTranslartor> paramsTranslators = new HashMap<>();
@@ -217,7 +220,7 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 				
 				if(pt == null) throw new DataException(String.format("The params type %s is unknown in entity %s", paramType, name));
 				
-				RequestBody body = pt.translate(rb, ovParams);
+				RequestBody body = pt.translate(rb, ovParams, null);
 				
 				if(body != null) rb.post(body);
 			}
