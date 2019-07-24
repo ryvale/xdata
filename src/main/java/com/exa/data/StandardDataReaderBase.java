@@ -22,6 +22,8 @@ public abstract class StandardDataReaderBase<_FIELD extends Field> implements Da
 	
 	protected DMUtils dmu;
 	
+	protected boolean shouldCloseConnection = true;
+	
 	public StandardDataReaderBase(String name, DMUtils dmu) {
 		super();
 		this.name = name;
@@ -126,4 +128,8 @@ public abstract class StandardDataReaderBase<_FIELD extends Field> implements Da
 			
 		}
 	}
+
+
+	
+	
 }

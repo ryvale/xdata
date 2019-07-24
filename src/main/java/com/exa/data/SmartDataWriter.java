@@ -14,7 +14,7 @@ import com.exa.data.config.utils.DMUtils;
 import com.exa.data.config.utils.DataUserException;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
-import com.exa.expression.eval.MapVariableContext;
+
 import com.exa.lang.expression.XALCalculabeValue;
 import com.exa.utils.ManagedException;
 import com.exa.utils.io.FilesRepositories;
@@ -116,14 +116,23 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 			for(String drName :  mpConfig.keySet()) {
 				if("type".equals(drName) || "fields".equals(drName)  || "beforeConnection".equals(drName) || "break".equals(drName)  || "onExecutionStarted".equals(drName) || drName.startsWith("_")) continue;
 				
-				VariableContext vc = new MapVariableContext(dmu.getVc());
+				//VariableContext vc = new MapVariableContext(dmu.getVc());
 				ObjectValue<XPOperand<?>> ovDRConfig = config.getAttributAsObjectValue(drName);
+				
+				String type = ovDRConfig.getRequiredAttributAsString("type");
+				
+				DataManFactory dmf = dmFactories.get(type);
+				if(dmf == null) throw new ManagedException(String.format("The DataReader type '%s' is unknown in SmartDataReader", type));
+				
+				
+				DMUtils subDmu = dmu.newSubDmu(ovDRConfig.getAttributAsString("dataSource", dmf.getDefaultDataSource()));
+				VariableContext vc = subDmu.getVc();
 				
 				updateVariableContext(ovDRConfig, vc, dmu.getVc());
 				String flow  = ovDRConfig.getAttributAsString("flow");
 				if(flow == null) flow = FLW_MAIN;
 				
-				DMUtils subDmu = dmu.newSubDmu(vc);
+				
 				
 				DataWriter<?> dr = getDataWriter(ovDRConfig, drName, subDmu);
 				

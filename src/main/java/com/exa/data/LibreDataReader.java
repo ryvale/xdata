@@ -18,8 +18,8 @@ public class LibreDataReader extends StandardDataReaderBase<Field> {
 	private Value<?, ?> vlEOF = null;
 	
 	
-	public LibreDataReader(String name, ObjectValue<XPOperand<?>> config/*, XPEvaluator evaluator, VariableContext variableContext*/, DMUtils dmu) {
-		super(name/*, evaluator, variableContext*/, dmu);
+	public LibreDataReader(String name, ObjectValue<XPOperand<?>> config, DMUtils dmu) {
+		super(name, dmu);
 		this.config = config;
 	}
 

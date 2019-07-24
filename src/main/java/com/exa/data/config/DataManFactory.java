@@ -126,7 +126,8 @@ public abstract class DataManFactory {
 		}
 		VariableContext vc = new MapVariableContext(evaluator.getCurrentVariableContext());
 		
-		DMUtils dmu = new DMUtils(dmuDmf, ovRoot, evaluator, vc, dmuSetup);
+		String ds = ovEntities.getPathAttributAsString(name + ".dataSource");
+		DMUtils dmu = new DMUtils(dmuDmf, ovRoot, evaluator, vc, dmuSetup, ds);
 		dmuSetup.setup(dmu);
 				
 		evaluator.addVariable("rootOv", ObjectValue.class, ovRoot);
@@ -168,9 +169,10 @@ public abstract class DataManFactory {
 			name = mapEntities.keySet().iterator().next();
 		}
 		
+		String ds = ovEntities.getPathAttributAsString(name + ".dataSource");
 		
 		VariableContext vc = new MapVariableContext(evaluator.getCurrentVariableContext());
-		DMUtils dmu = new DMUtils(dmuDmf/*, parser*/, ovRoot, evaluator, vc, dmuSetup);
+		DMUtils dmu = new DMUtils(dmuDmf, ovRoot, evaluator, vc, dmuSetup, ds);
 		dmuSetup.setup(dmu);
 		
 		evaluator.addVariable("rootOv", ObjectValue.class, ovRoot);
@@ -293,6 +295,8 @@ public abstract class DataManFactory {
 	public void setDmuSetup(DMUSetup dmuSetup) {
 		this.dmuSetup = dmuSetup;
 	}
+	
+	
 
 	public abstract DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, DMUtils dmu) throws ManagedException;
 	

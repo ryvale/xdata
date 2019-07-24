@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.sql.DataSource;
-
 import com.exa.data.DataException;
 import com.exa.data.DynamicField;
 import com.exa.data.StandardDataReaderBase;
@@ -81,16 +79,14 @@ public class StoredProcedureReader  extends StandardDataReaderBase<DynamicField>
 	
 	private ObjectValue<XPOperand<?>> config;
 
-	private DataSource dataSource;
 	protected int _lineVisited = 0;
 	
 	private Connection connection = null;
 	
 	private CallableStatement spStatement;
 
-	public StoredProcedureReader(String name, DataSource dataSource/*, XPEvaluator evaluator, VariableContext variableContext*/, ObjectValue<XPOperand<?>> config, DMUtils dmu) {
-		super(name/*, evaluator, variableContext*/, dmu);
-		this.dataSource = dataSource;
+	public StoredProcedureReader(String name, ObjectValue<XPOperand<?>> config, DMUtils dmu) {
+		super(name, dmu);
 		
 		this.config = config;
 	}
@@ -312,8 +308,14 @@ public class StoredProcedureReader  extends StandardDataReaderBase<DynamicField>
 			
 			dmu.executeBeforeConnectionActions();
 			
-			connection = dataSource.getConnection();
-			if(SQLDataReader.debugOn) System.out.println(String.format("connexion open for '%s' Data reader-", name)  + this.hashCode());
+			Boolean shareConnection = config.getAttributAsBoolean("sharesConnection");
+			
+			shouldCloseConnection = shareConnection == null || !shareConnection;
+			
+			dmu.setShouldCloseConnection(shouldCloseConnection);
+			
+			connection = dmu.getSqlConnection();// dataSource.getConnection();
+			//if(SQLDataReader.debugOn) System.out.println(String.format("connexion open for '%s' Data reader-", name)  + this.hashCode());
 			String sql = "{call " + vlTable.asRequiredString() + "(" + sbSql + ")}";
 			if(SQLDataReader.debugOn) System.out.println(sql);
 			spStatement = connection.prepareCall(sql);
@@ -344,13 +346,12 @@ public class StoredProcedureReader  extends StandardDataReaderBase<DynamicField>
 
 	@Override
 	public void close() throws DataException {
-		dmu.clean();
+		
 		params.clear();
 		if(connection != null)
 			try {
-				connection.close();
-				if(SQLDataReader.debugOn) System.out.println(String.format("connexion close for '%s' Data reader-", name)  + this.hashCode());
-			} catch (SQLException e) {
+				dmu.releaseSqlConnection(); dmu.clean();
+			} catch (ManagedException e) {
 				e.printStackTrace();
 			}
 		spStatement = null;
@@ -367,7 +368,7 @@ public class StoredProcedureReader  extends StandardDataReaderBase<DynamicField>
 
 	@Override
 	public StoredProcedureReader cloneDM() throws DataException {
-		return new StoredProcedureReader(name, dataSource/*, evaluator, variableContext*/, config, dmu);
+		return new StoredProcedureReader(name, config, dmu);
 	}
 
 	

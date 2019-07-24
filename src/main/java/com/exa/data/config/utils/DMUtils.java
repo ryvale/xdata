@@ -1,5 +1,7 @@
 package com.exa.data.config.utils;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -10,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.exa.data.DataReader;
+import com.exa.data.XADataSource;
 import com.exa.data.action.ASAssignment;
 import com.exa.data.action.Action;
 import com.exa.data.action.ActionSeeker;
@@ -18,6 +21,9 @@ import com.exa.data.config.DataManFactory;
 import com.exa.data.config.DataManFactory.DMUSetup;
 import com.exa.data.expression.macro.MCReaderStrValue;
 import com.exa.data.expression.macro.Macro;
+import com.exa.data.sql.SQLDataReader;
+import com.exa.data.sql.SQLDataWriter;
+import com.exa.data.sql.XASQLDataSource;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.MapVariableContext;
@@ -29,7 +35,6 @@ import com.exa.utils.values.ObjectValue;
 import com.exa.utils.values.Value;
 
 public class DMUtils {
-	//private static final String DSN_PREFIX = "_ds";
 	
 	public static final DateFormat DF_STD = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
@@ -40,6 +45,8 @@ public class DMUtils {
 	protected Map<String, ?> params = new HashMap<>();
 	
 	private List<DataReader<?>> drToClose = new ArrayList<>();
+	
+	private Map<String, Connection> connectionsToClose = new HashMap<>();
 	
 	private List<Action> beforeConnectionActions = new ArrayList<>();
 	
@@ -59,7 +66,15 @@ public class DMUtils {
 	
 	private DMUSetup dmuSetup;
 	
-	public DMUtils(DMFGeneral dmf, ObjectValue<XPOperand<?>> ovRoot, XPEvaluator evaluator, VariableContext vc, DMUSetup dmuSetup) {
+	//private Map<String, XADataSource> dataSources;
+	
+	private String dataSource;
+	
+	private boolean shouldCloseConnection = true;
+	
+	private XASQLDataSource xaSqlataSource = null;
+	
+	public DMUtils(DMFGeneral dmf, ObjectValue<XPOperand<?>> ovRoot, XPEvaluator evaluator, VariableContext vc, DMUSetup dmuSetup, String dataSource) {
 		super();
 		this.ovRoot = ovRoot;
 		this.dmf = dmf;
@@ -71,6 +86,8 @@ public class DMUtils {
 		macros.put(MC_READER_STR_VALUE, new MCReaderStrValue(this));
 		
 		actionSeekers.add(new ASAssignment(this));
+		
+		this.dataSource = dataSource == null ? dmf.getDefaultDataSource() : dataSource;
 	}
 	
 	public void register(String name, DataReader<?> dr) {
@@ -166,15 +183,21 @@ public class DMUtils {
 
 	public XPEvaluator getEvaluator() {	return evaluator; }
 	
-	public DMUtils newSubDmu(VariableContext vc) { return new DMUtils(dmf, ovRoot, evaluator, vc, dmuSetup); }
+	public DMUtils newSubDmu(VariableContext vc, String ds) { return new DMUtils(dmf, ovRoot, evaluator, vc, dmuSetup/*, dataSources*/, ds); }
+	
+	public DMUtils newSubDmu(String ds) { 
+		VariableContext subVC =  new MapVariableContext(vc);
+		return new DMUtils(dmf, ovRoot, evaluator, subVC, dmuSetup/*, dataSources*/, ds); 
+	}
 	
 	public DataReader<?> loadReader(String readerRef) throws ManagedException {
 		ObjectValue<XPOperand<?>> ovEntity = ovRoot.getPathAttributAsObjecValue(String.format("entities.%s", readerRef));
 		if(ovEntity == null) throw new ManagedException(String.format("The path '%s' could be found", readerRef));
 		
 		ObjectValue<XPOperand<?>> ovReader = Computing.object(DataManFactory.parser, ovEntity, evaluator, vc, Computing.getDefaultObjectLib(ovRoot));
-		 
-		DMUtils dmu = newSubDmu(new MapVariableContext(vc));
+		
+		String ds = ovEntity.getAttributAsString("dataSource", dmf.getDefaultDataSource());
+		DMUtils dmu = newSubDmu(ds);
 		dmuSetup.setup(dmu);
 		
 		DataReader<?> res = dmf.getDataReader(readerRef, ovReader, dmu);
@@ -199,8 +222,9 @@ public class DMUtils {
 		ObjectValue<XPOperand<?>> ovEntity = ovRoot.getPathAttributAsObjecValue(String.format("entities.%s", readerRef));
 		if(ovEntity == null) throw new ManagedException(String.format("The path '%s' could be found", readerRef));
 		ObjectValue<XPOperand<?>> ovReader = Computing.object(DataManFactory.parser, ovEntity, evaluator, vc, Computing.getDefaultObjectLib(ovRoot));
-		 
-		DMUtils dmu = newSubDmu(new MapVariableContext(vc));
+		
+		String ds = ovEntity.getAttributAsString("dataSource", dmf.getDefaultDataSource());
+		DMUtils dmu = newSubDmu(ds);
 		DataReader<?> res = dmf.getDataReader(readerRef, ovReader, dmu);
 		
 		res.open();
@@ -229,7 +253,60 @@ public class DMUtils {
 		}
 	}
 	
+	public Connection openSqlConnection(String cnName) throws ManagedException, SQLException {
+		XADataSource xaDS = dmf.getDataSources().get(cnName);
+		if(xaDS == null) throw new ManagedException(String.format("The data source %s specified is not present.", cnName));
+		
+		XASQLDataSource xasqlds = xaDS.asXASQLDataSource();
+		if(xasqlds == null) throw new ManagedException(String.format("The data source %s specified should be sql type.", cnName));
+		
+		Connection cn = xasqlds.getNewConnection();
+		
+		connectionsToClose.put(cnName, cn);
+		
+		return cn;
+	}
+	
+	public Connection openSqlConnection() throws ManagedException, SQLException { 
+		if(xaSqlataSource == null) {
+			XADataSource xaDS = dmf.getDataSources().get(dataSource);
+			if(xaDS == null) throw new ManagedException(String.format("The data source %s specified is not present.", dataSource));
+			
+			xaSqlataSource = xaDS.asXASQLDataSource();
+			if(dataSource == null) throw new ManagedException(String.format("The data source %s specified should be sql type.", dataSource));
+		}
+		Connection cn = xaSqlataSource.getNewConnection();
+		
+		connectionsToClose.put(dataSource, cn);
+		
+		return cn;
+	}
+	
+	public Connection getSharedConnection(String cnName) throws ManagedException, SQLException {
+		XADataSource xaDS = dmf.getDataSources().get(cnName);
+		if(xaDS == null) throw new ManagedException(String.format("The data source %s specified is not present.", cnName));
+		
+		XASQLDataSource xasqlds = xaDS.asXASQLDataSource();
+		if(xasqlds == null) throw new ManagedException(String.format("The data source %s specified should be sql type.", cnName));
+		
+		return xasqlds.getSharedConnection();
+	}
+	
+	public Connection getSharedConnection() throws ManagedException, SQLException {
+		if(xaSqlataSource == null) {
+			XADataSource xaDS = dmf.getDataSources().get(dataSource);
+			if(xaDS == null) throw new ManagedException(String.format("The data source %s specified is not present.", dataSource));
+			
+			xaSqlataSource = xaDS.asXASQLDataSource();
+			if(dataSource == null) throw new ManagedException(String.format("The data source %s specified should be sql type.", dataSource));
+		}
+		return xaSqlataSource.getSharedConnection();
+	}
+	
 	public void clean() {
+		for(Connection cn: connectionsToClose.values()) {
+			try {cn.close();} catch(Exception e) {}
+		}
 		for(DataReader<?> dr : drToClose) {
 			try {dr.close();} catch(Exception e) {}
 		}
@@ -237,5 +314,43 @@ public class DMUtils {
 	}
 
 	
+	public boolean isShouldCloseConnection() {
+		return shouldCloseConnection;
+	}
+
+	public void setShouldCloseConnection(boolean shouldCloseConnection) {
+		this.shouldCloseConnection = shouldCloseConnection;
+	}
 	
+	public Connection getSqlConnection() throws ManagedException, SQLException {
+		if(shouldCloseConnection) return openSqlConnection();
+		
+		return getSharedConnection();
+	}
+	
+	public void releaseSqlConnection() throws ManagedException {
+		if(xaSqlataSource == null) {
+			XADataSource xaDS = dmf.getDataSources().get(dataSource);
+			if(xaDS == null) throw new ManagedException(String.format("The data source %s specified is not present.", dataSource));
+			
+			xaSqlataSource = xaDS.asXASQLDataSource();
+			if(dataSource == null) throw new ManagedException(String.format("The data source %s specified should be sql type.", dataSource));
+		}
+		
+		if(shouldCloseConnection) {
+			Connection cn = connectionsToClose.get(dataSource);
+			if(cn != null) {
+				try {
+					cn.close();
+					if(SQLDataReader.debugOn || SQLDataWriter.debugOn) System.out.println("Connection closed id-" + cn.hashCode());
+					connectionsToClose.remove(dataSource);
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			return;
+		}
+		
+		xaSqlataSource.releaseSharedConnection();
+	}
 }

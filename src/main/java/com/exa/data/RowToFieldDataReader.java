@@ -9,7 +9,6 @@ import com.exa.data.config.DataManFactory.DMUSetup;
 import com.exa.data.config.utils.DMUtils;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
-import com.exa.expression.eval.MapVariableContext;
 import com.exa.utils.ManagedException;
 import com.exa.utils.io.FilesRepositories;
 import com.exa.utils.values.BooleanValue;
@@ -96,8 +95,6 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 	public boolean open() throws DataException {
 		
 		try {
-			/*String drVariableName = DataManFactory.getDRVariableName(name);
-			evaluator.getCurrentVariableContext().addVariable(drVariableName, DataReader.class, this);*/
 			
 			VariableContext variableContext = dmu.getVc();
 			
@@ -109,12 +106,11 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 			
 			if(dmf == null) throw new ManagedException(String.format("the type %s is unknown", type));
 			
-			VariableContext sourceVc = new MapVariableContext(dmu.getVc());
-			
-			DMUtils sourceDmu = dmu.newSubDmu(sourceVc);
+			String ds = ovSource.getAttributAsString("dataSource", dmf.getDefaultDataSource());
+			DMUtils sourceDmu = dmu.newSubDmu(ds);
 			dmuSetup.setup(dmu);
 			
-			drSource = dmf.getDataReader("source", ovSource/*, evaluator, variableContext*/, sourceDmu);
+			drSource = dmf.getDataReader("source", ovSource, sourceDmu);
 			
 			variableContext.addVariable("sourceDr", DataReader.class, drSource);
 			
@@ -196,10 +192,6 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 	public void close() throws DataException {
 		if(drSource != null) try { drSource.close();} catch(DataException e) { e.printStackTrace();}
 		
-		/*for(DataReader<?> dr : dmu.getReaders().values()) {
-			try { dr.close(); } catch(DataException e) { e.printStackTrace();}
-		}*/
-		
 		dmu.clean();
 	}
 
@@ -210,7 +202,7 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 
 	@Override
 	public RowToFieldDataReader cloneDM() throws DataException {
-		return new RowToFieldDataReader(name, config/*, evaluator, variableContext*/, filesRepos, dataSources, defaultDataSource, dmu, dmuSetup);
+		return new RowToFieldDataReader(name, config, filesRepos, dataSources, defaultDataSource, dmu, dmuSetup);
 	}
 
 	@Override

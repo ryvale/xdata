@@ -14,6 +14,7 @@ import com.exa.data.DataException;
 import com.exa.data.DynamicField;
 
 import com.exa.data.StandardDataReaderBase;
+import com.exa.data.XADataSource;
 import com.exa.data.config.utils.DMUtils;
 
 import com.exa.expression.XPOperand;

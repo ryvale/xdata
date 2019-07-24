@@ -8,8 +8,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.sql.DataSource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +38,6 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 	
 	private FieldManager fieldManager = null;
 	
-	private DataSource dataSource;
 	private Connection connection = null;
 	private ResultSet rs;
 	private Boolean dataRead = null;
@@ -48,9 +45,11 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 	
 	protected int _lineVisited = 0;
 	
-	public SQLDataReader(String name, DataSource dataSource, ObjectValue<XPOperand<?>> config, DMUtils dmu) throws DataException {
+	private boolean shouldCloseConnection = true; 
+	
+	public SQLDataReader(String name, ObjectValue<XPOperand<?>> config, DMUtils dmu) throws DataException {
 		super(name, dmu);
-		this.dataSource = dataSource;
+		
 		this.config = config;
 		
 		fieldsManagerFactories.put("default", new FieldManagerFactory());
@@ -181,8 +180,14 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 						
 			dmu.executeBeforeConnectionActions();
 			
-			connection = dataSource.getConnection();
-			if(debugOn) LOG.info(String.format("connexion open for '%s' Data reader-", name)  + this.hashCode());
+			Boolean shareConnection = config.getAttributAsBoolean("sharesConnection");
+			
+			shouldCloseConnection = shareConnection == null || !shareConnection;
+			
+			dmu.setShouldCloseConnection(shouldCloseConnection);
+			
+			connection = dmu.getSqlConnection();
+			
 			String sql = getSQL();
 			
 			if(debugOn) System.out.println(sql);
@@ -200,11 +205,10 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 
 	@Override
 	public void close() throws DataException {
-		dmu.clean();
 		try {
-			connection.close();
-			if(debugOn)  LOG.info(String.format("connexion closed for '%s' Data reader-", name)  + this.hashCode());
-		} catch (SQLException e) {
+			dmu.releaseSqlConnection();
+			dmu.clean();
+		} catch (ManagedException e) {
 			e.printStackTrace();
 		}
 		
@@ -236,7 +240,7 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 
 	@Override
 	public SQLDataReader cloneDM() throws DataException {
-		SQLDataReader res = new SQLDataReader(name, dataSource/*, evaluator, variableContext*/, config, dmu);
+		SQLDataReader res = new SQLDataReader(name, config, dmu);
 		if(isOpen()) res.open();
 		return res;
 		

@@ -68,6 +68,8 @@ entities {
 			
 			source @nbItSql("m.evt_created", start, end),
 			
+			sharesConnection,
+			
 			fields {
 				value => sourceDr.getDouble("nb"),
 				

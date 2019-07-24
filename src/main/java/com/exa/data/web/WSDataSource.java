@@ -16,6 +16,10 @@ public class WSDataSource implements XADataSource {
 	
 	private String urlPrefix;
 	
+	private String tokenMethod;
+	
+	private String token;
+	
 	
 	public WSDataSource() {
 		super();
@@ -75,8 +79,25 @@ public class WSDataSource implements XADataSource {
 
 	@Override
 	public MapDataSource asMapDataSource() {
-		// TODO Auto-generated method stub
 		return null;
 	}
+
+	public String getTokenMethod() {
+		return tokenMethod;
+	}
+
+	public void setTokenMethod(String tokenMethod) {
+		this.tokenMethod = tokenMethod;
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
+	
+	
 
 }

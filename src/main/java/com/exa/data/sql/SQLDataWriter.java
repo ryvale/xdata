@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.sql.DataSource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,7 +90,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 		expTypes.add("default");expTypes.add("reader");expTypes.add("value");expTypes.add("sql");expTypes.add("entire-sql");
 	}
 	
-	private DataSource dataSource;
+	//private DataSource dataSource;
 	private Connection connection = null;
 	private ObjectValue<XPOperand<?>> config;
 	
@@ -114,14 +112,13 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 	
 	private List<Value<?, XPOperand<?>>> lstKey = new ArrayList<>();
 
-	public SQLDataWriter(String name, DataSource dataSource, DataReader<?> drSource, ObjectValue<XPOperand<?>> config, DMUtils dmu, boolean preventInsertion, boolean preventUpdate) {
+	public SQLDataWriter(String name, DataReader<?> drSource, ObjectValue<XPOperand<?>> config, DMUtils dmu, boolean preventInsertion, boolean preventUpdate) {
 		super(name, drSource, dmu);
 		
 		this.preventInsertion = preventInsertion;
 		this.preventUpdate = preventUpdate;
 		
 		this.config = config;
-		this.dataSource = dataSource;
 		
 		this.drSource = drSource;
 		
@@ -471,11 +468,16 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 			
 			dmu.executeBeforeConnectionActions();
 			
-			connection = dataSource.getConnection();
-			if(debugOn)  LOG.info(String.format("connexion open for '%s' Data writer-", name) + this.hashCode());
+			Boolean shareConnection = config.getAttributAsBoolean("sharesConnection");
+			
+			boolean shouldCloseConnection = shareConnection == null || !shareConnection;
+			
+			dmu.setShouldCloseConnection(shouldCloseConnection);
+			
+			connection = dmu.getSqlConnection();
 		}
 		catch(ManagedException|SQLException e) {
-			if(connection != null) try { connection.close(); } catch (Exception e2) { e2.printStackTrace(); }
+			//if(connection != null) try { connection.close(); } catch (Exception e2) { e2.printStackTrace(); }
 			throw new DataException(e);
 		}
 		
@@ -486,10 +488,15 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 
 	@Override
 	public void close() throws DataException {
-		dmu.clean();
+		
 		if(connection != null) {
-			try { connection.close(); if(debugOn) LOG.info(String.format("connexion closed for '%s' Data writer-", name)  + this.hashCode()); } catch (SQLException e) { e.printStackTrace(); }
-			
+			try {
+				dmu.releaseSqlConnection();
+			} catch (ManagedException e) {
+				e.printStackTrace();
+			}
+			//try { connection.close(); if(debugOn) LOG.info(String.format("connexion closed for '%s' Data writer-", name)  + this.hashCode()); } catch (SQLException e) { e.printStackTrace(); }
+			dmu.clean();
 			connection = null;
 		}
 		

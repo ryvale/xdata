@@ -183,6 +183,7 @@ public class XadataApplicationTests extends TestCase {
         });
         dmfXL.initialize();
         
+        
         DataReader<?> drSource = dmfXL.getDataReader("default:/sql-w#testData", evSetup);
         
         DataWriter<?> dw = dmfSQL.getDataWriter("default:/sql-w#r5uoms", evSetup, drSource, false, false);

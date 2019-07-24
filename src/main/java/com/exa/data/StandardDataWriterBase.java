@@ -9,7 +9,6 @@ import com.exa.utils.ManagedException;
 
 public abstract class StandardDataWriterBase<_FIELD extends Field> implements DataWriter<_FIELD> {
 	
-	
 	protected Map<String, _FIELD> fields = new LinkedHashMap<>();
 	
 	protected DataMan parent;
@@ -28,12 +27,7 @@ public abstract class StandardDataWriterBase<_FIELD extends Field> implements Da
 		
 		this.dmu = dmu;
 	}
-
-	/*@Override
-	public void setEvaluator(XPEvaluator evaluator) {
-		this.evaluator = evaluator;
-	}*/
-
+	
 	@Override
 	public XPEvaluator getEvaluator() {	return dmu.getEvaluator(); }
 

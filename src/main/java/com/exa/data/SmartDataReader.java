@@ -13,7 +13,7 @@ import com.exa.data.config.DataManFactory.DMUSetup;
 import com.exa.data.config.utils.DMUtils;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
-import com.exa.expression.eval.MapVariableContext;
+
 import com.exa.utils.ManagedException;
 import com.exa.utils.io.FilesRepositories;
 import com.exa.utils.values.ObjectValue;
@@ -42,7 +42,7 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		
 	
 	public SmartDataReader(String name, ObjectValue<XPOperand<?>> config, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUtils dmu, DMUSetup dmuSetup, MapGetter mapGetter) {
-		super(name, config/*, evaluator, variableContext*/, filesRepos, dataSources, defaultDataSource, dmu, dmuSetup);
+		super(name, config, filesRepos, dataSources, defaultDataSource, dmu, dmuSetup);
 	}
 	
 	public void addMainDataReader(String name, DataReader<?> dataReader) throws DataException {
@@ -101,20 +101,26 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		Map<String, Value<?, XPOperand<?>>> mpConfig = config.getValue();
 		
 		try {
-			
-			//XPEvaluator evaluator = dmu.getEvaluator();
+
 			
 			for(String drName :  mpConfig.keySet()) {
-				if("type".equals(drName) || drName.startsWith("_")) continue;
+				if("type".equals(drName) || "fields".equals(drName)  || "beforeConnection".equals(drName) || "break".equals(drName)  || "onExecutionStarted".equals(drName) || drName.startsWith("_")) continue;
 				
-				VariableContext vc = new MapVariableContext(dmu.getVc());
 				
 				ObjectValue<XPOperand<?>> ovDRConfig = config.getAttributAsObjectValue(drName);
+				
+				String type = ovDRConfig.getRequiredAttributAsString("type");
+				
+				DataManFactory dmf = dmFactories.get(type);
+				if(dmf == null) throw new ManagedException(String.format("The DataReader type '%s' is unknown in SmartDataReader", type));
+				
+				DMUtils subDmu = dmu.newSubDmu(ovDRConfig.getAttributAsString("dataSource", dmf.getDefaultDataSource()));
+				
+				VariableContext vc = subDmu.getVc();
+				
 				updateVariableContext(ovDRConfig, vc, dmu.getVc());
 				String flow  = ovDRConfig.getAttributAsString("flow");
 				if(flow == null) flow = FLW_MAIN;
-				
-				DMUtils subDmu = dmu.newSubDmu(vc);
 				
 				DataReader<?> dr = getDataReader(ovDRConfig, drName, subDmu);
 				
@@ -165,7 +171,7 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		
 		DataManFactory dmf = dmFactories.get(type);
 		
-		if(dmf == null) throw new ManagedException(String.format("the type %s is unknown", type));
+		if(dmf == null) throw new ManagedException(String.format("The DataReader type '%s' is unknown in SmartDataReader", type));
 		
 		ObjectValue<XPOperand<?>> ovBeforeConnectionActions = ovDRConfig.getAttributAsObjectValue("beforeConnection");
 		if(ovBeforeConnectionActions != null) {

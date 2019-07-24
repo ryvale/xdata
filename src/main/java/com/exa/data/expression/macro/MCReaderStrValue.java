@@ -1,6 +1,7 @@
 package com.exa.data.expression.macro;
 
 import com.exa.data.DataReader;
+import com.exa.data.config.DMFGeneral;
 import com.exa.data.config.DataManFactory;
 import com.exa.data.config.utils.DMUtils;
 import com.exa.expression.XPOperand;
@@ -25,7 +26,10 @@ public class MCReaderStrValue extends Macro<String> {
 		
 		ObjectValue<XPOperand<?>> ovReader = Computing.object(DataManFactory.parser, ovMacro.getRequiredAttributAsObjectValue("reader"), dmu.getEvaluator(), dmu.getVc(), Computing.getDefaultObjectLib(dmu.getOvRoot()));
 		
-		DataReader<?> dr = dmu.getDmf().getDataReader("macro:" + macroName, ovReader/*, dmu.getEvaluator(), dmu.getVc()*/, dmu);
+		DMFGeneral dmf = dmu.getDmf();
+		
+		DMUtils subDmu = dmu.newSubDmu(ovReader.getAttributAsString("dataSource", dmf.getDefaultDataSource()));
+		DataReader<?> dr = dmf.getDataReader("macro:" + macroName, ovReader, subDmu);
 		
 		try {
 			dr.open();dr.next();
