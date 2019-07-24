@@ -68,7 +68,7 @@ public class XadataApplicationTests extends TestCase {
 	}
 	
 	
-	public void testDMFGeneral() throws ManagedException {
+	/*public void testDMFGeneral() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
 		
 		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
@@ -228,7 +228,7 @@ public class XadataApplicationTests extends TestCase {
         
         System.out.println(dr.getString("value"));
         dr.close();
-	}
+	}*/
 	
 	/*public void testWS() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
@@ -296,7 +296,7 @@ public class XadataApplicationTests extends TestCase {
 		dr.close();
 	}
 	
-	public void testMacroSP() throws ManagedException {
+	/*public void testMacroSP() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
 		
 		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
@@ -327,7 +327,7 @@ public class XadataApplicationTests extends TestCase {
         System.out.println(dr.getString("code"));
         
 		dr.close();
-	}
+	}*/
 	
 	public void testBeforeConnectionActions() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();

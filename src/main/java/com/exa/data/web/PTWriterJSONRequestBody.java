@@ -97,7 +97,7 @@ public class PTWriterJSONRequestBody implements ParamTranslartor {
 		}
 		
 		
-		MediaType mediaType = MediaType.parse("application/json;");
+		MediaType mediaType = MediaType.parse("application/json; charset=UTF-8");
 		String strBody = "{" + (sb.length() > 0 ? sb.substring(2) : "") + "}";
 		
 		if(WSDataWriter.debugOn || WSDataReader.debugOn) System.out.println(strBody);

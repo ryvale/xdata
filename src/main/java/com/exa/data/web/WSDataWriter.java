@@ -202,8 +202,11 @@ public class WSDataWriter extends StandardDataWriterBase<DynamicField> {
 			
 			OkHttpClient httpClient = new OkHttpClient();
 			
+			if(debugOn)  {
+				System.out.println("url :" + request.urlString());
+				System.out.println("headers :" + request.headers());
+			}
 			
-			if(debugOn) System.out.println(request.urlString());
 			Response response = httpClient.newCall(request).execute();
 			
 			responseMan.manage(response);
