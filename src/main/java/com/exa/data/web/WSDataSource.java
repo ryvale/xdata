@@ -2,6 +2,7 @@ package com.exa.data.web;
 
 import com.exa.data.MapDataSource;
 import com.exa.data.XADataSource;
+import com.exa.data.config.utils.DataUserException;
 import com.exa.data.sql.XASQLDataSource;
 
 import com.squareup.okhttp.Request;
@@ -16,9 +17,11 @@ public class WSDataSource implements XADataSource {
 	
 	private String urlPrefix;
 	
-	private String tokenMethod;
+	private String tokenMethod = null;
 	
-	private String token;
+	private String token = null;
+	
+	private String tokenName = null;
 	
 	
 	public WSDataSource() {
@@ -67,10 +70,20 @@ public class WSDataSource implements XADataSource {
 		this.port = port;
 	}
 
-	public Request.Builder getRequestBuilder(String resource) {
+	public Request.Builder getRequestBuilder(String resource) throws DataUserException {
 		String url = (protocol + "://" + server + (port == null ? "" : ":" + port) + withFirstSlash(urlPrefix)) + withFirstSlash(resource);
+	
+		Request.Builder res = new Request.Builder().url(url);
 		
-		return new Request.Builder().url(url);
+		if(token != null || tokenMethod != null || tokenName != null) {
+			if(token == null || tokenMethod == null || tokenName == null) throw new DataUserException(String.format("The web service (%s) token is misconfiguated", url), "WEB_SERVICE_TOKEN_MISCONFIG");
+			
+			if(!tokenMethod.equals("Header")) throw new DataUserException(String.format("The web service (%s) token is misconfiguated. '%s' : Unknow token method", url, tokenMethod), "WEB_SERVICE_TOKEN_MISCONFIG");
+			
+			res.addHeader(tokenName, token);
+		}
+		
+		return res;
 	}
 	
 	static String withFirstSlash(String urlPart) {
@@ -96,6 +109,14 @@ public class WSDataSource implements XADataSource {
 
 	public void setToken(String token) {
 		this.token = token;
+	}
+
+	public String getTokenName() {
+		return tokenName;
+	}
+
+	public void setTokenName(String tokenName) {
+		this.tokenName = tokenName;
 	}
 	
 	
