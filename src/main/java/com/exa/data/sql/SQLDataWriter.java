@@ -131,85 +131,12 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 		
 		try {
 			
-			String table = vlTable.asRequiredString();
+			String updateSQL = getSQL();
 			
-			VariableContext variableContext = dmu.getVc();
-			if(lstKey.size() == 0) {
-				if(preventInsertion) return 0;
-				variableContext.assignOrDeclareVariable("updateMode", String.class, "insert");
-				String sql = getInsertSQL(table);
-				PreparedStatement ps = connection.prepareStatement(sql);
-				return ps.executeUpdate();
-			}
-			
-			StringBuilder sbWhere = new StringBuilder();
-			if(vlWhere != null) {
-				sbWhere.append(vlWhere.asRequiredString());
-			}
-			
-			String type = vlType.asRequiredString();
-			
-			String fieldForSelection = null;
-			
-			StringBuilder sbKeyFields = new StringBuilder();
-			for(Value<?, XPOperand<?>> vl : lstKey) {
-				String keyField = vl.asRequiredString();
-				DynamicField field = fields.get(keyField);
-				
-				String fieldName = field.getVlName().asRequiredString();
-				if(fieldForSelection == null) fieldForSelection = fieldName;
-				
-				if("reader".equals(field.getExpType())) {
-					String ft = field.getType() + "-" + type;
-					DataFormatter<?> dataf = formatters.get(ft);
-					if(dataf == null) throw new ManagedException(String.format("No formatter provide for type '%s' for the field", ft, field.getName()));
-					
-					sbKeyFields.append("AND ").
-						append(fieldName).append(" = ").append(dataf.toSQLFormObject(drSource.getObject(field.getVlExp().asRequiredString())));
-					continue;
-				}
-				
-				if("value".equals(field.getExpType())) {
-					String ft = field.getType() + "-" + type;
-					DataFormatter<?> dataf = formatters.get(ft);
-					
-					sbKeyFields.append(", ").
-						append(fieldName).append(" = ").append(dataf.toSQLFormObject(field.getVlExp().getValue()));
-					continue;
-				}
-				
-				if("sql".equals(field.getExpType())) {
-					
-					sbKeyFields.append(", ").append(field.getVlExp().asRequiredString());
-					continue;
-				}
-				
-				throw new ManagedException(String.format("Invalid expresssion type '%' for field '%s'", field.getExpType(), field.getName()));
-			}
-			
-			sbWhere.append(sbWhere.length() == 0 ? sbKeyFields.substring(4) : sbKeyFields.toString());
-			
-			String recordSeekSql = "SELECT " + fieldForSelection + " FROM " + table + " WHERE " + sbWhere.toString();
-			PreparedStatement ps = connection.prepareStatement(recordSeekSql);
-			ResultSet rs = ps.executeQuery();
-			
-			String updateSQL;
-			if(rs.next()) {
-				variableContext.assignOrDeclareVariable("updateMode", String.class, "update");
-				if(mustBreak()) return 0;
-				if(preventUpdate) return 0;
-				updateSQL = getUpdateSQL(table, sbWhere.toString());
-			}
-			else {
-				variableContext.assignOrDeclareVariable("updateMode", String.class, "insert");
-				if(mustBreak()) return 0;
-				if(preventInsertion) return 0;
-				updateSQL = getInsertSQL(table);
-			}
-			ps.close();
+			if(updateSQL == null) return 0;
 			
 			if(debugOn) System.out.println(updateSQL);
-			ps = connection.prepareStatement(updateSQL);
+			PreparedStatement ps = connection.prepareStatement(updateSQL);
 			return ps.executeUpdate();
 			
 			
@@ -218,6 +145,113 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 			throw new DataException(e);
 		}
 		
+	}
+	
+	private String getSQL() throws ManagedException, SQLException {
+		String table = vlTable.asRequiredString();
+		VariableContext variableContext = dmu.getVc();
+		
+		if(lstKey.size() == 0) {
+			if(preventInsertion) return null;
+			variableContext.assignOrDeclareVariable("updateMode", String.class, "insert");
+			if(mustBreak()) return null;
+			
+			String sql = getInsertSQL(table);
+			return sql;
+		}
+		
+		if(!preventInsertion && !preventUpdate) {
+			
+			String where = getSQLWhere(table);
+			
+			DynamicField field = fields.get(lstKey.get(0).asRequiredString()) ;
+			
+			String recordSeekSql = "SELECT " + field.getVlName().asRequiredString() + " FROM " + table + " WHERE " + where;
+			PreparedStatement ps = connection.prepareStatement(recordSeekSql);
+			ResultSet rs = ps.executeQuery();
+			
+			String updateSQL;
+			if(rs.next()) {
+				variableContext.assignOrDeclareVariable("updateMode", String.class, "update");
+				if(mustBreak()) return null;
+				if(preventUpdate) return null;
+				updateSQL = getUpdateSQL(table, where);
+			}
+			else {
+				variableContext.assignOrDeclareVariable("updateMode", String.class, "insert");
+				if(mustBreak()) return null;
+				if(preventInsertion) return null;
+				updateSQL = getInsertSQL(table);
+			}
+			ps.close();
+			
+			return updateSQL;
+		}
+		
+		if(preventUpdate) {
+			variableContext.assignOrDeclareVariable("updateMode", String.class, "insert");
+			if(mustBreak()) return null;
+			return getInsertSQL(table);
+		}
+		
+		variableContext.assignOrDeclareVariable("updateMode", String.class, "update");
+		if(mustBreak()) return null;
+		
+		String where = getSQLWhere(table);
+		
+		return getUpdateSQL(table, where);
+		
+	}
+	
+	
+	private String getSQLWhere(String table) throws ManagedException {
+		StringBuilder sbWhere = new StringBuilder();
+		if(vlWhere != null) {
+			sbWhere.append(vlWhere.asRequiredString());
+		}
+		
+		String type = vlType.asRequiredString();
+		
+		StringBuilder sbKeyFields = new StringBuilder();
+		
+		for(Value<?, XPOperand<?>> vl : lstKey) {
+			String keyField = vl.asRequiredString();
+			DynamicField field = fields.get(keyField);
+			
+			String fieldName = field.getVlName().asRequiredString();
+			//if(fieldForSelection == null) fieldForSelection = fieldName;
+			
+			if("reader".equals(field.getExpType())) {
+				String ft = field.getType() + "-" + type;
+				DataFormatter<?> dataf = formatters.get(ft);
+				if(dataf == null) throw new ManagedException(String.format("No formatter provide for type '%s' for the field", ft, field.getName()));
+				
+				sbKeyFields.append("AND ").
+					append(fieldName).append(" = ").append(dataf.toSQLFormObject(drSource.getObject(field.getVlExp().asRequiredString())));
+				continue;
+			}
+			
+			if("value".equals(field.getExpType())) {
+				String ft = field.getType() + "-" + type;
+				DataFormatter<?> dataf = formatters.get(ft);
+				
+				sbKeyFields.append(", ").
+					append(fieldName).append(" = ").append(dataf.toSQLFormObject(field.getVlExp().getValue()));
+				continue;
+			}
+			
+			if("sql".equals(field.getExpType())) {
+				
+				sbKeyFields.append(", ").append(field.getVlExp().asRequiredString());
+				continue;
+			}
+			
+			throw new ManagedException(String.format("Invalid expresssion type '%' for field '%s'", field.getExpType(), field.getName()));
+		}
+		
+		sbWhere.append(sbWhere.length() == 0 ? sbKeyFields.substring(4) : sbKeyFields.toString());
+		
+		return sbWhere.toString();
 	}
 	
 	private boolean mustBreak() throws ManagedException {
