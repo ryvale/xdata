@@ -2,6 +2,7 @@ package com.exa.data.config;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import com.exa.data.DataReader;
@@ -122,8 +123,17 @@ public abstract class DataManFactory {
 		else {
 			Map<String, Value<?, XPOperand<?>>> mapEntities = ovEntities.getValue();
 			if(mapEntities.size() == 0) throw new ManagedException(String.format("No entity found while seeking %s", drName));
-			name = mapEntities.keySet().iterator().next();
+			Iterator<String> it = mapEntities.keySet().iterator();
+			name = null;
+			while(it.hasNext()) {
+				String curent = it.next();
+				if(Computing.PRTY_PARAMS.equals(curent)) continue;
+				name = curent;
+				break;
+			}
+			if(name == null) throw new ManagedException(String.format("No entity found while seeking %s", drName));
 		}
+		
 		VariableContext vc = new MapVariableContext(evaluator.getCurrentVariableContext());
 		
 		String ds = ovEntities.getPathAttributAsString(name + ".dataSource");
@@ -132,13 +142,15 @@ public abstract class DataManFactory {
 				
 		evaluator.addVariable("rootOv", ObjectValue.class, ovRoot);
 		
-		evaluator.pushVariableContext(vc);
+		//evaluator.pushVariableContext(vc);
 		
 		DataReader<?> dr = getDataReader(ovEntities, name, Computing.getDefaultObjectLib(ovRoot), dmu);
 		
 		vc.addVariable("rootDr", DataReader.class, dr);
 		
 		vc.addVariable("dmu", DMUtils.class, dmu);
+		
+		//evaluator.popVariableContext();
 		
 		return dr;
 	}
@@ -166,7 +178,15 @@ public abstract class DataManFactory {
 		else {
 			Map<String, Value<?, XPOperand<?>>> mapEntities = ovEntities.getValue();
 			if(mapEntities.size() == 0) throw new ManagedException(String.format("No entity found while seeking %s", drName));
-			name = mapEntities.keySet().iterator().next();
+			Iterator<String> it = mapEntities.keySet().iterator();
+			name = null;
+			while(it.hasNext()) {
+				String curent = it.next();
+				if(Computing.PRTY_PARAMS.equals(curent)) continue;
+				name = curent;
+				break;
+			}
+			if(name == null) throw new ManagedException(String.format("No entity found while seeking %s", drName));
 		}
 		
 		String ds = ovEntities.getPathAttributAsString(name + ".dataSource");
@@ -177,7 +197,7 @@ public abstract class DataManFactory {
 		
 		evaluator.addVariable("rootOv", ObjectValue.class, ovRoot);
 	
-		evaluator.pushVariableContext(vc);
+		//evaluator.pushVariableContext(vc);
 		
 		DataWriter<?> dm = getDataWriter(ovEntities, name, evaluator, vc, drSource, Computing.getDefaultObjectLib(ovRoot), dmu, preventInsertion, preventUpdate);
 		
@@ -186,6 +206,8 @@ public abstract class DataManFactory {
 		vc.addVariable("rootDw", DataWriter.class, dm);
 		
 		vc.addVariable("dmu", DMUtils.class, dmu);
+		
+		//evaluator.popVariableContext();
 		
 		return dm;
 	}

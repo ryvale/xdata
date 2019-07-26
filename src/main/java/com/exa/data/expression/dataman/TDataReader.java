@@ -8,6 +8,7 @@ import com.exa.eva.OperatorManager.OMOperandType;
 import com.exa.expression.OMMethod;
 import com.exa.expression.Type;
 import com.exa.expression.types.TObjectClass;
+import com.exa.utils.ManagedException;
 
 public class TDataReader extends TObjectClass<DataReader<?>, DataMan> {
 
@@ -52,6 +53,13 @@ public class TDataReader extends TObjectClass<DataReader<?>, DataMan> {
 	@Override
 	public Type<DataReader<?>> specificType() {
 		return this;
+	}
+
+	@Override
+	public DataReader<?> convert(Object o) throws ManagedException {
+		if(o instanceof DataReader) return (DataReader<?>) o;
+		
+		return super.convert(o);
 	}
 	
 	

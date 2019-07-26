@@ -16,6 +16,7 @@ import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 
 import com.exa.lang.expression.XALCalculabeValue;
+import com.exa.lang.parsing.Computing;
 import com.exa.utils.ManagedException;
 import com.exa.utils.io.FilesRepositories;
 import com.exa.utils.values.ArrayValue;
@@ -31,6 +32,8 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 	protected static final String FLW_AFTER_MAIN = "after-main-next";
 	
 	protected Map<String, DataWriter<?>> mainDataWriters = new LinkedHashMap<>();
+	
+	protected Map<String, DataWriter<?>> afterMainActions = new LinkedHashMap<>();
 	
 	protected DataWriter<?> currentMainDataWriter = null;
 	
@@ -52,8 +55,29 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 			if(mustBreak()) return 0;
 			for(DataWriter<?> dw :  mainDataWriters.values()) {	dw.open();	}
 			
+			boolean mainOK = false;
+			
 			for(DataWriter<?> dw :  mainDataWriters.values()) {
-				dw.execute();
+				mainOK = mainOK || dw.execute();
+			}
+			
+			if(mainOK) {
+				try {
+					for(DataWriter<?> dw :  afterMainActions.values()) { dw.open();	}
+					
+					for(DataWriter<?> dw :  afterMainActions.values()) {
+						dw.execute();
+					}
+					
+					for(DataWriter<?> dw :  afterMainActions.values()) { dw.close(); }
+				}
+				catch(ManagedException e) {
+					if(e instanceof DataException) throw (DataException)e;
+					throw new DataException(e);
+				}
+				finally {
+					for(DataWriter<?> dw :  afterMainActions.values()) {	try { dw.close(); } catch(Exception e) { e.printStackTrace(); }	}
+				}
 			}
 			
 			for(DataWriter<?> dw :  mainDataWriters.values()) {	dw.close();	}
@@ -114,9 +138,8 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 			}
 			
 			for(String drName :  mpConfig.keySet()) {
-				if("type".equals(drName) || "fields".equals(drName)  || "beforeConnection".equals(drName) || "break".equals(drName)  || "onExecutionStarted".equals(drName) || drName.startsWith("_")) continue;
+				if("type".equals(drName) || Computing.PRTY_PARAMS.equals(drName) || "fields".equals(drName)  || "beforeConnection".equals(drName) || "break".equals(drName)  || "onExecutionStarted".equals(drName) || drName.startsWith("_")) continue;
 				
-				//VariableContext vc = new MapVariableContext(dmu.getVc());
 				ObjectValue<XPOperand<?>> ovDRConfig = config.getAttributAsObjectValue(drName);
 				
 				String type = ovDRConfig.getRequiredAttributAsString("type");
@@ -132,8 +155,6 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 				String flow  = ovDRConfig.getAttributAsString("flow");
 				if(flow == null) flow = FLW_MAIN;
 				
-				
-				
 				DataWriter<?> dr = getDataWriter(ovDRConfig, drName, subDmu);
 				
 				vc.addVariable("this", DataWriter.class, dr);
@@ -141,6 +162,11 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 				if(FLW_MAIN.equals(flow)) {
 					
 					mainDataWriters.put(drName, dr);
+					continue;
+				}
+				
+				if(FLW_AFTER_MAIN.equals(flow)) {
+					afterMainActions.put(drName, dr);
 					continue;
 				}
 			}

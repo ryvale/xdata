@@ -202,9 +202,9 @@ public class DMUtils {
 		
 		DataReader<?> res = dmf.getDataReader(readerRef, ovReader, dmu);
 		
-		res.open(); res.next();
-		
 		drToClose.add(res);
+		
+		res.open(); res.next();
 		
 		return res;
 	}
@@ -227,9 +227,9 @@ public class DMUtils {
 		DMUtils dmu = newSubDmu(ds);
 		DataReader<?> res = dmf.getDataReader(readerRef, ovReader, dmu);
 		
-		res.open();
-		
 		drToClose.add(res);
+		
+		res.open();
 		
 		return res;
 	}

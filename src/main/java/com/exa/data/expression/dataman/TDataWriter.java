@@ -6,6 +6,7 @@ import com.exa.eva.OperatorManager.OMOperandType;
 import com.exa.expression.OMMethod;
 import com.exa.expression.Type;
 import com.exa.expression.types.TObjectClass;
+import com.exa.utils.ManagedException;
 
 public class TDataWriter extends TObjectClass<DataWriter<?>, DataMan> {
 
@@ -26,4 +27,11 @@ public class TDataWriter extends TObjectClass<DataWriter<?>, DataMan> {
 		return this;
 	}
 
+	@Override
+	public DataWriter<?> convert(Object o) throws ManagedException {
+		if(o instanceof DataWriter) return (DataWriter<?>) o;
+		return super.convert(o);
+	}
+
+	
 }

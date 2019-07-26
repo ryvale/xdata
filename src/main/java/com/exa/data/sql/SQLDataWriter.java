@@ -18,6 +18,7 @@ import com.exa.data.DataException;
 import com.exa.data.DataReader;
 import com.exa.data.DataWriter;
 import com.exa.data.DynamicField;
+import com.exa.data.Field;
 import com.exa.data.StandardDataWriterBase;
 import com.exa.data.config.utils.BreakProperty;
 import com.exa.data.config.utils.DMUtils;
@@ -246,7 +247,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 				continue;
 			}
 			
-			throw new ManagedException(String.format("Invalid expresssion type '%' for field '%s'", field.getExpType(), field.getName()));
+			throw new ManagedException(String.format("Invalid expresssion type '%s' for field '%s'", field.getExpType(), field.getName()));
 		}
 		
 		sbWhere.append(sbWhere.length() == 0 ? sbKeyFields.substring(4) : sbKeyFields.toString());
@@ -294,14 +295,14 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 				DataFormatter<?> dataf = formatters.get(ft);
 				if(dataf == null) throw new ManagedException(String.format("No formatter provide for type '%s' for the field", ft, field.getName()));
 				
-				sbValues.append(", ").append(dataf.toSQLFormObject(drSource.getObject(field.getVlExp().asRequiredString())));
+				sbValues.append(", ").append(field.getFromString().asRequiredBoolean() ? dataf.toSQLFormString(drSource.getString(field.getVlExp().asRequiredString())) : dataf.toSQLFormObject(drSource.getObject(field.getVlExp().asRequiredString())));
 				continue;
 			}
 			
 			if("value".equals(field.getExpType())) {
 				String ft = field.getType() + "-" + type;
 				DataFormatter<?> dataf = formatters.get(ft);
-				sbValues.append(", ").append(dataf.toSQLFormObject(field.getVlExp().getValue()));
+				sbValues.append(", ").append(field.getFromString().asRequiredBoolean() ? dataf.toSQLFormString(field.getVlExp().asString()) : dataf.toSQLFormObject(field.getVlExp().getValue()));
 				continue;
 			}
 			
@@ -311,7 +312,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 				continue;
 			}
 			
-			throw new ManagedException(String.format("The expresssion type '%' for field '%s' is not managed in this context", field.getExpType(), field.getName()));
+			throw new ManagedException(String.format("The expresssion type '%s' for field '%s' is not managed in this context", field.getExpType(), field.getName()));
 		}
 		
 		return "INSERT INTO " + table + "(" + sbFields.substring(2)  + ") VALUES(" + sbValues.substring(2) + ")";
@@ -332,7 +333,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 				if(dataf == null) throw new ManagedException(String.format("No formatter provide for type '%s' for the field", ft, field.getName()));
 				
 				sbFields.append(", ").
-					append(field.getVlName().asRequiredString()).append(" = ").append(dataf.toSQLFormObject(drSource.getObject(field.getVlExp().asRequiredString())));
+					append(field.getVlName().asRequiredString()).append(" = ").append(field.getFromString().asRequiredBoolean() ?  dataf.toSQLFormString(drSource.getString(field.getVlExp().asRequiredString())) : dataf.toSQLFormObject(drSource.getObject(field.getVlExp().asRequiredString())));
 				continue;
 			}
 			
@@ -341,7 +342,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 				DataFormatter<?> dataf = formatters.get(ft);
 				
 				sbFields.append(", ").
-					append(field.getVlName().asRequiredString()).append(" = ").append(dataf.toSQLFormObject(field.getVlExp().getValue()));
+					append(field.getVlName().asRequiredString()).append(" = ").append(field.getFromString().asRequiredBoolean() ? dataf.toSQLFormString(field.getVlExp().asString()) : dataf.toSQLFormObject(field.getVlExp().getValue()));
 				continue;
 			}
 			
@@ -433,48 +434,201 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 					Value<?, XPOperand<?>> vlName, vlExp, vlCondition;
 					String type, expType;
 					BooleanValue<?> blField = vlField.asBooleanValue();
+					
+					Value<?, XPOperand<?>> fromString;
 					if(blField == null) {
 						StringValue<XPOperand<?>> sv = vlField.asStringValue();
 						if(sv == null) {
-							ObjectValue<XPOperand<?>> ov = vlField.asRequiredObjectValue();
+							CalculableValue<?, XPOperand<?>> cl = vlField.asCalculableValue();
 							
-							vlName= ov.getAttribut("name");
-							if(vlName == null) vlName = new StringValue<>(fieldManager.toSQL(fname));
-							vlExp = ov.getRequiredAttribut("exp");
-							type = ov.getAttributAsString("type");
-							expType = ov.getAttributAsString("expType", "reader");
-							vlCondition = ov.getAttribut("condition");
-							if(vlCondition == null) vlCondition = new BooleanValue<XPOperand<?>>(Boolean.TRUE);
-							else {
-								CalculableValue<?, XPOperand<?>> clCondition = vlCondition.asCalculableValue();
-								if(clCondition == null) {
-									if(vlCondition.asBooleanValue() == null) throw new ManagedException(String.format("Boolean expression expected as value of 'condition' propertu for the entity %s", name));
+							if(cl == null) {
+							
+								ObjectValue<XPOperand<?>> ov = vlField.asRequiredObjectValue();
+								
+								vlName= ov.getAttribut("name");
+								if(vlName == null) vlName = new StringValue<>(fieldManager.toSQL(fname));
+								
+								type = ov.getAttributAsString("type");
+								vlExp = ov.getAttribut("exp");
+								expType = ov.getAttributAsString("expType");
+								fromString = ov.getAttribut("fromString");
+								if(fromString == null) fromString = new BooleanValue<>(Boolean.FALSE);
+										
+								if(type == null) {
+									if(expType == null) {
+										
+										if(vlExp == null) {
+											Field f = drSource.getField(fname);
+											if(f == null) throw new DataException(String.format("Unable to infer the type  for field '%s' when 'exp', 'expType' properties is not set in data man '%s'", fname, name));
+											
+											expType = "reader";
+											vlExp = new StringValue<>(fname);
+											type = f.getType();
+										}
+										else {
+											CalculableValue<?, XPOperand<?>> clexp = vlExp.asCalculableValue();
+											if(clexp == null) {
+												Field f = drSource.getField(fname);
+												if(f == null) throw new DataException(String.format("Unable to infer the type  for field '%s' when 'exp', 'expType' properties is not set in data man '%s'", fname, name));
+												
+												expType = "reader";
+												type = f.getType();
+											} else {
+												expType = "value";
+												type = vlExp.typeName();
+											}
+										}
+									}
+									else {
+										if("value".equals(expType)) {
+											if(vlExp == null) throw new DataException(String.format("Unable to infer the type  for field '%s' when 'expType' = 'value' and 'exp' is not set in data man '%s'", fname, name));
+											type = vlExp.typeName();
+										}
+										else if("reader".equals(expType)) {
+											if(vlExp == null) {
+												Field f = drSource.getField(fname);
+												if(f == null) throw new DataException(String.format("Unable to infer the type  for field '%s' because '%s' doesn't exist in source in data man '%s'", fname, fname, name));
+												
+												vlExp = new StringValue<>(fname);
+												type = f.getType();
+											}
+											else {
+												if(vlExp.asStringValue() == null) throw new DataException(String.format("Unable to infer the type  for field '%s' when 'expType' = 'reader' and 'exp' is not a string value in data man '%s'", fname, name));
+												
+												String expFname = vlExp.asRequiredString();
+												Field f = drSource.getField(expFname);
+												if(f == null) throw new DataException(String.format("Unable to infer the type  for field '%s' when 'expType' = 'reader' and 'exp' value (%s) is not a source field in data man '%s'", fname, expFname, name));
+
+												type = f.getType();
+											}
+										}
+										else if("sql".equals(expType) || "entire-sql".equals(expType)) {
+											if(vlExp == null) throw new DataException(String.format("'exp' sould not be null when 'expType' = 'sql' for field '%s' in data man '%s'", fname, name));
+											
+											if(!"string".equals(vlExp.typeName())) throw new DataException(String.format("'exp' sould be a string when 'expType' = 'sql' for field '%s' in data man '%s'", fname, name));
+										}
+									}
+								}
+								else if(expType == null) {
+									if(vlExp == null) {
+										Field f = drSource.getField(fname);
+										if(f == null) throw new DataException(String.format("Unable to infer the type  for field '%s' when 'exp', 'expType' properties is not set in data man '%s'", fname, name));
+										
+										expType = "reader";
+										vlExp = new StringValue<>(fname);
+										
+										if(typeMismatch(fromString.asRequiredBoolean() ? "string" : type, f.getType())) 
+											throw new DataException(String.format("Type imcompatible for field '%s' (%s != %s) in data man %S", fname, type, f.getType(), name));
+									}
+									else {
+										CalculableValue<?, XPOperand<?>> clexp = vlExp.asCalculableValue();
+										if(clexp == null) {
+											
+											if(vlExp.asStringValue() == null)
+												throw new DataException(String.format("Unable to infer the type  for field '%s' when 'expType' = 'reader' and 'exp' is not a string value in data man '%s'", fname, name));
+											
+											String expFname = vlExp.asRequiredString();
+											Field f = drSource.getField(expFname);
+											if(f == null) throw new DataException(String.format("Unable to infer the type  for field '%s' when 'expType' = 'reader' and 'exp' value (%s) is not a source field in data man '%s'", fname, expFname, name));
+											
+											expType = "reader";
+											
+											if(typeMismatch(fromString.asRequiredBoolean() ? "string" : type, f.getType())) 
+												throw new DataException(String.format("Type imcompatible for field '%s' (%s != %s) in data man %S", fname, type, f.getType(), name));
+										}
+										else {
+											expType = "value";
+											
+											if(typeMismatch(fromString.asRequiredBoolean() ? "string" : type,  vlExp.typeName())) 
+												throw new DataException(String.format("Type imcompatible for field '%s' (%s != %s) in data man %S", fname, type,vlExp.typeName(), name));
+										}
+									}
 								}
 								else {
-									if(!"boolean".equals(clCondition.typeName())) throw new ManagedException(String.format("Boolean expression expected as value of 'condition' propertu for the entity %s", name));
+									if("value".equals(expType)) {
+										if(vlExp == null) throw new DataException(String.format("Unable to infer the type  for field '%s' when 'expType' = 'value' and 'exp' is not set in data man '%s'", fname, name));
+				
+										if(typeMismatch(fromString.asRequiredBoolean() ? "string" : type,  vlExp.typeName())) 
+											throw new DataException(String.format("Type imcompatible for field '%s' (%s != %s) in data man %S", fname, type, vlExp.typeName(), name));
+									}
+									else if("reader".equals(expType)) {
+										if(vlExp == null) {
+											Field f = drSource.getField(fname);
+											if(f == null) throw new DataException(String.format("Unable to infer the type  for field '%s' because '%s' doesn't exist in source in data man '%s'", fname, fname, name));
+											
+											if(typeMismatch(fromString.asRequiredBoolean() ? "string" : type, f.getType())) 
+												throw new DataException(String.format("Type imcompatible for field '%s' (%s != %s) in data man %S", fname, type, f.getType(), name));
+											vlExp = new StringValue<>(fname);
+										}
+										else {
+											
+											if(vlExp.asStringValue() != null) {
+												String expFname = vlExp.asRequiredString();
+												Field f = drSource.getField(expFname);
+												if(f == null) throw new DataException(String.format("Unable to infer the type  for field '%s' when 'expType' = 'reader' and 'exp' value (%s) is not a source field in data man '%s'", fname, expFname, name));
+												
+												if(typeMismatch(fromString.asRequiredBoolean() ? "string" : type, f.getType())) 
+													throw new DataException(String.format("Type imcompatible for field '%s' (%s != %s) in data man %S", fname, type, f.getType(), name));
+											}
+										}
+									}
+									else if("sql".equals(expType) || "entire-sql".equals(expType)) {
+										if(vlExp == null) throw new DataException(String.format("'exp' sould not be null when 'expType' = 'sql' for field '%s' in data man '%s'", fname, name));
+										if(!"string".equals(vlExp.typeName())) throw new DataException(String.format("'exp' sould be a string when 'expType' = 'sql' for field '%s' in data man '%s'", fname, name));
+									}
 								}
 								
+								vlCondition = ov.getAttribut("condition");
+								if(vlCondition == null) vlCondition = new BooleanValue<XPOperand<?>>(Boolean.TRUE);
+								else {
+									CalculableValue<?, XPOperand<?>> clCondition = vlCondition.asCalculableValue();
+									if(clCondition == null) {
+										if(vlCondition.asBooleanValue() == null) throw new ManagedException(String.format("Boolean expression expected as value of 'condition' propertu for the entity %s", name));
+									}
+									else {
+										if(!"boolean".equals(clCondition.typeName())) throw new ManagedException(String.format("Boolean expression expected as value of 'condition' propertu for the entity %s", name));
+									}
+									
+								}
+							}
+							else {
+								vlName = new StringValue<>(fieldManager.toSQL(fname));
+								vlExp = cl;
+								expType = "value";
+								type = cl.typeName();
+								fromString = new BooleanValue<>(Boolean.FALSE);
+								vlCondition = new BooleanValue<XPOperand<?>>(Boolean.TRUE);
 							}
 						}
 						else {
+							Field f = drSource.getField(sv.getValue());
+							if(f == null) throw new DataException(String.format("Unable to infer the type  for field '%s' because '%s' doesn't exist in source in data man '%s'", fname, fname, name));
+							
 							vlName = new StringValue<>(fieldManager.toSQL(fname));
 							vlExp = sv;
 							expType = "reader";
-							type = sv.typeName();
+							
+							fromString = new BooleanValue<>(Boolean.FALSE);
+							
+							type = f.getType();
 							vlCondition = new BooleanValue<XPOperand<?>>(Boolean.TRUE);
 						}
 					}
 					else {
+						Field f = drSource.getField(fname);
+						if(f == null) throw new DataException(String.format("Unable to infer the type  for field '%s' because '%s' doesn't exist in source in data man '%s'", fname, fname, name));
 						vlName = new StringValue<>(fieldManager.toSQL(fname));
 						vlExp = new StringValue<>(fname);
 						expType = "reader";
-						type = "string";
+						fromString = new BooleanValue<>(Boolean.FALSE);
+						
+						type = f.getType();
 						vlCondition = new BooleanValue<XPOperand<?>>(Boolean.TRUE);
 					}
 					
-					if(!expTypes.contains(expType)) throw new DataException(String.format("Invalid expresssion type '%' for field '%s'", expType, fname));
+					if(!expTypes.contains(expType)) throw new DataException(String.format("Invalid expresssion type '%s' for field '%s'", expType, fname));
 					
-					if("value".equals(expType)) {
+					/*if("value".equals(expType)) {
 						String et = vlExp.typeName();
 						if(type == null) type = et;
 						else {
@@ -483,7 +637,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 							}
 						}
 					}
-					else if(type == null) type= "string";
+					else if(type == null) type= "string";*/
 					
 					if("default".equals(expType)) expType = "reader";
 					
@@ -491,6 +645,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 					field.setVlExp(vlExp);
 					field.setVlCondition(vlCondition);
 					field.setVlName(vlName);
+					field.setFromString(fromString);
 					
 					fields.put(fname, field);
 				}
@@ -516,6 +671,25 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 		}
 		
 		return true;
+	}
+	
+	private boolean typeMismatch(String t1, String t2) {
+		if(t1.equals("int") || t1.equals("integer")) {
+			if(!(t2.equals("int") || t2.equals("integer"))) return true;
+			return false;
+		}
+		
+		if(t1.equals("float") || t1.equals("double") || t1.equals("decimal")) {
+			if(!(t2.equals("float") || t2.equals("double") || t2.equals("decimal"))) return true;
+			return false;
+		}
+		
+		if(t1.equals("date") || t1.equals("datetime") || t1.equals("time")) {
+			if(!(t2.equals("date") || t2.equals("datetime") || t2.equals("time"))) return true;
+			return false;
+		}
+		
+		return !t1.equals(t2);
 	}
 	
 	

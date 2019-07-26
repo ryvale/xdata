@@ -29,8 +29,9 @@ public class ASAssignment implements ActionSeeker {
 			do {
 				Variable<?> v = vc.getContextVariable(name);
 				if(v != null) {
-					vc.assignContextVariable(name, value.getValue());
-					break;
+					
+					vc.assignContextVariable(name, value.getValue(), v.valueClass());
+					return "OK";
 				}
 				vc = vc.getParent();
 			} while(vc != null);

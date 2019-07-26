@@ -9,6 +9,8 @@ public class DynamicField extends Field {
 	private String expType;
 	private Value<?, XPOperand<?>> vlCondition;
 	
+	private Value<?, XPOperand<?>> fromString;
+	
 	private Value<?, XPOperand<?>> vlExp;
 	
 	public DynamicField(String name, String type, String expType) {
@@ -50,6 +52,14 @@ public class DynamicField extends Field {
 
 	public void setVlName(Value<?, XPOperand<?>> vlName) {
 		this.vlName = vlName;
+	}
+
+	public Value<?, XPOperand<?>> getFromString() {
+		return fromString;
+	}
+
+	public void setFromString(Value<?, XPOperand<?>> fromString) {
+		this.fromString = fromString;
 	}
 	
 	

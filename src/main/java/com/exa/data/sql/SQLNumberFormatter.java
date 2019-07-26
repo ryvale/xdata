@@ -9,4 +9,9 @@ public class SQLNumberFormatter extends DataFormatter<Number> {
 		return rawValue.toString();
 	}
 
+	@Override
+	public String toSQLFormString(String str) {
+		return str;
+	}
+
 }

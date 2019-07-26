@@ -13,6 +13,8 @@ public abstract class DataFormatter<T> {
 		return toSQLFormObject(rawValue, "null");
 	}
 	
+	public abstract String toSQLFormString(String str);
+	
 	public String toSQL(T rawValue) {
 		return toSQL(rawValue, "null");
 	}

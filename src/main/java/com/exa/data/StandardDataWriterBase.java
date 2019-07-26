@@ -52,9 +52,9 @@ public abstract class StandardDataWriterBase<_FIELD extends Field> implements Da
 			if(e instanceof DataException) throw (DataException)e;
 			throw new DataException(e);
 		}
-		update(drSource);
+		int r = update(drSource);
 		
-		return true;
+		return r > 0;
 	}
 	
 }

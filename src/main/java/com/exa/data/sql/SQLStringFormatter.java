@@ -9,4 +9,9 @@ public class SQLStringFormatter  extends DataFormatter<String> {
 		return "'" + rawValue.replaceAll("'", "''") + "'";
 	}
 
+	@Override
+	public String toSQLFormString(String str) {
+		return toSQL(str);
+	}
+
 }
