@@ -1,9 +1,11 @@
 package com.exa.data;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.exa.data.MapReader.MapGetter;
 import com.exa.data.action.Action;
@@ -14,7 +16,7 @@ import com.exa.data.config.utils.DMUtils;
 import com.exa.data.config.utils.DataUserException;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
-
+import com.exa.expression.eval.XPEvaluator;
 import com.exa.lang.expression.XALCalculabeValue;
 import com.exa.lang.parsing.Computing;
 import com.exa.utils.ManagedException;
@@ -142,6 +144,7 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 				
 				ObjectValue<XPOperand<?>> ovDRConfig = config.getAttributAsObjectValue(drName);
 				
+				
 				String type = ovDRConfig.getRequiredAttributAsString("type");
 				
 				DataManFactory dmf = dmFactories.get(type);
@@ -150,8 +153,18 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 				
 				DMUtils subDmu = dmu.newSubDmu(ovDRConfig.getAttributAsString("dataSource", dmf.getDefaultDataSource()));
 				VariableContext vc = subDmu.getVc();
+				vc.addVariable("dmu", DMUtils.class, subDmu);
 				
-				updateVariableContext(ovDRConfig, vc, dmu.getVc());
+				ObjectValue<XPOperand<?>> ovParams = ovDRConfig.getAttributAsObjectValue(Computing.PRTY_PARAMS);
+				if(ovParams != null) {
+					Map<String, Value<?, XPOperand<?>>> mpParams = ovParams.getValue();
+					
+					for(String param : mpParams.keySet()) {
+						vc.addVariable(param, dmu.getEvaluator().getClassesMan().getType(mpParams.get(param).asString()).valueClass(), null);
+					}
+				}
+				
+				updateVariableContext(ovDRConfig, dmu.getEvaluator(), vc, dmu.getVc());
 				String flow  = ovDRConfig.getAttributAsString("flow");
 				if(flow == null) flow = FLW_MAIN;
 				
@@ -185,6 +198,8 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 
 	@Override
 	public void close() throws DataException {
+		breakProperties.clear();
+		
 		dmu.clean();
 		
 		for(DataWriter<?> dm : mainDataWriters.values()) {
@@ -207,7 +222,7 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 		return opened;
 	}
 	
-	public static void updateVariableContext(ObjectValue<XPOperand<?>> ov, VariableContext vc, VariableContext prentVC) {
+	public static void updateVariableContext(ObjectValue<XPOperand<?>> ov, XPEvaluator evaluator, VariableContext vc, VariableContext parentVC) {
 		Map<String, Value<?, XPOperand<?>>> mp = ov.getValue();
 		
 		for(String propertyName : mp.keySet()) {
@@ -215,7 +230,7 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 			
 			ObjectValue<XPOperand<?>> vov = vl.asObjectValue();
 			if(vov != null) {
-				updateVariableContext(vov, vc, prentVC);
+				updateVariableContext(vov, evaluator, vc, parentVC);
 				continue;
 			}
 			
@@ -224,24 +239,44 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 				List<Value<?, XPOperand<?>>> lst = av.getValue();
 				
 				for(Value<?, XPOperand<?>> vlItem : lst) {
-					updateVariableContext(vlItem, vc, prentVC);
+					updateVariableContext(vlItem, evaluator, vc, parentVC);
 				}
 			}
-			
 			
 			CalculableValue<?, XPOperand<?>> cl = vl.asCalculableValue();
 			if(cl == null) continue;
 			
 			XALCalculabeValue<?> xalCL = (XALCalculabeValue<?>) cl;
-			if(xalCL.getVariableContext() == prentVC) xalCL.setVariableContext(vc);
 			
+			VariableContext clVc = xalCL.getVariableContext();
+			
+			if(clVc == parentVC) xalCL.setVariableContext(vc);
+			
+			Set<VariableContext> vcs = evaluator.getRegisteredVariableContexts(Computing.VCC_CALLS);
+			
+			if(vcs != null) {
+			
+				Set<VariableContext> vcsToRemove = new HashSet<>();
+				
+				for(VariableContext ivc : vcs) {
+					if(ivc.getParent() == vc) { vcsToRemove.add(ivc); continue;}
+					if(ivc.getParent() == parentVC) {
+						ivc.setParent(vc);
+						vcsToRemove.add(ivc); 
+					}
+				}
+				
+				for(VariableContext ivc : vcsToRemove) {
+					evaluator.unregisterVariableContext(Computing.VCC_CALLS, ivc);
+				}
+			}
 		}
 	}
 	
-	private static void updateVariableContext(Value<?, XPOperand<?>> vl, VariableContext vc, VariableContext prentVC) {
+	private static void updateVariableContext(Value<?, XPOperand<?>> vl, XPEvaluator evaluator, VariableContext vc, VariableContext parentVC) {
 		ObjectValue<XPOperand<?>> vov = vl.asObjectValue();
 		if(vov != null) {
-			updateVariableContext(vov, vc, prentVC);
+			updateVariableContext(vov, evaluator, vc, parentVC);
 			return;
 		}
 		
@@ -250,7 +285,7 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 			List<Value<?, XPOperand<?>>> lst = av.getValue();
 			
 			for(Value<?, XPOperand<?>> vlItem : lst) {
-				updateVariableContext(vlItem, vc, prentVC);
+				updateVariableContext(vlItem, evaluator, vc, parentVC);
 			}
 		}
 		
@@ -258,7 +293,34 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 		if(cl == null) return;
 		
 		XALCalculabeValue<?> xalCL = (XALCalculabeValue<?>) cl;
-		if(xalCL.getVariableContext() == prentVC) xalCL.setVariableContext(vc);
+		
+		VariableContext clVc = xalCL.getVariableContext();
+		
+		if(clVc == parentVC) xalCL.setVariableContext(vc);
+		/*else if(clVc != null) {
+			if(clVc.getParent() == parentVC) clVc.setParent(vc);
+		}*/
+		
+		Set<VariableContext> vcs = evaluator.getRegisteredVariableContexts(Computing.VCC_CALLS);
+		
+		if(vcs != null) {
+		
+			Set<VariableContext> vcsToRemove = new HashSet<>();
+			
+			for(VariableContext ivc : vcs) {
+				if(ivc.getParent() == vc) { vcsToRemove.add(ivc); continue;}
+				if(ivc.getParent() == parentVC) {
+					ivc.setParent(vc);
+					vcsToRemove.add(ivc); 
+				}
+			}
+			
+			for(VariableContext ivc : vcsToRemove) {
+				evaluator.unregisterVariableContext(Computing.VCC_CALLS, ivc);
+			}
+		
+		}
+		
 	}
 	
 	private DataWriter<?> getDataWriter(ObjectValue<XPOperand<?>> ovDRConfig, String dwName, DMUtils subDmu) throws ManagedException {

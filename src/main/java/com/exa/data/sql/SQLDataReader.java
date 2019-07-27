@@ -16,6 +16,7 @@ import com.exa.data.Field;
 import com.exa.data.StandardDataReaderBase;
 import com.exa.data.config.utils.DMUtils;
 import com.exa.expression.XPOperand;
+import com.exa.lang.parsing.Computing;
 import com.exa.utils.ManagedException;
 import com.exa.utils.values.ArrayValue;
 import com.exa.utils.values.BooleanValue;
@@ -128,6 +129,8 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 				Map<String, Value<?,XPOperand<?>>> mpFields = ovFields.getValue();
 				
 				for(String fname : mpFields.keySet()) {
+					if(Computing.PRTY_ENTITY.equals(fname)) continue;
+					
 					Value<?, XPOperand<?>> vlField = mpFields.get(fname);
 					
 					String exp, type;

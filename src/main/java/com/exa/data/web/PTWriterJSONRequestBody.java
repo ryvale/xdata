@@ -3,7 +3,9 @@ package com.exa.data.web;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import com.exa.data.DataException;
 import com.exa.data.DataReader;
+import com.exa.data.Field;
 import com.exa.expression.XPOperand;
 import com.exa.utils.ManagedException;
 import com.exa.utils.values.CalculableValue;
@@ -39,6 +41,9 @@ public class PTWriterJSONRequestBody implements ParamTranslartor {
 					
 					if(expType == null || "reader".equals(expType)) {
 						readerField = ov.getAttributAsString("exp", property);
+						
+						Field f = reader.getField(readerField);
+						if(f == null) throw new DataException(String.format("The field '%s' is not found in the reader", readerField));
 						type = reader.getField(readerField).getType();
 					}
 					else if("value".equals(expType)) {
@@ -64,7 +69,10 @@ public class PTWriterJSONRequestBody implements ParamTranslartor {
 				expType = "reader";
 				readerField = sv.getValue();
 				
-				type = reader.getField(readerField).getType();
+				Field f = reader.getField(readerField);
+				if(f == null) throw new DataException(String.format("The field '%s' is not found in the reader", readerField));
+				
+				type = f.getType();
 			}
 			
 			Object v = "value".equals(expType) ? vl.getValue() : reader.getObject(readerField);

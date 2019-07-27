@@ -72,8 +72,7 @@ public class WSDataWriter extends StandardDataWriterBase<DynamicField> {
 
 	@Override
 	public int update(DataReader<?> dr) throws DataException {
-		responseMan.next();
-		return 0;
+		return responseMan.next() ? 1  : 0;
 	}
 
 	@Override
@@ -217,7 +216,7 @@ public class WSDataWriter extends StandardDataWriterBase<DynamicField> {
 		/*finally {
 			if(response != null) try { response.} catch (Exception e2) { e2.printStackTrace(); }
 		}*/
-		return false;
+		return true;
 	}
 
 	@Override

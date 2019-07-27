@@ -26,6 +26,7 @@ import com.exa.data.config.utils.DataUserException;
 import com.exa.data.sql.oracle.PLSQLDateFormatter;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
+import com.exa.lang.parsing.Computing;
 import com.exa.utils.ManagedException;
 import com.exa.utils.values.ArrayValue;
 import com.exa.utils.values.BooleanValue;
@@ -250,7 +251,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 			throw new ManagedException(String.format("Invalid expresssion type '%s' for field '%s'", field.getExpType(), field.getName()));
 		}
 		
-		sbWhere.append(sbWhere.length() == 0 ? sbKeyFields.substring(4) : sbKeyFields.toString());
+		sbWhere.append(sbWhere.length() == 0 ? sbKeyFields.substring(3) : sbKeyFields.toString());
 		
 		return sbWhere.toString();
 	}
@@ -429,6 +430,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 				Map<String, Value<?,XPOperand<?>>> mpFields = ovFields.getValue();
 				
 				for(String fname : mpFields.keySet()) {
+					if(Computing.PRTY_ENTITY.equals(fname)) continue;
 					Value<?, XPOperand<?>> vlField = mpFields.get(fname);
 					
 					Value<?, XPOperand<?>> vlName, vlExp, vlCondition;
@@ -537,10 +539,9 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 												throw new DataException(String.format("Type imcompatible for field '%s' (%s != %s) in data man %S", fname, type, f.getType(), name));
 										}
 										else {
-											expType = "value";
+											expType = "reader";
 											
-											if(typeMismatch(fromString.asRequiredBoolean() ? "string" : type,  vlExp.typeName())) 
-												throw new DataException(String.format("Type imcompatible for field '%s' (%s != %s) in data man %S", fname, type,vlExp.typeName(), name));
+											if(!"string".equals(vlExp.typeName())) throw new DataException(String.format("'exp' should be a string when 'expType' = 'reader' for field '%s' in data man '%s'", fname, name));
 										}
 									}
 								}
@@ -552,25 +553,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 											throw new DataException(String.format("Type imcompatible for field '%s' (%s != %s) in data man %S", fname, type, vlExp.typeName(), name));
 									}
 									else if("reader".equals(expType)) {
-										if(vlExp == null) {
-											Field f = drSource.getField(fname);
-											if(f == null) throw new DataException(String.format("Unable to infer the type  for field '%s' because '%s' doesn't exist in source in data man '%s'", fname, fname, name));
-											
-											if(typeMismatch(fromString.asRequiredBoolean() ? "string" : type, f.getType())) 
-												throw new DataException(String.format("Type imcompatible for field '%s' (%s != %s) in data man %S", fname, type, f.getType(), name));
-											vlExp = new StringValue<>(fname);
-										}
-										else {
-											
-											if(vlExp.asStringValue() != null) {
-												String expFname = vlExp.asRequiredString();
-												Field f = drSource.getField(expFname);
-												if(f == null) throw new DataException(String.format("Unable to infer the type  for field '%s' when 'expType' = 'reader' and 'exp' value (%s) is not a source field in data man '%s'", fname, expFname, name));
-												
-												if(typeMismatch(fromString.asRequiredBoolean() ? "string" : type, f.getType())) 
-													throw new DataException(String.format("Type imcompatible for field '%s' (%s != %s) in data man %S", fname, type, f.getType(), name));
-											}
-										}
+										if(vlExp == null) vlExp = new StringValue<>(fname);
 									}
 									else if("sql".equals(expType) || "entire-sql".equals(expType)) {
 										if(vlExp == null) throw new DataException(String.format("'exp' sould not be null when 'expType' = 'sql' for field '%s' in data man '%s'", fname, name));
@@ -594,8 +577,8 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 							else {
 								vlName = new StringValue<>(fieldManager.toSQL(fname));
 								vlExp = cl;
-								expType = "value";
 								type = cl.typeName();
+								expType = "value";
 								fromString = new BooleanValue<>(Boolean.FALSE);
 								vlCondition = new BooleanValue<XPOperand<?>>(Boolean.TRUE);
 							}
@@ -696,6 +679,9 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 
 	@Override
 	public void close() throws DataException {
+		
+		lstKey.clear();
+		breakProperties.clear();
 		
 		if(connection != null) {
 			try {
