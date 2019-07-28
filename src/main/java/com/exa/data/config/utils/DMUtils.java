@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +18,6 @@ import com.exa.data.action.ASAssignment;
 import com.exa.data.action.Action;
 import com.exa.data.action.ActionSeeker;
 import com.exa.data.config.DMFGeneral;
-import com.exa.data.config.DataManFactory;
 import com.exa.data.config.DataManFactory.DMUSetup;
 import com.exa.data.expression.macro.MCReaderStrValue;
 import com.exa.data.expression.macro.Macro;
@@ -44,7 +44,7 @@ public class DMUtils {
 	
 	protected Map<String, ?> params = new HashMap<>();
 	
-	private List<DataReader<?>> drToClose = new ArrayList<>();
+	private Map<String, DataReader<?>> drToClose = new LinkedHashMap<>();
 	
 	private Map<String, Connection> connectionsToClose = new HashMap<>();
 	
@@ -54,7 +54,7 @@ public class DMUtils {
 	
 	private List<ActionSeeker> actionSeekers = new ArrayList<>();
 	
-	private ObjectValue<XPOperand<?>> ovRoot;
+	//private ObjectValue<XPOperand<?>> ovRoot;
 	
 	private DMFGeneral dmf;
 	
@@ -62,7 +62,7 @@ public class DMUtils {
 	
 	private VariableContext vc;
 	
-	private XPEvaluator evaluator;
+	//private XPEvaluator evaluator;
 	
 	private DMUSetup dmuSetup;
 	
@@ -74,11 +74,13 @@ public class DMUtils {
 	
 	private XASQLDataSource xaSqlataSource = null;
 	
-	public DMUtils(DMFGeneral dmf, ObjectValue<XPOperand<?>> ovRoot, XPEvaluator evaluator, VariableContext vc, DMUSetup dmuSetup, String dataSource) {
+	private Computing executedComputing;
+	
+	public DMUtils(DMFGeneral dmf, Computing executedComputing/*, ObjectValue<XPOperand<?>> ovRoot, XPEvaluator evaluator*/, VariableContext vc, DMUSetup dmuSetup, String dataSource) {
 		super();
-		this.ovRoot = ovRoot;
+		//this.ovRoot = ovRoot;
 		this.dmf = dmf;
-		this.evaluator = evaluator;
+		this.executedComputing = executedComputing;
 		this.vc = vc;
 		
 		this.dmuSetup = dmuSetup;
@@ -130,8 +132,8 @@ public class DMUtils {
 		return null;
 	}
 
-	public ObjectValue<XPOperand<?>> getOvRoot() {
-		return ovRoot;
+	public Computing getExecutedComputing() {
+		return executedComputing;
 	}
 
 	public DataReader<?> getReader(String name) { return readers.get(name); }
@@ -139,6 +141,7 @@ public class DMUtils {
 	public Map<String, DataReader<?>> getReaders() { return readers; }
 	
 	public String evalString(String macroRef) throws ManagedException {
+		ObjectValue<XPOperand<?>> ovRoot = executedComputing.getResult();
 		ObjectValue<XPOperand<?>> ovMacro = ovRoot.getPathAttributAsObjecValue(macroRef);
 		
 		if(ovMacro == null) throw new ManagedException(String.format("'%s' macro is not defined", macroRef));
@@ -155,6 +158,7 @@ public class DMUtils {
 	
 	
 	public DataReader<?> evalDataReader(String macroRef) throws ManagedException {
+		ObjectValue<XPOperand<?>> ovRoot = executedComputing.getResult();
 		ObjectValue<XPOperand<?>> ovMacro = ovRoot.getPathAttributAsObjecValue(macroRef);
 		
 		if(ovMacro == null) throw new ManagedException(String.format("'%s' macro is not defined", macroRef));
@@ -181,30 +185,38 @@ public class DMUtils {
 
 	public VariableContext getVc() { return vc;	}
 
-	public XPEvaluator getEvaluator() {	return evaluator; }
+	public XPEvaluator getEvaluator() {	return executedComputing.getXPEvaluator(); }
 	
-	public DMUtils newSubDmu(VariableContext vc, String ds) { return new DMUtils(dmf, ovRoot, evaluator, vc, dmuSetup/*, dataSources*/, ds); }
+	public DMUtils newSubDmu(VariableContext vc, String ds) { return new DMUtils(dmf, executedComputing,  vc, dmuSetup, ds); }
 	
 	public DMUtils newSubDmu(String ds) { 
 		VariableContext subVC =  new MapVariableContext(vc);
-		return new DMUtils(dmf, ovRoot, evaluator, subVC, dmuSetup/*, dataSources*/, ds); 
+		return new DMUtils(dmf, executedComputing, subVC, dmuSetup, ds); 
 	}
 	
 	public DataReader<?> loadReader(String readerRef) throws ManagedException {
+		DataReader<?> oldDr = drToClose.get(readerRef);
+		if(oldDr != null) try { oldDr.close(); drToClose.remove(readerRef); } catch (Exception e) {e.printStackTrace();}
+		
+		ObjectValue<XPOperand<?>> ovRoot = executedComputing.getResult();
+		
 		ObjectValue<XPOperand<?>> ovEntity = ovRoot.getPathAttributAsObjecValue(String.format("entities.%s", readerRef));
 		if(ovEntity == null) throw new ManagedException(String.format("The path '%s' could be found", readerRef));
-		
-		ObjectValue<XPOperand<?>> ovReader = Computing.object(DataManFactory.parser, ovEntity, evaluator, vc, Computing.getDefaultObjectLib(ovRoot));
-		
 		String ds = ovEntity.getAttributAsString("dataSource", dmf.getDefaultDataSource());
+		
 		DMUtils dmu = newSubDmu(ds);
 		dmuSetup.setup(dmu);
 		
+		ObjectValue<XPOperand<?>> ovReader = executedComputing.object(ovEntity, dmu.getVc());
+		
 		DataReader<?> res = dmf.getDataReader(readerRef, ovReader, dmu);
 		
-		drToClose.add(res);
-		
-		res.open(); res.next();
+		try {res.open(); res.next();} 
+		catch (Exception e) {	
+			try { res.close();} catch (Exception e2) { e2.printStackTrace();	}
+			throw new ManagedException(e);
+		}
+		drToClose.put(readerRef, res);
 		
 		return res;
 	}
@@ -219,15 +231,27 @@ public class DMUtils {
 	}
 	
 	public DataReader<?> openReader(String readerRef) throws ManagedException {
+		DataReader<?> oldDr = drToClose.get(readerRef);
+		if(oldDr != null) try { oldDr.close(); drToClose.remove(readerRef); } catch (Exception e) {e.printStackTrace();}
+		
+		ObjectValue<XPOperand<?>> ovRoot = executedComputing.getResult();
+		
 		ObjectValue<XPOperand<?>> ovEntity = ovRoot.getPathAttributAsObjecValue(String.format("entities.%s", readerRef));
 		if(ovEntity == null) throw new ManagedException(String.format("The path '%s' could be found", readerRef));
-		ObjectValue<XPOperand<?>> ovReader = Computing.object(DataManFactory.parser, ovEntity, evaluator, vc, Computing.getDefaultObjectLib(ovRoot));
-		
 		String ds = ovEntity.getAttributAsString("dataSource", dmf.getDefaultDataSource());
 		DMUtils dmu = newSubDmu(ds);
+		
+		ObjectValue<XPOperand<?>> ovReader = executedComputing.object(ovEntity, dmu.getVc());//Computing.object(DataManFactory.parser, ovEntity, evaluator, vc, Computing.getDefaultObjectLib(ovRoot));
+		
 		DataReader<?> res = dmf.getDataReader(readerRef, ovReader, dmu);
 		
-		drToClose.add(res);
+		try { res.open(); } 
+		catch (Exception e) {	
+			try { res.close();} catch (Exception e2) { e2.printStackTrace(); }
+			throw new ManagedException(e);
+		}
+		
+		drToClose.put(readerRef, res);
 		
 		res.open();
 		
@@ -307,7 +331,7 @@ public class DMUtils {
 		for(Connection cn: connectionsToClose.values()) {
 			try {cn.close();} catch(Exception e) {}
 		}
-		for(DataReader<?> dr : drToClose) {
+		for(DataReader<?> dr : drToClose.values()) {
 			try {dr.close();} catch(Exception e) {}
 		}
 		drToClose.clear();

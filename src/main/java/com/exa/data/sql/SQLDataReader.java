@@ -46,8 +46,6 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 	
 	protected int _lineVisited = 0;
 	
-	private boolean shouldCloseConnection = true; 
-	
 	public SQLDataReader(String name, ObjectValue<XPOperand<?>> config, DMUtils dmu) throws DataException {
 		super(name, dmu);
 		
@@ -185,7 +183,7 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 			
 			Boolean shareConnection = config.getAttributAsBoolean("sharesConnection");
 			
-			shouldCloseConnection = shareConnection == null || !shareConnection;
+			boolean shouldCloseConnection = shareConnection != null && !shareConnection;
 			
 			dmu.setShouldCloseConnection(shouldCloseConnection);
 			

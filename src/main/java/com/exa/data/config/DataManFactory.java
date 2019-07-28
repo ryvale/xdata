@@ -1,6 +1,5 @@
 package com.exa.data.config;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -106,13 +105,11 @@ public abstract class DataManFactory {
 		
 		/**/
 		
-		Computing computing = parser.getComputeObjectFormFile(drConfigFileName, evSetup, uiv);
+		Computing computing = parser.getExecutedComputeObjectFormFile(drConfigFileName, evSetup, uiv);
 		
 		XPEvaluator evaluator = computing.getXPEvaluator();
 		
-		ObjectValue<XPOperand<?>> ovRoot = computing.execute();
-		
-		try { computing.closeCharReader(); } catch (IOException e) { e.printStackTrace(); }
+		ObjectValue<XPOperand<?>> ovRoot = computing.getResult();
 		
 		ObjectValue<XPOperand<?>> ovEntities = ovRoot.getAttributAsObjectValue("entities");
 		
@@ -137,20 +134,16 @@ public abstract class DataManFactory {
 		VariableContext vc = new MapVariableContext(evaluator.getCurrentVariableContext());
 		
 		String ds = ovEntities.getPathAttributAsString(name + ".dataSource");
-		DMUtils dmu = new DMUtils(dmuDmf, ovRoot, evaluator, vc, dmuSetup, ds);
+		DMUtils dmu = new DMUtils(dmuDmf, computing, vc, dmuSetup, ds);
 		dmuSetup.setup(dmu);
 				
 		evaluator.addVariable("rootOv", ObjectValue.class, ovRoot);
 		
-		//evaluator.pushVariableContext(vc);
-		
-		DataReader<?> dr = getDataReader(ovEntities, name, Computing.getDefaultObjectLib(ovRoot), dmu);
+		DataReader<?> dr = getDataReader(ovEntities, name, XALParser.getDefaultObjectLib(ovRoot), dmu);
 		
 		vc.addVariable("rootDr", DataReader.class, dr);
 		
 		vc.addVariable("dmu", DMUtils.class, dmu);
-		
-		//evaluator.popVariableContext();
 		
 		return dr;
 	}
@@ -161,13 +154,13 @@ public abstract class DataManFactory {
 		
 		String drConfigFileName = filesRepos.getName(parts[0] +".ds.xal");
 		
-		Computing computing = parser.getComputeObjectFormFile(drConfigFileName, evSetup, uiv);
+		Computing computing = parser.getExecutedComputeObjectFormFile(drConfigFileName, evSetup, uiv);
 		
 		XPEvaluator evaluator = computing.getXPEvaluator();
 		
-		ObjectValue<XPOperand<?>> ovRoot = computing.execute();
+		ObjectValue<XPOperand<?>> ovRoot = computing.getResult();
 		
-		try { computing.closeCharReader();	} catch (IOException e) { e.printStackTrace();	}
+		//try { computing.closeCharReader();	} catch (IOException e) { e.printStackTrace();	}
 		
 		ObjectValue<XPOperand<?>> ovEntities = ovRoot.getAttributAsObjectValue("entities");
 		
@@ -192,14 +185,14 @@ public abstract class DataManFactory {
 		String ds = ovEntities.getPathAttributAsString(name + ".dataSource");
 		
 		VariableContext vc = new MapVariableContext(evaluator.getCurrentVariableContext());
-		DMUtils dmu = new DMUtils(dmuDmf, ovRoot, evaluator, vc, dmuSetup, ds);
+		DMUtils dmu = new DMUtils(dmuDmf, computing, vc, dmuSetup, ds);
 		dmuSetup.setup(dmu);
 		
 		evaluator.addVariable("rootOv", ObjectValue.class, ovRoot);
 	
 		//evaluator.pushVariableContext(vc);
 		
-		DataWriter<?> dm = getDataWriter(ovEntities, name, evaluator, vc, drSource, Computing.getDefaultObjectLib(ovRoot), dmu, preventInsertion, preventUpdate);
+		DataWriter<?> dm = getDataWriter(ovEntities, name, evaluator, vc, drSource, XALParser.getDefaultObjectLib(ovRoot), dmu, preventInsertion, preventUpdate);
 		
 		vc.addVariable("sourceDr", DataReader.class, drSource);
 		
@@ -222,7 +215,7 @@ public abstract class DataManFactory {
 	
 	public DataReader<?> getDataReader(ObjectValue<XPOperand<?>> ovEntities, String name, Map<String, ObjectValue<XPOperand<?>>> libOV, DMUtils dmu) throws ManagedException {
 		
-		ObjectValue<XPOperand<?>> ovEntity = parser.object(ovEntities, name, dmu.getEvaluator(), dmu.getVc(), libOV);
+		ObjectValue<XPOperand<?>> ovEntity = dmu.getExecutedComputing().object(ovEntities, name, dmu.getVc(), libOV); //parser.object(ovEntities, name, dmu.getEvaluator(), dmu.getVc(), libOV);
 		
 		ObjectValue<XPOperand<?>> ovBeforeConnectionActions = ovEntities.getPathAttributAsObjecValue(name + ".beforeConnection");
 		if(ovBeforeConnectionActions != null) {
@@ -249,9 +242,13 @@ public abstract class DataManFactory {
 		return res;
 	}
 	
+	public DataReader<?> getDataReader(ObjectValue<XPOperand<?>> ovEntities, String name, DMUtils dmu) throws ManagedException {
+		return getDataReader(ovEntities, name, XALParser.getDefaultObjectLib(dmu.getExecutedComputing().getResult()), dmu);
+	}
+	
 	public DataWriter<?> getDataWriter(ObjectValue<XPOperand<?>> ovEntities, String name, XPEvaluator eval, VariableContext vc, DataReader<?> drSource, Map<String, ObjectValue<XPOperand<?>>> libOV, DMUtils dmu, boolean preventInsertion, boolean preventUpdate) throws ManagedException {
 		
-		ObjectValue<XPOperand<?>> ovEntity = parser.object(ovEntities, name, eval, vc, libOV);
+		ObjectValue<XPOperand<?>> ovEntity = dmu.getExecutedComputing().object(ovEntities, name, dmu.getVc(), libOV);
 		
 		ObjectValue<XPOperand<?>> ovBeforeConnectionActions = ovEntity.getAttributAsObjectValue("beforeConnection");
 		if(ovBeforeConnectionActions != null) {
@@ -276,6 +273,10 @@ public abstract class DataManFactory {
 		DataWriter<?> res = getDataWriter(name, ovEntity, drSource, dmu, preventInsertion, preventUpdate);
 		
 		return res;
+	}
+	
+	public DataWriter<?> getDataWriter(ObjectValue<XPOperand<?>> ovEntities, String name, XPEvaluator eval, VariableContext vc, DataReader<?> drSource, DMUtils dmu, boolean preventInsertion, boolean preventUpdate) throws ManagedException {
+		return getDataWriter(ovEntities, name, eval, vc, drSource, XALParser.getDefaultObjectLib(dmu.getExecutedComputing().getResult()), dmu, preventInsertion, preventUpdate);
 	}
 	
 	public FilesRepositories getFilesRepos() {

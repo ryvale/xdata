@@ -642,7 +642,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 			
 			Boolean shareConnection = config.getAttributAsBoolean("sharesConnection");
 			
-			boolean shouldCloseConnection = shareConnection == null || !shareConnection;
+			boolean shouldCloseConnection = shareConnection != null && !shareConnection;
 			
 			dmu.setShouldCloseConnection(shouldCloseConnection);
 			
