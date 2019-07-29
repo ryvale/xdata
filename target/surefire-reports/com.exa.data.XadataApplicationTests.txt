@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.exa.data.XadataApplicationTests
 -------------------------------------------------------------------------------
-Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.402 sec - in com.exa.data.XadataApplicationTests
+Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.66 sec - in com.exa.data.XadataApplicationTests

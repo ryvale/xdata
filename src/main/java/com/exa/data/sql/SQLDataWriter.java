@@ -169,6 +169,8 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 			DynamicField field = fields.get(lstKey.get(0).asRequiredString()) ;
 			
 			String recordSeekSql = "SELECT " + field.getVlName().asRequiredString() + " FROM " + table + " WHERE " + where;
+			if(debugOn) System.out.println(recordSeekSql);
+			
 			PreparedStatement ps = connection.prepareStatement(recordSeekSql);
 			ResultSet rs = ps.executeQuery();
 			
@@ -228,7 +230,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 				DataFormatter<?> dataf = formatters.get(ft);
 				if(dataf == null) throw new ManagedException(String.format("No formatter provide for type '%s' for the field", ft, field.getName()));
 				
-				sbKeyFields.append("AND ").
+				sbKeyFields.append(" AND ").
 					append(fieldName).append(" = ").append(dataf.toSQLFormObject(drSource.getObject(field.getVlExp().asRequiredString())));
 				continue;
 			}
@@ -237,21 +239,21 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 				String ft = field.getType() + "-" + type;
 				DataFormatter<?> dataf = formatters.get(ft);
 				
-				sbKeyFields.append(", ").
+				sbKeyFields.append(" AND ").
 					append(fieldName).append(" = ").append(dataf.toSQLFormObject(field.getVlExp().getValue()));
 				continue;
 			}
 			
 			if("sql".equals(field.getExpType())) {
 				
-				sbKeyFields.append(", ").append(field.getVlExp().asRequiredString());
+				sbKeyFields.append(" AND ").append(field.getVlExp().asRequiredString());
 				continue;
 			}
 			
 			throw new ManagedException(String.format("Invalid expresssion type '%s' for field '%s'", field.getExpType(), field.getName()));
 		}
 		
-		sbWhere.append(sbWhere.length() == 0 ? sbKeyFields.substring(3) : sbKeyFields.toString());
+		sbWhere.append(sbWhere.length() == 0 ? sbKeyFields.substring(4) : sbKeyFields.toString());
 		
 		return sbWhere.toString();
 	}
@@ -611,16 +613,6 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 					
 					if(!expTypes.contains(expType)) throw new DataException(String.format("Invalid expresssion type '%s' for field '%s'", expType, fname));
 					
-					/*if("value".equals(expType)) {
-						String et = vlExp.typeName();
-						if(type == null) type = et;
-						else {
-							if(!type.equals(et)) {
-								throw new DataException(String.format("Field '%s' type '%s' mismatch with the expression type %s", fname, type, et));
-							}
-						}
-					}
-					else if(type == null) type= "string";*/
 					
 					if("default".equals(expType)) expType = "reader";
 					
