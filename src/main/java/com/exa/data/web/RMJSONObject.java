@@ -56,6 +56,7 @@ public class RMJSONObject extends ResponseManager {
 		try {
 			strResp = response.body().string();
 			Integer httpStatus = response.code();
+			if(WSDataWriter.debugOn || WSDataReader.debugOn) System.out.println("http status : " +  httpStatus + "\n responseBody :" + strResp);
 			if(httpStatus != 200) throw new DataUserException(strResp, "WEB_SERVICE_ERROR - http status : " + httpStatus);
 			
 			valuesCache = new JSONObject(strResp);

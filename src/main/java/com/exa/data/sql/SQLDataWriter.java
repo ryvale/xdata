@@ -109,6 +109,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 	private Value<?, XPOperand<?>> fieldsItems;
 	private Value<?, XPOperand<?>> vlWhere = null;
 	private Value<?, XPOperand<?>> vlType;
+	private Value<?, XPOperand<?>> vlNoInsert, vlNoUpdate;
 	
 	private List<BreakProperty> breakProperties = new ArrayList<>();
 	
@@ -153,16 +154,11 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 		String table = vlTable.asRequiredString();
 		VariableContext variableContext = dmu.getVc();
 		
-		if(lstKey.size() == 0) {
-			if(preventInsertion) return null;
-			variableContext.assignOrDeclareVariable("updateMode", String.class, "insert");
-			if(mustBreak()) return null;
-			
-			String sql = getInsertSQL(table);
-			return sql;
-		}
+		boolean insertable = !vlNoInsert.asBoolean() && !preventInsertion;
 		
-		if(!preventInsertion && !preventUpdate) {
+		boolean updatable = !vlNoUpdate.asBoolean() && !preventUpdate && lstKey.size() != 0;
+		
+		if(insertable && updatable) {
 			
 			String where = getSQLWhere(table);
 			
@@ -192,11 +188,13 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 			return updateSQL;
 		}
 		
-		if(preventUpdate) {
+		if(insertable) {
 			variableContext.assignOrDeclareVariable("updateMode", String.class, "insert");
 			if(mustBreak()) return null;
 			return getInsertSQL(table);
 		}
+		
+		if(!updatable) return null;
 		
 		variableContext.assignOrDeclareVariable("updateMode", String.class, "update");
 		if(mustBreak()) return null;
@@ -395,6 +393,15 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 				}
 			}
 			
+			
+			vlNoInsert = config.getAttribut("noInsert");
+			if(vlNoInsert == null) vlNoInsert = new BooleanValue<>(Boolean.FALSE);
+			if(!"boolean".equals(vlNoInsert.typeName())) throw new DataException(String.format("The property 'noInsert' should be a boolean in data man '%S'", name));
+			
+			vlNoUpdate = config.getAttribut("noUpdate");
+			if(vlNoUpdate == null) vlNoUpdate = new BooleanValue<>(Boolean.FALSE);
+			if(!"boolean".equals(vlNoUpdate.typeName())) throw new DataException(String.format("The property 'noUpdate' should be a boolean in data man '%S'", name));
+			
 			ObjectValue<XPOperand<?>> fm = config.getAttributAsObjectValue("fields");
 			
 			Value<?, XPOperand<?>> vlKey = fm.getAttribut("key");
@@ -472,8 +479,10 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 										else {
 											CalculableValue<?, XPOperand<?>> clexp = vlExp.asCalculableValue();
 											if(clexp == null) {
-												Field f = drSource.getField(fname);
-												if(f == null) throw new DataException(String.format("Unable to infer the type  for field '%s' when 'exp', 'expType' properties is not set in data man '%s'", fname, name));
+												if(vlExp.asStringValue() == null) throw new DataException(String.format("Unable to infer the type  for field '%s' when 'type', 'expType' properties is not set and 'exp' is not a string value in data man '%s'", fname, name));
+												String expFieldName = vlExp.asRequiredString();
+												Field f = drSource.getField(expFieldName);
+												if(f == null) throw new DataException(String.format("Unable to infer the type  for field '%s' when 'type', 'expType' properties is not set and 'exp' '%s' is not a source field in data man '%s'", fname, expFieldName, name));
 												
 												expType = "reader";
 												type = f.getType();
