@@ -4,18 +4,18 @@ references {},
 entities {
 
 	entity0 {
-		type 'x-literal',
+		type 'x-literal'
 		
 		rows [{ status 'OK'}]
-	},
+	}
 
 	entity1(dr1 @DataReader) {
 	
-		type 'x-literal',
+		type 'x-literal'
 		
 		beforeConnection {
 			dr1 = dmu.loadReader("entity0")
-		},
+		}
 		
 		rows [{ code = dr1.getString('status') }]
 	}

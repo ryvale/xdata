@@ -211,6 +211,7 @@ public class WSDataWriter extends StandardDataWriterBase<DynamicField> {
 			responseMan.manage(response);
 			
 		} catch (ManagedException | IOException e) {
+			if(e instanceof DataException) throw (DataException)e;
 			throw new DataException(e);
 		}
 		/*finally {

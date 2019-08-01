@@ -1,39 +1,39 @@
-:smart,
+:smart
 
 references {
 
 	nbItOracle(dateField, start, end) {
-		type "oracle",
+		type "oracle"
 		
-		from "r5events m",
+		from "r5events m"
 		
 		fields {
-			manager exa { prefix 'm.evt_' },
+			manager exa { prefix 'm.evt_' }
 			
 			items {
-				equipe "m.evt_mrc",
+				equipe "m.evt_mrc"
 				
 				nb { exp "count(*)", type "decimal" }
 			}
-		},
+		}
 		
 		criteria => dateField + " >= TO_DATE('" + start + "', 'YYYY-MM-DD HH24:MI:SS') and " + dateField + " <= TO_DATE('" + end + "', 'YYYY-MM-DD HH24:MI:SS')"
 	},
 	
 	nbItSql(dateField, start, end) {
-		type "sql",
+		type "sql"
 		
-		from "r5events m",
+		from "r5events m"
 		
 		fields {
-			manager exa { prefix 'm.evt_' },
+			manager exa { prefix 'm.evt_' }
 			
 			items {
 				equipe "m.evt_mrc",
 				
 				nb { exp "count(*)", type "decimal" }
 			}
-		},
+		}
 		
 		criteria =>  dateField + " >= convert(datetime, '" + start + "', 103) and " + dateField + " <= convert(datetime, '" + end + "', 103)",
 		
@@ -50,13 +50,13 @@ entities {
 			eof => this.lineVisited == 1
 		}
 		
-	},
+	}
 	
 	entity2(dateField, start, end) {
-		type "smart",
+		type "smart"
 			
 		main {
-			type "libre",
+			type "libre"
 			
 			eof => this.lineVisited == 1
 		},
