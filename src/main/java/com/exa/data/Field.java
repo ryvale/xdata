@@ -4,6 +4,7 @@ public class Field {
 	protected String name;
 	protected String type;
 	protected String exp = null;
+	protected boolean longValue = false;
 	
 	public Field(String name) {
 		super();
@@ -34,6 +35,14 @@ public class Field {
 
 	public void setExp(String exp) {
 		this.exp = exp;
+	}
+
+	public boolean isLongValue() {
+		return longValue;
+	}
+
+	public void setLongValue(boolean longValue) {
+		this.longValue = longValue;
 	}
 	
 	

@@ -44,6 +44,8 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 	private Boolean dataRead = null;
 	private ObjectValue<XPOperand<?>> config;
 	
+	private Map<String, Object> cachedValues = new HashMap<>();
+	
 	protected int _lineVisited = 0;
 	
 	public SQLDataReader(String name, ObjectValue<XPOperand<?>> config, DMUtils dmu) throws DataException {
@@ -61,6 +63,12 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 			dataRead = rs.next();
 			if(!dataRead) return false;
 			++_lineVisited;
+			
+			for(Field field : fields.values()) {
+				if(field.isLongValue()) {
+					cachedValues.put(field.getName(), getObject(field.getName()));
+				}
+			}
 			return true;
 			
 		} catch (SQLException e) {
@@ -94,6 +102,11 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 	@Override
 	public String getString(String fieldName) throws DataException {
 		try {
+			if(cachedValues.containsKey(fieldName)) {
+				Object  ov = cachedValues.get(fieldName);
+				if(ov == null) return null;
+				return (String)ov;
+			}
 			
 			return rs.getString(fieldName);
 		} catch (SQLException e) {
@@ -132,6 +145,7 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 					Value<?, XPOperand<?>> vlField = mpFields.get(fname);
 					
 					String exp, type;
+					boolean longValue = false;
 					BooleanValue<?> blField = vlField.asBooleanValue();
 					if(blField == null) {
 						StringValue<XPOperand<?>> sv = vlField.asStringValue();
@@ -140,6 +154,9 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 							
 							exp = ov.getAttributAsString("exp");
 							type = ov.getAttributAsString("type", "string");
+							Boolean v = ov.getAttributAsBoolean("longValue");
+							//longValue = ov.getAttributAsBoolean(fname);
+							if(v != null) longValue = v;
 						}
 						else {
 							exp = sv.getValue();
@@ -153,7 +170,7 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 					
 					Field field = new Field(fname, type);
 					field.setExp(exp == null ? fieldManager.toSQL(fname) : exp);
-					
+					field.setLongValue(longValue);
 					fields.put(fname, field);
 				}
 		 	}
@@ -196,7 +213,6 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 			Statement stmt = connection.createStatement();
 			rs = stmt.executeQuery(sql);
 			
-			
 			return true;
 		}
 		catch (ManagedException|SQLException e) {
@@ -209,6 +225,8 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 		try {
 			dmu.releaseSqlConnection();
 			dmu.clean();
+			cachedValues.clear();
+			connection = null;
 		} catch (ManagedException e) {
 			e.printStackTrace();
 		}
