@@ -35,6 +35,8 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 	protected String orderBy = null;
 	protected String groupBy = null;
 	
+	private Map<String, String> fromTypes = new HashMap<>();
+	
 	protected Map<String, FieldManagerFactory> fieldsManagerFactories = new HashMap<>();
 	
 	private FieldManager fieldManager = null;
@@ -43,6 +45,8 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 	private ResultSet rs;
 	private Boolean dataRead = null;
 	private ObjectValue<XPOperand<?>> config;
+	
+	private boolean valueFromCache = false;
 	
 	private Map<String, Object> cachedValues = new HashMap<>();
 	
@@ -64,11 +68,13 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 			if(!dataRead) return false;
 			++_lineVisited;
 			
+			valueFromCache = false;
 			for(Field field : fields.values()) {
 				if(field.isLongValue()) {
 					cachedValues.put(field.getName(), getObject(field.getName()));
 				}
 			}
+			valueFromCache = true;
 			return true;
 			
 		} catch (SQLException e) {
@@ -102,13 +108,22 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 	@Override
 	public String getString(String fieldName) throws DataException {
 		try {
-			if(cachedValues.containsKey(fieldName)) {
+			if(valueFromCache && cachedValues.containsKey(fieldName)) {
 				Object  ov = cachedValues.get(fieldName);
 				if(ov == null) return null;
 				return (String)ov;
 			}
 			
-			return rs.getString(fieldName);
+			String v = rs.getString(fieldName);
+			if(v == null) return null;
+			
+			String fromType = fromTypes.get(fieldName);
+			if(fromType == null) return v;
+			
+			if("html".equals(fromType)) 
+				return v.toString().replaceAll("\\<.*?>","");
+			
+			return v;
 		} catch (SQLException e) {
 			throw new DataException(e);
 		}
@@ -155,6 +170,9 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 							exp = ov.getAttributAsString("exp");
 							type = ov.getAttributAsString("type", "string");
 							Boolean v = ov.getAttributAsBoolean("longValue");
+							
+							String fromType = ov.getAttributAsString("from");
+							fromTypes.put(fname, fromType);
 							//longValue = ov.getAttributAsBoolean(fname);
 							if(v != null) longValue = v;
 						}
