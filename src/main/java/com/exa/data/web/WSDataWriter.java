@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import com.exa.data.DataException;
 import com.exa.data.DataReader;
@@ -200,6 +201,9 @@ public class WSDataWriter extends StandardDataWriterBase<DynamicField> {
 			Request request = rb.build();
 			
 			OkHttpClient httpClient = new OkHttpClient();
+			httpClient.setConnectTimeout(15, TimeUnit.SECONDS);
+			httpClient.setWriteTimeout(15, TimeUnit.SECONDS);
+			httpClient.setReadTimeout(30, TimeUnit.SECONDS);
 			
 			if(debugOn)  {
 				System.out.println("url :" + request.urlString());
@@ -207,10 +211,15 @@ public class WSDataWriter extends StandardDataWriterBase<DynamicField> {
 			}
 			
 			Response response = httpClient.newCall(request).execute();
+		
 			
 			responseMan.manage(response);
 			
 		} catch (ManagedException | IOException e) {
+			
+			if(debugOn) 
+				System.out.println(e.getMessage());
+			
 			if(e instanceof DataException) throw (DataException)e;
 			throw new DataException(e);
 		}

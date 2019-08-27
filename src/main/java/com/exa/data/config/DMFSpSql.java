@@ -24,6 +24,8 @@ public class DMFSpSql extends DataManFactory {
 		super(dmuDmf);
 	}
 	
+	
+	
 	@Override
 	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity/*, XPEvaluator eval, VariableContext vc*/, DMUtils dmu) throws ManagedException {
 		/*String dsName = ovEntity.getAttributAsString("dataSource");
