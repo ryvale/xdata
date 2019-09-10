@@ -291,19 +291,21 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 			if(!field.getVlCondition().asBoolean()) continue;
 			
 			sbFields.append(", ").append(field.getVlName().asRequiredString());
+			boolean fromString = field.getFrom() == null ? false : ("string".equals(field.getFrom().asString()) ? true : false);
+			String fromFormat = field.getFromFormat() == null ? null : field.getFromFormat().asString();
 			if("reader".equals(field.getExpType())) {
 				String ft = field.getType() + "-" + type;
 				DataFormatter<?> dataf = formatters.get(ft);
 				if(dataf == null) throw new ManagedException(String.format("No formatter provide for type '%s' for the field", ft, field.getName()));
 				
-				sbValues.append(", ").append(field.getFromString().asRequiredBoolean() ? dataf.toSQLFormString(drSource.getString(field.getVlExp().asRequiredString())) : dataf.toSQLFormObject(drSource.getObject(field.getVlExp().asRequiredString())));
+				sbValues.append(", ").append(fromString ? dataf.toSQLFormString(drSource.getString(field.getVlExp().asRequiredString()), fromFormat) : dataf.toSQLFormObject(drSource.getObject(field.getVlExp().asRequiredString())));
 				continue;
 			}
 			
 			if("value".equals(field.getExpType())) {
 				String ft = field.getType() + "-" + type;
 				DataFormatter<?> dataf = formatters.get(ft);
-				sbValues.append(", ").append(field.getFromString().asRequiredBoolean() ? dataf.toSQLFormString(field.getVlExp().asString()) : dataf.toSQLFormObject(field.getVlExp().getValue()));
+				sbValues.append(", ").append(fromString ? dataf.toSQLFormString(field.getVlExp().asString(), fromFormat) : dataf.toSQLFormObject(field.getVlExp().getValue()));
 				continue;
 			}
 			
@@ -328,13 +330,16 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 		for(DynamicField field : fields.values()) {
 			if(!field.getVlCondition().asBoolean()) continue;
 			
+			boolean fromString = field.getFrom() == null ? false : ("string".equals(field.getFrom().asString()) ? true : false);
+			String fromFormat = field.getFromFormat() == null ? null : field.getFromFormat().asString();
+			
 			if("reader".equals(field.getExpType())) {
 				String ft = field.getType() + "-" + type;
 				DataFormatter<?> dataf = formatters.get(ft);
 				if(dataf == null) throw new ManagedException(String.format("No formatter provide for type '%s' for the field", ft, field.getName()));
 				
 				sbFields.append(", ").
-					append(field.getVlName().asRequiredString()).append(" = ").append(field.getFromString().asRequiredBoolean() ?  dataf.toSQLFormString(drSource.getString(field.getVlExp().asRequiredString())) : dataf.toSQLFormObject(drSource.getObject(field.getVlExp().asRequiredString())));
+					append(field.getVlName().asRequiredString()).append(" = ").append(fromString ?  dataf.toSQLFormString(drSource.getString(field.getVlExp().asRequiredString()), fromFormat) : dataf.toSQLFormObject(drSource.getObject(field.getVlExp().asRequiredString())));
 				continue;
 			}
 			
@@ -343,7 +348,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 				DataFormatter<?> dataf = formatters.get(ft);
 				
 				sbFields.append(", ").
-					append(field.getVlName().asRequiredString()).append(" = ").append(field.getFromString().asRequiredBoolean() ? dataf.toSQLFormString(field.getVlExp().asString()) : dataf.toSQLFormObject(field.getVlExp().getValue()));
+					append(field.getVlName().asRequiredString()).append(" = ").append(fromString ? dataf.toSQLFormString(field.getVlExp().asString(), fromFormat) : dataf.toSQLFormObject(field.getVlExp().getValue()));
 				continue;
 			}
 			
@@ -446,7 +451,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 					String type, expType;
 					BooleanValue<?> blField = vlField.asBooleanValue();
 					
-					Value<?, XPOperand<?>> fromString;
+					Value<?, XPOperand<?>> from = null; Value<?, XPOperand<?>> fromFormat = null;
 					if(blField == null) {
 						StringValue<XPOperand<?>> sv = vlField.asStringValue();
 						if(sv == null) {
@@ -462,8 +467,23 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 								type = ov.getAttributAsString("type");
 								vlExp = ov.getAttribut("exp");
 								expType = ov.getAttributAsString("expType");
-								fromString = ov.getAttribut("fromString");
-								if(fromString == null) fromString = new BooleanValue<>(Boolean.FALSE);
+								
+								from = ov.getAttribut("from");
+								
+								if(from == null) {
+									fromFormat = ov.getAttribut("fromFormat");
+									//For ascendant compatibility
+									Value<?, XPOperand<?>> fromString = ov.getAttribut("fromString");
+									if(fromString != null) {
+										if(!"boolean".equals(fromString.typeName())) throw new DataException(String.format("Bad attribute type 'fromString' for field '%s' in data man '%s'. The value should be boolean", fname, name));
+										
+										if(fromString.asRequiredBoolean()) from = new StringValue<>("string");
+									}
+								}
+								
+								
+								
+								//if(from == null) from = new BooleanValue<>(Boolean.FALSE);
 										
 								if(type == null) {
 									if(expType == null) {
@@ -530,7 +550,9 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 										expType = "reader";
 										vlExp = new StringValue<>(fname);
 										
-										if(typeMismatch(fromString.asRequiredBoolean() ? "string" : type, f.getType())) 
+										String vfrom = from == null ? null : from.asString();
+										
+										if(typeMismatch("string".equals(vfrom) ? "string" : type, f.getType())) 
 											throw new DataException(String.format("Type imcompatible for field '%s' (%s != %s) in data man %S", fname, type, f.getType(), name));
 									}
 									else {
@@ -546,7 +568,9 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 											
 											expType = "reader";
 											
-											if(typeMismatch(fromString.asRequiredBoolean() ? "string" : type, f.getType())) 
+											String vfrom = from == null ? null : from.asString();
+											
+											if(typeMismatch("string".equals(vfrom) ? "string" : type, f.getType())) 
 												throw new DataException(String.format("Type imcompatible for field '%s' (%s != %s) in data man %S", fname, type, f.getType(), name));
 										}
 										else {
@@ -560,7 +584,9 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 									if("value".equals(expType)) {
 										if(vlExp == null) throw new DataException(String.format("Unable to infer the type  for field '%s' when 'expType' = 'value' and 'exp' is not set in data man '%s'", fname, name));
 				
-										if(typeMismatch(fromString.asRequiredBoolean() ? "string" : type,  vlExp.typeName())) 
+										String vfrom = from == null ? null : from.asString();
+										
+										if(typeMismatch("string".equals(vfrom) ? "string" : type,  vlExp.typeName())) 
 											throw new DataException(String.format("Type imcompatible for field '%s' (%s != %s) in data man %S", fname, type, vlExp.typeName(), name));
 									}
 									else if("reader".equals(expType)) {
@@ -590,7 +616,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 								vlExp = cl;
 								type = cl.typeName();
 								expType = "value";
-								fromString = new BooleanValue<>(Boolean.FALSE);
+								//from = new BooleanValue<>(Boolean.FALSE);
 								vlCondition = new BooleanValue<XPOperand<?>>(Boolean.TRUE);
 							}
 						}
@@ -602,7 +628,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 							vlExp = sv;
 							expType = "reader";
 							
-							fromString = new BooleanValue<>(Boolean.FALSE);
+							//from = new BooleanValue<>(Boolean.FALSE);
 							
 							type = f.getType();
 							vlCondition = new BooleanValue<XPOperand<?>>(Boolean.TRUE);
@@ -614,7 +640,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 						vlName = new StringValue<>(fieldManager.toSQL(fname));
 						vlExp = new StringValue<>(fname);
 						expType = "reader";
-						fromString = new BooleanValue<>(Boolean.FALSE);
+						//from = new BooleanValue<>(Boolean.FALSE);
 						
 						type = f.getType();
 						vlCondition = new BooleanValue<XPOperand<?>>(Boolean.TRUE);
@@ -629,7 +655,8 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 					field.setVlExp(vlExp);
 					field.setVlCondition(vlCondition);
 					field.setVlName(vlName);
-					field.setFromString(fromString);
+					field.setFrom(from);
+					field.setFromFormat(fromFormat);
 					
 					fields.put(fname, field);
 				}

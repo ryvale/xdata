@@ -13,14 +13,39 @@ entities {
 			{ code "zz", desc "mètre" },
 			{ code "m2", desc "mètre carré"}
 		]
-	},
+	}
+	
+	testData2 {
+		type "x-literal"
+		
+		rows [
+			{ code "19079", downtime "1.5" },
+			{ code "19079", downtime "1,5" }
+		]
+	}
+	
+	r5events {
+		type "tsql"
+		
+		fields {
+			manager exa { prefix "evt_" }
+			
+			key "code"
+			
+			items {
+				code { condition false}
+				
+				downtime { type "float", from "string" }
+			}
+		}
+	}
 
 	r5uoms(dr1 @DataReader) {
-		type "tsql",
+		type "tsql"
 		
 		beforeConnection {
 			dr1 = dmu.openReader("testData")
-		},
+		}
 		
 		break = dr1.next() == false,
 		
@@ -40,7 +65,7 @@ entities {
 				updated { type "datetime", expType "sql", exp "GETDATE()"}
 			}
 		}
-	},
+	}
 	
 	udm {
 		type "tsql",

@@ -10,8 +10,8 @@ public class SQLNumberFormatter extends DataFormatter<Number> {
 	}
 
 	@Override
-	public String toSQLFormString(String str) {
-		return str;
+	public String toSQLFormString(String str, String format) {
+		return format == null ? str.replaceAll("[,]", ".") : str;
 	}
 
 }

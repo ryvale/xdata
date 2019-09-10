@@ -9,7 +9,11 @@ public class DynamicField extends Field {
 	private String expType;
 	private Value<?, XPOperand<?>> vlCondition;
 	
-	private Value<?, XPOperand<?>> fromString;
+	//private Value<?, XPOperand<?>> fromString;
+	
+	private Value<?, XPOperand<?>> from = null;
+	
+	private Value<?, XPOperand<?>> fromFormat = null;
 	
 	private Value<?, XPOperand<?>> vlExp;
 	
@@ -54,12 +58,28 @@ public class DynamicField extends Field {
 		this.vlName = vlName;
 	}
 
-	public Value<?, XPOperand<?>> getFromString() {
+	/*public Value<?, XPOperand<?>> getFromString() {
 		return fromString;
 	}
 
 	public void setFromString(Value<?, XPOperand<?>> fromString) {
 		this.fromString = fromString;
+	}*/
+
+	public Value<?, XPOperand<?>> getFrom() {
+		return from;
+	}
+
+	public void setFrom(Value<?, XPOperand<?>> from) {
+		this.from = from;
+	}
+
+	public Value<?, XPOperand<?>> getFromFormat() {
+		return fromFormat;
+	}
+
+	public void setFromFormat(Value<?, XPOperand<?>> fromFormat) {
+		this.fromFormat = fromFormat;
 	}
 	
 	

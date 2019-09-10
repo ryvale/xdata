@@ -201,6 +201,61 @@ public class XadataApplicationTests extends TestCase {
 		dw.close();
 	}
 	
+	public void testDwFromStringSQL() throws ManagedException {
+		FilesRepositories filesRepo = new FilesRepositories();
+		
+		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
+		filesRepo.addRepoPart("data-config", new OSFileRepoPart("C:/Users/leader/Desktop/travaux"));
+		
+		SQLServerDataSource ds = new SQLServerDataSource();
+		ds.setUser("sa");  
+        ds.setPassword("e@mP0wer");  
+        ds.setServerName("192.168.79.132");  
+        ds.setPortNumber(1433);
+        ds.setDatabaseName("EAMPROD");
+        
+        Map<String, XADataSource> dataSources = new HashMap<>();
+        dataSources.put("default", new XASQLDataSource(ds));
+        
+        DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
+        
+        DataManFactory dmfSQL = new DMFSql(filesRepo, dataSources, "default", s -> {}, (id, context) -> {
+        	if("rootOv".equals(id)) return "ObjectValue";
+        	
+        	if("updateMode".equals(id)) return "string";
+        	
+        	if("dmu".equals(id)) return "DMUtils";
+        	
+        	return null;
+        });//new DMFSmart(filesRepo, dataSources, "default");
+        dmfSQL.initialize();
+        DataManFactory dmfXL = new DMFXLiteral(filesRepo, dataSources, "default", s -> {}, (id, context) -> {
+        	if("updateMode".equals(id)) return "string";
+        	
+        	if("dmu".equals(id)) return "DMUtils";
+        	
+        	return null;
+        });
+        dmfXL.initialize();
+        
+        
+        DataReader<?> drSource = dmfXL.getDataReader("default:/sql-w#testData2", evSetup);
+        
+        DataWriter<?> dw = dmfSQL.getDataWriter("default:/sql-w#r5events", evSetup, drSource, false, false);
+        
+        drSource.open();
+        
+        dw.open();
+        
+        while(drSource.next()) {
+        	dw.execute();
+        }
+        
+        drSource.close();
+        
+		dw.close();
+	}
+	
 	public void testStoredProcSQL() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
 		
