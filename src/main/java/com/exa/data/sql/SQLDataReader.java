@@ -134,7 +134,11 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 		
 		try {
 			
-			from = config.getRequiredAttributAsString("from");
+			from = config.getAttributAsString("from");
+			
+			if(from == null) {
+				from = name;
+			}
 			
 			ObjectValue<XPOperand<?>> fm = config.getAttributAsObjectValue("fields");
 			

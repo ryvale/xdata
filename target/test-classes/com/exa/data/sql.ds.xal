@@ -1,0 +1,20 @@
+references {
+	codes ['h', 'm']
+}
+
+entities {
+
+	r5uoms {
+		type "tsql"
+		
+		fields {
+			manager exa { prefix "uom_" }
+			
+			items {
+				description { exp "uom_desc" }
+			}
+		}
+		
+		criteria = "uom_code in " + dmu.listToSQL(rootOv.getArray("references.codes")) + " or uom_desc like " + dmu.stringToSQL("%e'%")
+	}
+}

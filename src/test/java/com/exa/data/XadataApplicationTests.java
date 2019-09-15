@@ -146,6 +146,39 @@ public class XadataApplicationTests extends TestCase {
 		dr.close();
 	}
 	
+	public void testSQL() throws ManagedException {
+		FilesRepositories filesRepo = new FilesRepositories();
+		
+		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
+		filesRepo.addRepoPart("data-config", new OSFileRepoPart("C:/Users/leader/Desktop/travaux"));
+		
+		SQLServerDataSource ds = new SQLServerDataSource();
+		ds.setUser("sa");  
+        ds.setPassword("e@mP0wer");  
+        ds.setServerName("192.168.79.132");  
+        ds.setPortNumber(1433);
+        ds.setDatabaseName("EAMPROD");
+        
+        Map<String, XADataSource> dataSources = new HashMap<>();
+        dataSources.put("default", new XASQLDataSource(ds));
+        
+        DataManFactory dmf = new DMFSql(filesRepo, dataSources, "default", s -> {}); // new DMFSmart(filesRepo, dataSources, "default", s -> {});
+        dmf.initialize();
+        
+        DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
+        
+        evSetup.addVaraiable("start", String.class, "01/02/2016");
+        evSetup.addVaraiable("end", String.class, "17/08/2018");
+        
+        DataReader<?> dr = dmf.getDataReader("default:/sql#r5uoms", evSetup);
+        
+        dr.open();
+        
+        assertTrue(new Boolean(dr.next()));
+        
+		dr.close();
+	}
+	
 	public void testDwSQL() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
 		

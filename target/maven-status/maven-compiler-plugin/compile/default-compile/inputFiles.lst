@@ -58,6 +58,7 @@ D:\p-project\exa-data\xadata\src\main\java\com\exa\data\web\RMJSONArray.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\config\DMFSql.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\dmu\MtdOpenReader.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\macro\Macro.java
+D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\dmu\MtdStringToSQL.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\dataman\MtdDrGetDouble.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\config\DMFRowToField.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\DataWriter.java
@@ -75,6 +76,7 @@ D:\p-project\exa-data\xadata\src\main\java\com\exa\data\action\ActionSeeker.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\action\Action.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\dataman\MtdDrClose.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\web\WSDataReader.java
+D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\dmu\MtdListToSQL.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\sql\XAFieldManagerFactory.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\MapReader.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\action\ASThrowError.java

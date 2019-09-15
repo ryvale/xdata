@@ -377,4 +377,23 @@ public class DMUtils {
 		
 		xaSqlataSource.releaseSharedConnection();
 	}
+	
+	public static String toSQLString(List<?> values) {
+		if(values.size() == 0) return "('')";
+		
+		StringBuilder sb = new StringBuilder();
+		
+		for(Object v : values) {
+			sb.append(", '").append(v.toString().replaceAll("'", "''")).append("'");
+		}
+		
+		return "(" + sb.substring(2) + ")";
+	}
+	
+	public static String toSQLString(String v, String defaultValue) {
+		
+		if(v == null || "".equals(v)) return defaultValue;
+		
+		return "'" + v.replaceAll("'", "''") + "'";
+	}
 }

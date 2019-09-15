@@ -34,6 +34,14 @@ public class TDMUtils extends TObjectClass<DMUtils, Object> {
 		omStr.addOperator(new MtdEvalString());
 		methods.put("evalString", new Method<>("evalString", String.class, omStr));
 		
+		omStr = new OMMethod<>("listToSQL", 2, OMOperandType.POST_OPERAND);
+		omStr.addOperator(new MtdListToSQL());
+		methods.put("listToSQL", new Method<>("listToSQL", String.class, omStr));
+		
+		omStr = new OMMethod<>("stringToSQL", 2, OMOperandType.POST_OPERAND);
+		omStr.addOperator(new MtdStringToSQL());
+		methods.put("stringToSQL", new Method<>("stringToSQL", String.class, omStr));
+		
 		omStr = new OMMethod<>("getStringParam", 2, OMOperandType.POST_OPERAND);
 		omStr.addOperator(new MtdGetStringParam());
 		methods.put("getStringParam", new Method<>("getStringParam", String.class, omStr));
