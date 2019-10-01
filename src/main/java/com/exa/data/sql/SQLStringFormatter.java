@@ -10,7 +10,7 @@ public class SQLStringFormatter  extends DataFormatter<String> {
 	}
 
 	@Override
-	public String toSQLFormString(String str, String format) {
+	public String toSQLFromString(String str, String format) {
 		return toSQL(str);
 	}
 

@@ -1,13 +1,16 @@
 package com.exa.data;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import com.exa.data.config.utils.DMUtils;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.XPEvaluator;
 import com.exa.lang.expression.XALCalculabeValue;
+import com.exa.lang.parsing.Computing;
 import com.exa.utils.ManagedException;
 import com.exa.utils.values.CalculableValue;
 import com.exa.utils.values.ObjectValue;
@@ -108,7 +111,7 @@ public abstract class StandardDataReaderBase<_FIELD extends Field> implements Da
 	}
 
 	
-	public static void updateVariableContext(ObjectValue<XPOperand<?>> ov, VariableContext vc, VariableContext prentVC) {
+	public static void updateVariableContext(ObjectValue<XPOperand<?>> ov, XPEvaluator evaluator, VariableContext vc, VariableContext parentVC) {
 		Map<String, Value<?, XPOperand<?>>> mp = ov.getValue();
 		
 		for(String propertyName : mp.keySet()) {
@@ -116,7 +119,7 @@ public abstract class StandardDataReaderBase<_FIELD extends Field> implements Da
 			
 			ObjectValue<XPOperand<?>> vov = vl.asObjectValue();
 			if(vov != null) {
-				updateVariableContext(vov, vc, prentVC);
+				updateVariableContext(vov, evaluator, vc, parentVC);
 				continue;
 			}
 			
@@ -124,7 +127,26 @@ public abstract class StandardDataReaderBase<_FIELD extends Field> implements Da
 			if(cl == null) continue;
 			
 			XALCalculabeValue<?> xalCL = (XALCalculabeValue<?>) cl;
-			if(xalCL.getVariableContext() == prentVC) xalCL.setVariableContext(vc);
+			if(xalCL.getVariableContext() == parentVC) xalCL.setVariableContext(vc);
+			
+			Set<VariableContext> vcs = evaluator.getRegisteredVariableContexts(Computing.VCC_CALLS);
+			
+			if(vcs != null) {
+			
+				Set<VariableContext> vcsToRemove = new HashSet<>();
+				
+				for(VariableContext ivc : vcs) {
+					if(ivc.getParent() == vc) { vcsToRemove.add(ivc); continue;}
+					if(ivc.getParent() == parentVC) {
+						ivc.setParent(vc);
+						vcsToRemove.add(ivc); 
+					}
+				}
+				
+				for(VariableContext ivc : vcsToRemove) {
+					evaluator.unregisterVariableContext(Computing.VCC_CALLS, ivc);
+				}
+			}
 			
 		}
 	}

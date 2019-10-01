@@ -298,14 +298,14 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 				DataFormatter<?> dataf = formatters.get(ft);
 				if(dataf == null) throw new ManagedException(String.format("No formatter provide for type '%s' for the field", ft, field.getName()));
 				
-				sbValues.append(", ").append(fromString ? dataf.toSQLFormString(drSource.getString(field.getVlExp().asRequiredString()), fromFormat) : dataf.toSQLFormObject(drSource.getObject(field.getVlExp().asRequiredString())));
+				sbValues.append(", ").append(fromString ? dataf.toSQLFromString(drSource.getString(field.getVlExp().asRequiredString()), fromFormat) : dataf.toSQLFormObject(drSource.getObject(field.getVlExp().asRequiredString())));
 				continue;
 			}
 			
 			if("value".equals(field.getExpType())) {
 				String ft = field.getType() + "-" + type;
 				DataFormatter<?> dataf = formatters.get(ft);
-				sbValues.append(", ").append(fromString ? dataf.toSQLFormString(field.getVlExp().asString(), fromFormat) : dataf.toSQLFormObject(field.getVlExp().getValue()));
+				sbValues.append(", ").append(fromString ? dataf.toSQLFromString(field.getVlExp().asString(), fromFormat) : dataf.toSQLFormObject(field.getVlExp().getValue()));
 				continue;
 			}
 			
@@ -339,7 +339,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 				if(dataf == null) throw new ManagedException(String.format("No formatter provide for type '%s' for the field", ft, field.getName()));
 				
 				sbFields.append(", ").
-					append(field.getVlName().asRequiredString()).append(" = ").append(fromString ?  dataf.toSQLFormString(drSource.getString(field.getVlExp().asRequiredString()), fromFormat) : dataf.toSQLFormObject(drSource.getObject(field.getVlExp().asRequiredString())));
+					append(field.getVlName().asRequiredString()).append(" = ").append(fromString ?  dataf.toSQLFromString(drSource.getString(field.getVlExp().asRequiredString()), fromFormat) : dataf.toSQLFormObject(drSource.getObject(field.getVlExp().asRequiredString())));
 				continue;
 			}
 			
@@ -348,7 +348,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 				DataFormatter<?> dataf = formatters.get(ft);
 				
 				sbFields.append(", ").
-					append(field.getVlName().asRequiredString()).append(" = ").append(fromString ? dataf.toSQLFormString(field.getVlExp().asString(), fromFormat) : dataf.toSQLFormObject(field.getVlExp().getValue()));
+					append(field.getVlName().asRequiredString()).append(" = ").append(fromString ? dataf.toSQLFromString(field.getVlExp().asString(), fromFormat) : dataf.toSQLFormObject(field.getVlExp().getValue()));
 				continue;
 			}
 			

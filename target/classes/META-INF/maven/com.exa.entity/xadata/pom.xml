@@ -25,10 +25,6 @@
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter</artifactId>
-		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -56,10 +52,22 @@
 		</dependency>
 		
 		<dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>ojdbc7</artifactId>
+            <version>12.1.0</version>
+            <systemPath>${basedir}/external-lib/ojdbc7.jar</systemPath>
+            <scope>system</scope>
+        </dependency>
+		
+		<dependency>
 		    <groupId>com.microsoft.sqlserver</groupId>
 		    <artifactId>mssql-jdbc</artifactId>
-		    <version>6.2.2.jre8</version>
+		    <!--version>6.2.2.jre8</version-->
 		    <scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jdbc</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -75,17 +83,18 @@
                     </goals>
                     <configuration>
                       <classifier>exec</classifier>
+                      <!--includeSystemScope>true</includeSystemScope-->
                     </configuration>
                   </execution>
                 </executions>
 			</plugin>
-			<plugin>
+			<!-- plugin>
 			  <groupId>org.springframework.boot</groupId>
 			  <artifactId>spring-boot-maven-plugin</artifactId>
 			  <configuration>
 			    <includeSystemScope>true</includeSystemScope>
 			  </configuration>
-			</plugin>
+			</plugin-->
 		</plugins>
 	</build>
 

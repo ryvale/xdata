@@ -12,7 +12,7 @@ import com.exa.expression.eval.XPEvaluator;
 import com.exa.utils.ManagedException;
 import com.exa.utils.values.ArrayValue;
 
-public class MtdListToSQL  extends OMMethod.XPOrtMethod<DMUtils, String> {
+public class MtdListToSQL extends OMMethod.XPOrtMethod<DMUtils, String> {
 
 	public MtdListToSQL() {
 		super("listToSQL", 1);

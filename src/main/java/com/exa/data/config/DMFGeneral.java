@@ -11,6 +11,7 @@ import com.exa.data.expression.DCEvaluatorSetup;
 import com.exa.expression.XPOperand;
 
 import com.exa.expression.parsing.Parser.UnknownIdentifierValidation;
+import com.exa.lang.parsing.XALParser;
 import com.exa.utils.ManagedException;
 import com.exa.utils.io.FilesRepositories;
 import com.exa.utils.values.ObjectValue;
@@ -74,14 +75,14 @@ public class DMFGeneral extends DataManFactory {
 		dmFactories.put("oracle", dmf);
 	}
 	
-	public DataReader<?> getDataReader(String type, String drName, DCEvaluatorSetup evSetup) throws ManagedException {
-		if(type == null) return getDataReader(drName, evSetup);
+	public DataReader<?> getDataReader(XALParser parser, String type, String drName, DCEvaluatorSetup evSetup) throws ManagedException {
+		if(type == null) return getDataReader(parser, drName, evSetup);
 		
 		DataManFactory dmf = dmFactories.get(type);
 		
 		if(dmf == null) throw new ManagedException(String.format("Invalid data reader type '%s' for '%s'", type, drName));
 		
-		return dmf.getDataReader(drName, evSetup);
+		return dmf.getDataReader(parser, drName, evSetup);
 	}
 	
 	@Override

@@ -118,7 +118,7 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 				
 				VariableContext vc = subDmu.getVc();
 				
-				updateVariableContext(ovDRConfig, vc, dmu.getVc());
+				updateVariableContext(ovDRConfig, dmu.getEvaluator(), vc, dmu.getVc());
 				String flow  = ovDRConfig.getAttributAsString("flow");
 				if(flow == null) flow = FLW_MAIN;
 				

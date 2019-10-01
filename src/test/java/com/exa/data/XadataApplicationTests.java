@@ -3,6 +3,8 @@ package com.exa.data;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+
 import com.exa.data.config.DMFGeneral;
 import com.exa.data.config.DMFMap;
 import com.exa.data.config.DMFSmart;
@@ -17,6 +19,7 @@ import com.exa.data.sql.XASQLDataSource;
 import com.exa.eva.OperatorManager.OMOperandType;
 import com.exa.expression.OMMethod;
 import com.exa.expression.eval.XPEvaluator;
+import com.exa.lang.parsing.XALParser;
 import com.exa.utils.ManagedException;
 import com.exa.utils.io.FilesRepositories;
 import com.exa.utils.io.OSFileRepoPart;
@@ -44,7 +47,7 @@ public class XadataApplicationTests extends TestCase {
 		SQLServerDataSource ds = new SQLServerDataSource();
 		ds.setUser("sa");  
         ds.setPassword("e@mP0wer");  
-        ds.setServerName("192.168.136.143");  
+        ds.setServerName("192.168.255.128");  
         ds.setPortNumber(1433);   
         ds.setDatabaseName("EAMPROD");
         
@@ -56,7 +59,9 @@ public class XadataApplicationTests extends TestCase {
         
         DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
         
-        DataReader<?> dr = dmf.getDataReader("default:/smart1", evSetup);
+        XALParser parser = new XALParser();
+        
+        DataReader<?> dr = dmf.getDataReader(parser, "default:/smart1", evSetup);
         
         dr.open();
         
@@ -77,7 +82,7 @@ public class XadataApplicationTests extends TestCase {
 		SQLServerDataSource ds = new SQLServerDataSource();
 		ds.setUser("sa");  
         ds.setPassword("e@mP0wer");  
-        ds.setServerName("192.168.79.132");  
+        ds.setServerName("192.168.255.128");  
         ds.setPortNumber(1433);
         ds.setDatabaseName("EAMPROD");
         
@@ -89,7 +94,9 @@ public class XadataApplicationTests extends TestCase {
         
         DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
         
-        DataReader<?> dr= dmf.getDataReader("default:/smart1", evSetup);
+        XALParser parser = new XALParser();
+        
+        DataReader<?> dr= dmf.getDataReader(parser, "default:/smart1", evSetup);
         
         dr.open();
         
@@ -99,7 +106,7 @@ public class XadataApplicationTests extends TestCase {
         
         dr.close();
         
-        dr = dmf.getDataReader("default:/sp-sql#newWOCode", evSetup);
+        dr = dmf.getDataReader(parser, "default:/sp-sql#newWOCode", evSetup);
         
         dr.open();
         
@@ -116,7 +123,7 @@ public class XadataApplicationTests extends TestCase {
 		SQLServerDataSource ds = new SQLServerDataSource();
 		ds.setUser("sa");  
         ds.setPassword("e@mP0wer");  
-        ds.setServerName("192.168.79.132");  
+        ds.setServerName("192.168.255.128");  
         ds.setPortNumber(1433);
         ds.setDatabaseName("EAMPROD");
         
@@ -131,7 +138,9 @@ public class XadataApplicationTests extends TestCase {
         evSetup.addVaraiable("start", String.class, "01/02/2016");
         evSetup.addVaraiable("end", String.class, "17/08/2018");
         
-        DataReader<?> dr = dmf.getDataReader("default:/smart2#entity2", evSetup);
+        XALParser parser =  new XALParser();
+        
+        DataReader<?> dr = dmf.getDataReader(parser, "default:/smart2#entity2", evSetup);
         
         dr.open();
         
@@ -146,6 +155,48 @@ public class XadataApplicationTests extends TestCase {
 		dr.close();
 	}
 	
+	/*public void testRealCase() throws ManagedException {
+		FilesRepositories filesRepo = new FilesRepositories();
+		
+		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
+		filesRepo.addRepoPart("private", new OSFileRepoPart("./src/test/java/com/exa/data/private"));
+		filesRepo.addRepoPart("data-config", new OSFileRepoPart("C:/Users/leader/Desktop/travaux"));
+		
+		
+		DriverManagerDataSource ds = new DriverManagerDataSource();
+		ds.setDriverClassName("oracle.jdbc.OracleDriver");
+		
+		String cnStr = "jdbc:oracle:thin:@//10.108.28.23:1521/GMAOP"; //getConnectionString("", "1521", dataBaseName, extendedProperties);
+		ds.setUrl(cnStr);
+		ds.setUsername("UGMAO");
+		ds.setPassword("ugmao");
+        
+        Map<String, XADataSource> dataSources = new HashMap<>();
+        dataSources.put("default", new XASQLDataSource(ds));
+        
+        DataManFactory dmf = new DMFSmart(filesRepo, dataSources, "default", s -> {});
+        dmf.initialize();
+        
+        DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
+        
+        evSetup.addVaraiable("start", String.class, "15/08/2019");
+        evSetup.addVaraiable("end", String.class, "30/08/2019");
+        
+        DataReader<?> dr = dmf.getDataReader("private:/stats-sollicitation#dras", evSetup);
+        
+        dr.open();
+        
+        assertTrue(new Boolean(dr.next()));
+        
+        System.out.println(dr.getInteger("traite022"));
+        
+        //System.out.println(dr.getString("nb2"));
+        
+        assertFalse(new Boolean(dr.next()));
+        
+		dr.close();
+	}*/
+	
 	public void testSQL() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
 		
@@ -155,7 +206,7 @@ public class XadataApplicationTests extends TestCase {
 		SQLServerDataSource ds = new SQLServerDataSource();
 		ds.setUser("sa");  
         ds.setPassword("e@mP0wer");  
-        ds.setServerName("192.168.79.132");  
+        ds.setServerName("192.168.255.128");  
         ds.setPortNumber(1433);
         ds.setDatabaseName("EAMPROD");
         
@@ -170,7 +221,10 @@ public class XadataApplicationTests extends TestCase {
         evSetup.addVaraiable("start", String.class, "01/02/2016");
         evSetup.addVaraiable("end", String.class, "17/08/2018");
         
-        DataReader<?> dr = dmf.getDataReader("default:/sql#r5uoms", evSetup);
+        
+       XALParser parser = new XALParser();
+        
+        DataReader<?> dr = dmf.getDataReader(parser, "default:/sql#r5uoms", evSetup);
         
         dr.open();
         
@@ -188,7 +242,7 @@ public class XadataApplicationTests extends TestCase {
 		SQLServerDataSource ds = new SQLServerDataSource();
 		ds.setUser("sa");  
         ds.setPassword("e@mP0wer");  
-        ds.setServerName("192.168.79.132");  
+        ds.setServerName("192.168.255.128");  
         ds.setPortNumber(1433);
         ds.setDatabaseName("EAMPROD");
         
@@ -216,10 +270,11 @@ public class XadataApplicationTests extends TestCase {
         });
         dmfXL.initialize();
         
+        XALParser parser = new XALParser();
         
-        DataReader<?> drSource = dmfXL.getDataReader("default:/sql-w#testData", evSetup);
+        DataReader<?> drSource = dmfXL.getDataReader(parser, "default:/sql-w#testData", evSetup);
         
-        DataWriter<?> dw = dmfSQL.getDataWriter("default:/sql-w#r5uoms", evSetup, drSource, false, false);
+        DataWriter<?> dw = dmfSQL.getDataWriter(parser, "default:/sql-w#r5uoms", evSetup, drSource, false, false);
         
         drSource.open();
         
@@ -243,7 +298,7 @@ public class XadataApplicationTests extends TestCase {
 		SQLServerDataSource ds = new SQLServerDataSource();
 		ds.setUser("sa");  
         ds.setPassword("e@mP0wer");  
-        ds.setServerName("192.168.79.132");  
+        ds.setServerName("192.168.255.128");  
         ds.setPortNumber(1433);
         ds.setDatabaseName("EAMPROD");
         
@@ -271,10 +326,11 @@ public class XadataApplicationTests extends TestCase {
         });
         dmfXL.initialize();
         
+        XALParser parser = new XALParser();
         
-        DataReader<?> drSource = dmfXL.getDataReader("default:/sql-w#testData2", evSetup);
+        DataReader<?> drSource = dmfXL.getDataReader(parser, "default:/sql-w#testData2", evSetup);
         
-        DataWriter<?> dw = dmfSQL.getDataWriter("default:/sql-w#r5events", evSetup, drSource, false, false);
+        DataWriter<?> dw = dmfSQL.getDataWriter(parser, "default:/sql-w#r5events", evSetup, drSource, false, false);
         
         drSource.open();
         
@@ -298,7 +354,7 @@ public class XadataApplicationTests extends TestCase {
 		SQLServerDataSource ds = new SQLServerDataSource();
 		ds.setUser("sa");  
         ds.setPassword("e@mP0wer");  
-        ds.setServerName("192.168.79.132");  
+        ds.setServerName("192.168.255.128");  
         ds.setPortNumber(1433);
         ds.setDatabaseName("EAMPROD");
         
@@ -310,7 +366,9 @@ public class XadataApplicationTests extends TestCase {
         
         DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
         
-        DataReader<?> dr = dmf.getDataReader("default:/sp-sql#newWOCode", evSetup);
+        XALParser parser = new XALParser();
+        
+        DataReader<?> dr = dmf.getDataReader(parser, "default:/sp-sql#newWOCode", evSetup);
         
         dr.open();
         
@@ -371,7 +429,9 @@ public class XadataApplicationTests extends TestCase {
 		
 		DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
 		
-		DataReader<?> dr = dmf.getDataReader("default:/map#test", evSetup);
+		XALParser parser = new XALParser();
+		
+		DataReader<?> dr = dmf.getDataReader(parser, "default:/map#test", evSetup);
 		
 		dr.open();
 		
@@ -393,7 +453,7 @@ public class XadataApplicationTests extends TestCase {
 		SQLServerDataSource ds = new SQLServerDataSource();
 		ds.setUser("sa");  
         ds.setPassword("e@mP0wer");  
-        ds.setServerName("192.168.79.132");  
+        ds.setServerName("192.168.255.128");  
         ds.setPortNumber(1433);
         ds.setDatabaseName("EAMPROD");
         
@@ -405,8 +465,9 @@ public class XadataApplicationTests extends TestCase {
         DataManFactory dmfGen = new DMFGeneral("smart", filesRepo, dataSources, "default", s -> {});//new DMFSmart(filesRepo, dataSources, "default");
         dmfGen.initialize();
         
+        XALParser parser = new XALParser();
         
-        DataReader<?> dr = dmfGen.getDataReader("default:/macro", evSetup);
+        DataReader<?> dr = dmfGen.getDataReader(parser, "default:/macro", evSetup);
         
         dr.open();
         
@@ -443,7 +504,9 @@ public class XadataApplicationTests extends TestCase {
 		DataManFactory dmfGen = new DMFGeneral("smart", filesRepo, dataSources, "default", s -> {});//new DMFSmart(filesRepo, dataSources, "default");
 	    dmfGen.initialize();
 	    
-	    DataReader<?> dr = dmfGen.getDataReader("default:/bca#entity1", evSetup);
+	    XALParser parser = new XALParser();
+	    
+	    DataReader<?> dr = dmfGen.getDataReader(parser, "default:/bca#entity1", evSetup);
         
         dr.open();
         
@@ -477,8 +540,9 @@ public class XadataApplicationTests extends TestCase {
 		DataManFactory dmfGen = new DMFGeneral("smart", filesRepo, dataSources, "default", s -> {});//new DMFSmart(filesRepo, dataSources, "default");
 	    dmfGen.initialize();
 	    
+	    XALParser parser = new XALParser();
 	    
-	    DataReader<?> dr = dmfGen.getDataReader("default:/dmu-setup", evSetup);
+	    DataReader<?> dr = dmfGen.getDataReader(parser, "default:/dmu-setup", evSetup);
         
         dr.open();
         

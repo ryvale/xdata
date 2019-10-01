@@ -85,9 +85,12 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 		if(field == null) return null;
 		
 		if(!"string".equals(field.getType())) throw new DataException(String.format("the field %s is not a string in the data reader %s", fieldName, name));
+		Value<?, XPOperand<?>> vl = rows.get(rowIndex).get(fieldName);
+		if(vl == null) return null;
+		
 		
 		try {
-			return rows.get(rowIndex).get(fieldName).asString();
+			return vl.asString();
 		} catch (ManagedException e) {
 			throw new DataException(e);
 		}
@@ -99,9 +102,11 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 		if(field == null) return null;
 		
 		if(!"int".equals(field.getType()) && !"integer".equals(field.getType())) throw new DataException(String.format("the field %s is not an integer in data reader %", fieldName, name));
+		Value<?, XPOperand<?>> vl = rows.get(rowIndex).get(fieldName);
+		if(vl == null) return null;
 		
 		try {
-			return rows.get(rowIndex).get(fieldName).asInteger();
+			return vl.asInteger();
 		} catch (ManagedException e) {
 			throw new DataException(e);
 		}
@@ -114,9 +119,11 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 		
 		if(!"date".equals(field.getType()) && !"datetime".equals(field.getType())) throw new DataException(String.format("the field %s is not a date in a data reader %s", fieldName, name));
 		
+		Value<?, XPOperand<?>> vl = rows.get(rowIndex).get(fieldName);
+		if(vl == null) return null;
 		
 		try {
-			String v = rows.get(rowIndex).get(fieldName).asString();
+			String v = vl.asString();
 			if(v == null) return null;
 			
 			return DF.parse(v);
@@ -131,8 +138,10 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 		if(field == null) return null;
 		
 		if(!"float".equals(field.getType()) && !"decimal".equals(field.getType()) && !"double".equals(field.getType())) throw new DataException(String.format("the field %s is not a float in data reader %s", fieldName, name));
+		Value<?, XPOperand<?>> vl = rows.get(rowIndex).get(fieldName);
+		if(vl == null) return null;
 		
-		return rows.get(rowIndex).get(fieldName).asDecimalValue().getValue();
+		return vl.asDecimalValue().getValue();
 	}
 
 	@Override
@@ -226,7 +235,9 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 		 			
 		 			if(field.getType().equals(vType)) continue;
 		 			
-		 			if(allowedTypes.contains(field.getType()) && allowedTypes.contains(vType)) continue;
+		 			if(allowedTypes.contains(field.getType())) continue;
+		 			
+		 			if("null".equals(vType)) continue;
 		 			
 		 			throw new DataException(String.format("Type mismatch for field %s of data reader %s. (not %s <=> %s)", fname, name, field.getType(), vType));
 		 		}
