@@ -7,11 +7,14 @@ import java.util.Map;
 import com.exa.data.config.DataManFactory;
 import com.exa.data.config.DataManFactory.DMUSetup;
 import com.exa.data.config.utils.DMUtils;
+import com.exa.expression.Variable;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
+import com.exa.lang.expression.XALCalculabeValue;
 import com.exa.utils.ManagedException;
 import com.exa.utils.io.FilesRepositories;
 import com.exa.utils.values.BooleanValue;
+import com.exa.utils.values.CalculableValue;
 import com.exa.utils.values.DecimalValue;
 import com.exa.utils.values.IntegerValue;
 import com.exa.utils.values.ObjectValue;
@@ -114,6 +117,8 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 			
 			variableContext.addVariable("sourceDr", DataReader.class, drSource);
 			
+			addSourceDRInVC(drSource);
+			
 			ObjectValue<XPOperand<?>> fm = config.getAttributAsObjectValue("fields");
 			
 			this.defaultIfExp = fm.getAttribut("if");
@@ -184,9 +189,87 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 		} catch (ManagedException e) {
 			throw new DataException(e);
 		}
-		
-		
 	}
+	
+	private static void addSourceDRInVC(ObjectValue<XPOperand<?>> ov, DataReader<?> thisDr, DataReader<?> sourceDr) throws ManagedException {
+		Map<String, Value<?, XPOperand<?>>> mp = ov.getValue();
+		
+		for(String propertyName : mp.keySet()) {
+			//if("source".equals(propertyName)) continue;
+			
+			Value<?, XPOperand<?>> vl=mp.get(propertyName);
+			
+			ObjectValue<XPOperand<?>> vov = vl.asObjectValue();
+			if(vov != null) {
+				addSourceDRInVC(vov, thisDr, sourceDr);
+				continue;
+			}
+			
+			CalculableValue<?, XPOperand<?>> cl = vl.asCalculableValue();
+			if(cl == null) continue;
+			
+			XALCalculabeValue<?> xalCL = (XALCalculabeValue<?>) cl;
+			VariableContext vc = xalCL.getVariableContext();
+			VariableContext varVc = getVariable(vc, "sourceDr");
+			if(varVc != null) 
+				varVc.addVariable("sourceDr", DataReader.class, sourceDr);
+				
+			varVc = getVariable(vc, "this");
+			if(varVc != null) 
+				varVc.addVariable("this", DataReader.class, thisDr);
+			
+		}
+	}
+	
+	private static VariableContext getVariable(VariableContext originalVc, String vname) {
+		Variable<?> var = null;
+		VariableContext vc = originalVc;
+		do {
+			var = vc.getContextVariable(vname);
+			if(var != null) {
+				if(var.asXPressionVariable() == null) return null;
+				
+				originalVc = vc.getParent();
+				if(originalVc == null) return null;
+			}
+			
+			vc = vc.getParent();
+			
+		} while(vc != null);
+		
+		return originalVc;
+	}
+	
+	private void addSourceDRInVC(DataReader<?> sourceDr) throws ManagedException {
+		Map<String, Value<?, XPOperand<?>>> mp = config.getValue();
+		
+		for(String propertyName : mp.keySet()) {
+			if("source".equals(propertyName)) continue;
+			
+			Value<?, XPOperand<?>> vl=mp.get(propertyName);
+			
+			ObjectValue<XPOperand<?>> vov = vl.asObjectValue();
+			if(vov != null) {
+				addSourceDRInVC(vov, this, sourceDr);
+				continue;
+			}
+			
+			CalculableValue<?, XPOperand<?>> cl = vl.asCalculableValue();
+			if(cl == null) continue;
+			
+			XALCalculabeValue<?> xalCL = (XALCalculabeValue<?>) cl;
+			VariableContext vc = xalCL.getVariableContext();
+			VariableContext varVc = getVariable(vc, "sourceDr");
+			if(varVc != null) 
+				varVc.addVariable("sourceDr", DataReader.class, sourceDr);
+				
+			varVc = getVariable(vc, "this");
+			if(varVc != null) 
+				varVc.addVariable("this", DataReader.class, this);
+				
+		}
+	}
+	
 
 	@Override
 	public void close() throws DataException {
