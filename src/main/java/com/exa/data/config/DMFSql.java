@@ -36,18 +36,6 @@ public class DMFSql extends DataManFactory {
 	@Override
 	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, DMUtils dmu) throws ManagedException {
 		
-		/*String dsName = ovEntity.getAttributAsString("dataSource");
-		
-		if(dsName == null) dsName = defaultDataSource;
-		
-		if(dsName == null) throw new ManagedException(String.format("No data source provided."));
-		
-		XADataSource xaDS = dataSources.get(dsName);
-		if(xaDS == null) throw new ManagedException(String.format("The data source %s specified is not present.", dsName));
-		
-		XASQLDataSource xasqlds = xaDS.asXASQLDataSource();
-		if(xasqlds == null) throw new ManagedException(String.format("The data source %s specified should be sql type.", dsName));*/
-		
 		DataReader<?> dr = new SQLDataReader(name, ovEntity, dmu);
 		
 		return dr;
@@ -55,20 +43,6 @@ public class DMFSql extends DataManFactory {
 
 	@Override
 	public DataWriter<?> getDataWriter(String name, ObjectValue<XPOperand<?>> ovEntity, DataReader<?> drSource, DMUtils dmu, boolean preventInsertion, boolean preventUpdate) throws ManagedException {
-		/*String dsName = ovEntity.getAttributAsString("dataSource");
-		
-		if(dsName == null) dsName = defaultDataSource;
-		
-		if(dsName == null) throw new ManagedException(String.format("No data source provided."));
-		
-		XADataSource xaDS = dataSources.get(dsName);
-		if(xaDS == null) throw new ManagedException(String.format("The data source %s specified is not present.", dsName));
-		
-		XASQLDataSource xasqlds = xaDS.asXASQLDataSource();
-		if(xasqlds == null) throw new ManagedException(String.format("The data source %s specified should be sql type.", dsName));
-		
-		DataSource ds = xasqlds.getDataSource();
-		if(ds == null) throw new ManagedException(String.format("The data source %s specified is not present.", dsName));*/
 		
 		DataWriter<?> dw = new SQLDataWriter(name, drSource, ovEntity, dmu, preventInsertion, preventUpdate);
 		

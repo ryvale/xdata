@@ -59,7 +59,7 @@ entities {
 			type "libre"
 			
 			eof => this.lineVisited == 1
-		},
+		}
 		
 		nb {
 			type "row-to-field",
@@ -111,6 +111,29 @@ entities {
 					}
 				}
 			}
+		}
+		
+	}
+	
+	entity3 {
+		type "smart"
+		
+		main {
+			type 'x-literal'
+			
+			rows [
+				{ code "00" }
+			]
+		}
+		
+		an {
+			type 'x-literal'
+			
+			flow 'after-main-next'
+			
+			rows [
+				{ code2 = rootDr.getString('code') }
+			]
 		}
 		
 	}

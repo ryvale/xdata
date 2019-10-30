@@ -1,7 +1,7 @@
 package com.exa.data;
 
 import java.util.Date;
-
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -125,6 +125,7 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 				DataReader<?> dr = getDataReader(ovDRConfig, drName, subDmu);
 				
 				vc.addVariable("this", DataReader.class, dr);
+				vc.addVariable("parentDr", DataReader.class, this);
 				
 				if(FLW_MAIN.equals(flow)) {
 					
@@ -272,8 +273,7 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 
 	@Override
 	public SmartDataReader cloneDM() {
-		
-		return null;
+		return new SmartDataReader(name, config, filesRepos, dataSources, defaultDataSource, dmu, dmuSetup, /* TO FIX*/ () -> new HashMap<>());
 	}
 
 	@Override

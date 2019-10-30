@@ -35,7 +35,7 @@ public class MtdExecuteFlow extends OMMethod.XPOrtMethod<DMUtils, String> {
 			public String value(XPEvaluator evaluator) throws ManagedException {
 				String macroRef = params.get(0).asOPString().value(evaluator);
 				
-				DMUtils v = object.value(evaluator);
+				//DMUtils v = object.value(evaluator);
 				
 				return "OK:" + macroRef;
 			}

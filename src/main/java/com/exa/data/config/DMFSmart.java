@@ -23,8 +23,8 @@ public class DMFSmart extends DataManFactory {
 	public DMFSmart(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUSetup dmuSetup, MapGetter mapGetter) {
 		
 		super(filesRepos, dataSources, defaultDataSource, dmuSetup, (id, context) -> {
-			if("rootDr".equals(id)) return "DataReader";
-			if("rootOv".equals(id)) return "ObjectValue";
+			if("rootDr".equals(id) || "parentDr".equals(id)) return "DataReader";
+			//if("rootOv".equals(id)) return "ObjectValue";
 			
 			if("dmu".equals(id)) return "DMUtils";
 			

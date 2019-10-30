@@ -3,8 +3,6 @@ package com.exa.data;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-
 import com.exa.data.config.DMFGeneral;
 import com.exa.data.config.DMFMap;
 import com.exa.data.config.DMFSmart;
@@ -153,6 +151,18 @@ public class XadataApplicationTests extends TestCase {
         assertFalse(new Boolean(dr.next()));
         
 		dr.close();
+		
+		dr = dmf.getDataReader(parser, "default:/smart2#entity3", evSetup);
+		
+		dr.open();
+		
+		assertTrue(new Boolean(dr.next()));
+		
+		System.out.println(dr.getString("code"));
+		
+		System.out.println(dr.getString("code2"));
+		
+		dr.close();
 	}
 	
 	/*public void testRealCase() throws ManagedException {
@@ -222,7 +232,7 @@ public class XadataApplicationTests extends TestCase {
         evSetup.addVaraiable("end", String.class, "17/08/2018");
         
         
-       XALParser parser = new XALParser();
+        XALParser parser = new XALParser();
         
         DataReader<?> dr = dmf.getDataReader(parser, "default:/sql#r5uoms", evSetup);
         
@@ -252,7 +262,7 @@ public class XadataApplicationTests extends TestCase {
         DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
         
         DataManFactory dmfSQL = new DMFSql(filesRepo, dataSources, "default", s -> {}, (id, context) -> {
-        	if("rootOv".equals(id)) return "ObjectValue";
+        	//if("rootOv".equals(id)) return "ObjectValue";
         	
         	if("updateMode".equals(id)) return "string";
         	
@@ -308,7 +318,7 @@ public class XadataApplicationTests extends TestCase {
         DCEvaluatorSetup evSetup = new DCEvaluatorSetup();
         
         DataManFactory dmfSQL = new DMFSql(filesRepo, dataSources, "default", s -> {}, (id, context) -> {
-        	if("rootOv".equals(id)) return "ObjectValue";
+        	//if("rootOv".equals(id)) return "ObjectValue";
         	
         	if("updateMode".equals(id)) return "string";
         	

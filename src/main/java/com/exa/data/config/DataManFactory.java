@@ -82,11 +82,9 @@ public abstract class DataManFactory {
 	
 	public DataManFactory(FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUSetup dmuSetup) {
 		this(filesRepos, dataSources, defaultDataSource, dmuSetup, (id, context) -> {
-			if("rootDr".equals(id) || "sourceDr".equals(id)) return "DataReader";
+			if("rootDr".equals(id) || "sourceDr".equals(id) || "parentDr".equals(id)) return "DataReader";
 			
 			if("rootDw".equals(id)) return "DataWriter";
-			
-			if("rootOv".equals(id)) return "ObjectValue";
 			
 			if("dmu".equals(id)) return "DMUtils";
 			
@@ -95,6 +93,10 @@ public abstract class DataManFactory {
 			
 			return "DataReader";
 		});
+	}
+	
+	public DataReader<?> getDataReader(XALParser parser, String drName) throws ManagedException {
+		return getDataReader(parser, drName, new DCEvaluatorSetup());
 	}
 	
 	public DataReader<?> getDataReader(XALParser parser, String drName, DCEvaluatorSetup evSetup) throws ManagedException {
@@ -135,8 +137,6 @@ public abstract class DataManFactory {
 		
 		Map<String, ObjectValue<XPOperand<?>>> libOV = XALParser.getDefaultObjectLib(ovRoot);
 		
-		evaluator.addVariable("rootOv", ObjectValue.class, ovRoot);
-		
 		computing.calculateInit();
 		
 		ObjectValue<XPOperand<?>> ovEntity = ovEntities.getAttributAsObjectValue(name);
@@ -176,8 +176,6 @@ public abstract class DataManFactory {
 		
 		ObjectValue<XPOperand<?>> ovEntities = ovRoot.getAttributAsObjectValue("entities");
 		
-		evaluator.addVariable("rootOv", ObjectValue.class, ovRoot);
-		
 		computing.calculateInit();
 		
 		String name;
@@ -204,8 +202,6 @@ public abstract class DataManFactory {
 		DMUtils dmu = new DMUtils(dmuDmf, computing, vc, dmuSetup, ds);
 		dmuSetup.setup(dmu);
 		
-		//evaluator.pushVariableContext(vc);
-		
 		DataWriter<?> dm = getDataWriter(ovEntities, name, evaluator, vc, drSource, XALParser.getDefaultObjectLib(ovRoot), dmu, preventInsertion, preventUpdate);
 		
 		vc.addVariable("sourceDr", DataReader.class, drSource);
@@ -213,8 +209,6 @@ public abstract class DataManFactory {
 		vc.addVariable("rootDw", DataWriter.class, dm);
 		
 		vc.addVariable("dmu", DMUtils.class, dmu);
-		
-		//evaluator.popVariableContext();
 		
 		return dm;
 	}
@@ -232,30 +226,6 @@ public abstract class DataManFactory {
 		ObjectValue<XPOperand<?>> ovEntity = dmu.getExecutedComputing().object(ovEntities, name, dmu.getVc(), libOV); //parser.object(ovEntities, name, dmu.getEvaluator(), dmu.getVc(), libOV);
 		
 		return getDataReader(name, ovEntity, libOV, dmu);
-		
-		/*ObjectValue<XPOperand<?>> ovBeforeConnectionActions = ovEntities.getPathAttributAsObjecValue(name + ".beforeConnection");
-		if(ovBeforeConnectionActions != null) {
-			Map<String, Value<?, XPOperand<?>>> mpBCA = ovBeforeConnectionActions.getValue();
-			
-			for(String bcaName: mpBCA.keySet()) {
-				Action ac  = dmu.registerBeforeConnectionAction(bcaName, mpBCA.get(bcaName));
-				if(ac == null) throw new ManagedException(String.format("the action %s in 'beforeConnection' for entity '%s' seem to be invalid", bcaName, name));
-			}
-		}
-		
-		ObjectValue<XPOperand<?>> ovBeforeExecution = ovEntities.getPathAttributAsObjecValue(name + ".beforeExecution");
-		if(ovBeforeExecution != null) {
-			Map<String, Value<?, XPOperand<?>>> mpBCA = ovBeforeExecution.getValue();
-			
-			for(String bcaName: mpBCA.keySet()) {
-				Action ac = dmu.registerOnExecutionStartedAction(bcaName, mpBCA.get(bcaName));
-				if(ac == null) throw new ManagedException(String.format("the action %s in 'beforeExecution' for entity '%s' seem to be invalid", bcaName, name));
-			}
-		}
-		
-		DataReader<?> res = getDataReader(name, ovEntity, dmu);
-		
-		return res;*/
 	}
 	
 	public DataReader<?> getDataReader(String name, ObjectValue<XPOperand<?>> ovEntity, Map<String, ObjectValue<XPOperand<?>>> libOV, DMUtils dmu) throws ManagedException {
