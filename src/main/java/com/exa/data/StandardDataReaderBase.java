@@ -27,6 +27,8 @@ public abstract class StandardDataReaderBase<_FIELD extends Field> implements Da
 	
 	protected boolean shouldCloseConnection = true;
 	
+	//protected Value<?, XPOperand<?>> openCondition = new BooleanValue<>(Boolean.TRUE);
+	
 	public StandardDataReaderBase(String name, DMUtils dmu) {
 		super();
 		this.name = name;

@@ -42,9 +42,17 @@ public class TDMUtils extends TObjectClass<DMUtils, Object> {
 		omStr.addOperator(new MtdStringToSQL());
 		methods.put("stringToSQL", new Method<>("stringToSQL", String.class, omStr));
 		
+		omStr = new OMMethod<>("comaStringToSQL", 2, OMOperandType.POST_OPERAND);
+		omStr.addOperator(new MtdComaStringToSQL());
+		methods.put("comaStringToSQL", new Method<>("comaStringToSQL", String.class, omStr));
+		
 		omStr = new OMMethod<>("getStringParam", 2, OMOperandType.POST_OPERAND);
 		omStr.addOperator(new MtdGetStringParam());
 		methods.put("getStringParam", new Method<>("getStringParam", String.class, omStr));
+		
+		OMMethod<Double> omDbl = new OMMethod<>("safeDiv", 3, OMOperandType.POST_OPERAND);
+		omDbl.addOperator(new MtdSafeDivider());
+		methods.put("safeDiv", new Method<>("safeDiv", Double.class, omDbl));
 	}
 
 	@SuppressWarnings("unchecked")

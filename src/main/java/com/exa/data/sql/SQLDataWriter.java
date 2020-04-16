@@ -24,6 +24,7 @@ import com.exa.data.config.utils.BreakProperty;
 import com.exa.data.config.utils.DMUtils;
 import com.exa.data.config.utils.DataUserException;
 import com.exa.data.sql.oracle.PLSQLDateFormatter;
+import com.exa.data.sql.sqlserver.TSQLDateFormatter;
 import com.exa.expression.VariableContext;
 import com.exa.expression.XPOperand;
 import com.exa.lang.parsing.Computing;
@@ -48,6 +49,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 	static {
 		formatters.put("string-sql", DF_STRING);
 		formatters.put("string-sql-server", DF_STRING);
+		formatters.put("float-sqlserver", DF_STRING);
 		formatters.put("string-oracle", DF_STRING);
 		formatters.put("string-sql-oracle", DF_STRING);
 		formatters.put("string-plsql", DF_STRING);
@@ -58,6 +60,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 		DataFormatter<?> df = new SQLNumberFormatter();
 		formatters.put("int-sql", df);
 		formatters.put("int-sql-server", df);
+		formatters.put("int-sqlserver", df);
 		formatters.put("int-oracle", df);
 		formatters.put("int-sql-oracle", df);
 		formatters.put("int-plsql", df);
@@ -67,6 +70,7 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 		
 		formatters.put("float-sql", df);
 		formatters.put("float-sql-server", df);
+		formatters.put("float-sqlserver", df);
 		formatters.put("float-oracle", df);
 		formatters.put("float-sql-oracle", df);
 		formatters.put("float-plsql", df);
@@ -88,6 +92,21 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 		formatters.put("date-sql-oracle", df);
 		formatters.put("date-plsql", df);
 		formatters.put("date-pl-sql", df);
+		
+		
+		df = new TSQLDateFormatter();
+		formatters.put("datetime-sql-server", df);
+		formatters.put("datetime-sqlserver", df);
+		formatters.put("datetime-tsql", df);
+		formatters.put("datetime-t-sql", df);
+		formatters.put("datetime-transact-sql", df);
+		
+		formatters.put("date-sql-server", df);
+		formatters.put("date-sqlserver", df);
+		formatters.put("date-tsql", df);
+		formatters.put("date-t-sql", df);
+		formatters.put("date-transact-sql", df);
+		
 		
 		expTypes.add("default");expTypes.add("reader");expTypes.add("value");expTypes.add("sql");expTypes.add("entire-sql");
 	}
@@ -140,7 +159,10 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 			
 			if(debugOn) System.out.println(updateSQL);
 			PreparedStatement ps = connection.prepareStatement(updateSQL);
-			return ps.executeUpdate();
+			int res =  ps.executeUpdate();
+			ps.close();
+			
+			return res;
 			
 			
 		} catch (ManagedException|SQLException e) {
@@ -173,14 +195,26 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 			String updateSQL;
 			if(rs.next()) {
 				variableContext.assignOrDeclareVariable("updateMode", String.class, "update");
-				if(mustBreak()) return null;
-				if(preventUpdate) return null;
+				if(mustBreak()) {
+					ps.close();
+					return null;
+				}
+				if(preventUpdate) {
+					ps.close();
+					return null;
+				}
 				updateSQL = getUpdateSQL(table, where);
 			}
 			else {
 				variableContext.assignOrDeclareVariable("updateMode", String.class, "insert");
-				if(mustBreak()) return null;
-				if(preventInsertion) return null;
+				if(mustBreak()) {
+					ps.close();
+					return null;
+				}
+				if(preventInsertion) {
+					ps.close();
+					return null;
+				}
 				updateSQL = getInsertSQL(table);
 			}
 			ps.close();

@@ -17,5 +17,7 @@ public abstract class ResponseManager {
 	public abstract String getString(String name) throws ManagedException;
 	
 	public abstract RMJSONObject asRMJSONObject();
+	
+	public abstract boolean isOpen();
  
 }

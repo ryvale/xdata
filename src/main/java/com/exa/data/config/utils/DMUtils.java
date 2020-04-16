@@ -35,6 +35,7 @@ import com.exa.utils.values.ObjectValue;
 import com.exa.utils.values.Value;
 
 public class DMUtils {
+	public static Boolean FIELD_DEBUG = Boolean.FALSE;
 	
 	public static final DateFormat DF_STD = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
@@ -54,19 +55,13 @@ public class DMUtils {
 	
 	private List<ActionSeeker> actionSeekers = new ArrayList<>();
 	
-	//private ObjectValue<XPOperand<?>> ovRoot;
-	
 	private DMFGeneral dmf;
 	
 	private Map<String, Macro<?>> macros = new HashMap<>();
 	
 	private VariableContext vc;
 	
-	//private XPEvaluator evaluator;
-	
 	private DMUSetup dmuSetup;
-	
-	//private Map<String, XADataSource> dataSources;
 	
 	private String dataSource;
 	
@@ -76,7 +71,7 @@ public class DMUtils {
 	
 	private Computing executedComputing;
 	
-	public DMUtils(DMFGeneral dmf, Computing executedComputing/*, ObjectValue<XPOperand<?>> ovRoot, XPEvaluator evaluator*/, VariableContext vc, DMUSetup dmuSetup, String dataSource) {
+	public DMUtils(DMFGeneral dmf, Computing executedComputing, VariableContext vc, DMUSetup dmuSetup, String dataSource) {
 		super();
 		//this.ovRoot = ovRoot;
 		this.dmf = dmf;
@@ -395,5 +390,20 @@ public class DMUtils {
 		if(v == null || "".equals(v)) return defaultValue;
 		
 		return "'" + v.replaceAll("'", "''") + "'";
+	}
+	
+	public static String comaStringtoSQLString(String v, String defaultValue) {
+		
+		if(v == null) return null;
+		
+		String[] parts = v.split("[,]");
+		
+		StringBuilder res = new StringBuilder();
+		
+		for(String part : parts) {
+			res.append(", " + toSQLString(part, defaultValue));
+		}
+		
+		return  (res.length() == 0 ? "''" : res.substring(2));
 	}
 }

@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Vector;
 
 import com.exa.data.DataReader;
+import com.exa.data.config.utils.DMUtils;
 import com.exa.expression.OMMethod;
 import com.exa.expression.OMMethod.XPOrtMethod;
 import com.exa.expression.Type;
@@ -37,6 +38,9 @@ public class MtdDrGetDate extends OMMethod.XPOrtMethod<DataReader<?>, Date> {
 			public Date value(XPEvaluator eval) throws ManagedException {
 				String fieldName = xpFieldName.get(0).asOPString().value(eval);
 				DataReader<?> dr = xpDR.value(eval);
+				
+				//if(DMUtils.FIELD_DEBUG) System.out.println(String.format("Getting date field '%s'", fieldName));
+				
 				
 				return dr.getDate(fieldName);
 			}

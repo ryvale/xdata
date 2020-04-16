@@ -24,9 +24,12 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 	protected static final String FLW_MAIN = "main";
 	
 	protected static final String FLW_AFTER_MAIN = "after-main-next";
+	
+	protected static final String FLW_AFTER_MAIN_REOPEN = "after-main-next-reopen";
 
 	protected Map<String, DataReader<?>> mainReaders = new LinkedHashMap<>();
 	protected Map<String, DataMan> afterMainActions = new LinkedHashMap<>();
+	protected Map<String, DataMan> afterMainActionsReopen = new LinkedHashMap<>();
 	protected Map<String, DataMan> oneTimeActions = new LinkedHashMap<>();
 	protected Map<String, DataMan> alwaysActions = new LinkedHashMap<>();
 	protected Map<String, DataMan>  afterMainOneTimeActions = new LinkedHashMap<>();
@@ -34,11 +37,13 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 	protected Map<String, SmartDataReader> subReaders = new LinkedHashMap<>();
 	
 	protected DataReader<?> currentMainReader = null;
-	protected boolean dataRead = false;
+	//protected boolean dataRead = false;
 
 	private Iterator<DataReader<?>> drIndex = null;
 	
 	protected Integer _lineVisited = 0;
+	
+	private boolean dataInBuffer = false;
 		
 	
 	public SmartDataReader(String name, ObjectValue<XPOperand<?>> config, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUtils dmu, DMUSetup dmuSetup, MapGetter mapGetter) {
@@ -66,13 +71,21 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 				currentMainReader.open();
 			}
 			else currentMainReader.close();
-			return dataRead = false;
+			return dataInBuffer = false;
 		}
 		
-		dataRead = true;
+		dataInBuffer = true;
 		++_lineVisited;
 		
 		for(DataMan dm : afterMainActions.values()) dm.execute();
+		
+		for(DataMan dm : afterMainActionsReopen.values()) {
+			try { dm.close(); } catch(DataException e) { e.printStackTrace(); }
+			
+			dm.open();
+			dm.execute();
+			//dm.close();
+		}
 		
 		return true;
 	}
@@ -89,6 +102,18 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		for(DataMan dm : afterMainActions.values()) {
 			DataReader<?> dr = dm.asDataReader();
 			if(dr == null) continue;
+			
+			if(dr.lineVisited() == 0) continue;
+			
+			if(dr.containsField(fieldName))
+				return dr.getString(fieldName);
+		}
+		
+		for(DataMan dm : afterMainActionsReopen.values()) {
+			DataReader<?> dr = dm.asDataReader();
+			if(dr == null) continue;
+			
+			if(dr.lineVisited() == 0) continue;
 			
 			if(dr.containsField(fieldName))
 				return dr.getString(fieldName);
@@ -138,6 +163,11 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 					continue;
 				}
 				
+				if(FLW_AFTER_MAIN_REOPEN.equals(flow)) {
+					afterMainActionsReopen.put(drName, dr);
+					continue;
+				}
+				
 			}
 			dmu.executeBeforeConnectionActions();
 		} catch (ManagedException e) {
@@ -147,7 +177,7 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		
 		drIndex = mainReaders.values().iterator();
 		
-		if(!drIndex.hasNext()) return dataRead = false;
+		if(!drIndex.hasNext()) return dataInBuffer = false;
 		currentMainReader = drIndex.next();
 		currentMainReader.open();
 		
@@ -159,11 +189,9 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 			DataReader<?> dr = dm.asDataReader();
 			
 			dr.open();
-		
-			
 		}
 		
-		return dataRead = true;
+		return dataInBuffer = true;
 		
 	}
 	
@@ -215,6 +243,14 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 			try { dr.close(); } catch(DataException e) { e.printStackTrace();}
 		}
 		
+		for(DataMan dm : afterMainActionsReopen.values()) {
+			DataReader<?> dr = dm.asDataReader();
+			
+			if(dr == null) continue;
+			
+			try { dr.close(); } catch(DataException e) { e.printStackTrace(); }
+		}
+		
 		for(DataMan dm : oneTimeActions.values()) {
 			DataReader<?> dr = dm.asDataReader();
 			if(dr == null) continue;
@@ -251,6 +287,18 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 			DataReader<?> dr = dm.asDataReader();
 			if(dr == null) continue;
 			
+			if(dr.lineVisited() == 0) continue;
+			
+			if(dr.containsField(fieldName))
+				return dr.getDate(fieldName);
+		}
+		
+		for(DataMan dm : afterMainActionsReopen.values()) {
+			DataReader<?> dr = dm.asDataReader();
+			if(dr == null) continue;
+			
+			if(dr.lineVisited() == 0) continue;
+			
 			if(dr.containsField(fieldName))
 				return dr.getDate(fieldName);
 		}
@@ -263,6 +311,19 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		for(DataMan dm : afterMainActions.values()) {
 			DataReader<?> dr = dm.asDataReader();
 			if(dr == null) continue;
+			
+			if(dr.lineVisited() == 0) continue;
+			
+			if(dr.containsField(fieldName)) 
+				return dr.getDouble(fieldName);
+			
+		}
+		
+		for(DataMan dm : afterMainActionsReopen.values()) {
+			DataReader<?> dr = dm.asDataReader();
+			if(dr == null) continue;
+			
+			if(dr.lineVisited() == 0) continue;
 			
 			if(dr.containsField(fieldName)) 
 				return dr.getDouble(fieldName);
@@ -283,6 +344,18 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 			DataReader<?> dr = dm.asDataReader();
 			if(dr == null) continue;
 			
+			if(dr.lineVisited() == 0) continue;
+			
+			if(dr.containsField(fieldName))
+				return dr.getObject(fieldName);
+		}
+		
+		for(DataMan dm : afterMainActionsReopen.values()) {
+			DataReader<?> dr = dm.asDataReader();
+			if(dr == null) continue;
+			
+			if(dr.lineVisited() == 0) continue;
+			
 			if(dr.containsField(fieldName))
 				return dr.getObject(fieldName);
 		}
@@ -290,9 +363,7 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 	}
 
 	@Override
-	public int lineVisited() {
-		return _lineVisited;
-	}
+	public int lineVisited() { return _lineVisited; }
 
 	@Override
 	public Integer getInteger(String fieldName) throws DataException {
@@ -301,10 +372,25 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 			DataReader<?> dr = dm.asDataReader();
 			if(dr == null) continue;
 			
+			if(dr.lineVisited() == 0) continue;
+			
+			if(dr.containsField(fieldName))
+				return dr.getInteger(fieldName);
+		}
+		
+		for(DataMan dm : afterMainActionsReopen.values()) {
+			DataReader<?> dr = dm.asDataReader();
+			if(dr == null) continue;
+			
+			if(dr.lineVisited() == 0) continue;
+			
 			if(dr.containsField(fieldName))
 				return dr.getInteger(fieldName);
 		}
 		return null;
 	}
+
+	@Override
+	public boolean dataInBuffer() { return dataInBuffer; }
 	
 }

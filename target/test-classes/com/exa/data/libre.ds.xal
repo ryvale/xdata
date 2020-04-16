@@ -1,0 +1,44 @@
+references {}
+
+entities {
+
+	test1 {
+		type "smart"
+		
+		from "r5binstock"
+		
+		main {
+			type "tsql"
+			
+			fields {
+				manager exa { prefix "bis_" }
+				
+				items {
+					store, part, part_org, bin, qty
+				}
+			}
+			
+			orderBy "bis_store"
+		}     
+		
+		libre0 {
+			type "libre"
+			flow "after-main-next"
+			
+			eof true
+			
+			fields {
+				items {
+				
+				}
+			}
+			
+			
+			
+			
+		}
+		
+		
+	}
+
+}

@@ -24,6 +24,8 @@ public class MapReader extends StandardDataReaderBase<DynamicField> {
 	public static final DateFormat DF_STD = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	protected final static Set<String> expTypes = new HashSet<>();
+	
+	private boolean dataInBuffer = false;
 
 	public static interface MapGetter {
 		Map<String, ?> get();
@@ -50,10 +52,10 @@ public class MapReader extends StandardDataReaderBase<DynamicField> {
 
 	@Override
 	public boolean next() throws DataException {
-		if(_lineVisited > 0) return false;
+		if(_lineVisited > 0) return dataInBuffer = false;
 		++_lineVisited;
 
-		return true;
+		return dataInBuffer = true;
 	}
 
 	@Override
@@ -259,6 +261,11 @@ public class MapReader extends StandardDataReaderBase<DynamicField> {
 	@Override
 	public MapReader cloneDM() throws DataException {
 		return new MapReader(name, config, dmu, mapGetter);
+	}
+
+	@Override
+	public boolean dataInBuffer() {
+		return dataInBuffer;
 	}
 
 	

@@ -3,6 +3,7 @@ package com.exa.data.expression.dataman;
 import java.util.Vector;
 
 import com.exa.data.DataReader;
+import com.exa.data.config.utils.DMUtils;
 import com.exa.expression.OMMethod;
 import com.exa.expression.Type;
 import com.exa.expression.XPOperand;
@@ -36,6 +37,8 @@ public class MtdDrGetInteger extends OMMethod.XPOrtMethod<DataReader<?>, Integer
 			public Integer value(XPEvaluator eval) throws ManagedException {
 				String fieldName = xpFieldName.get(0).asOPString().value(eval);
 				DataReader<?> dr = xpDR.value(eval);
+				
+				//if(DMUtils.FIELD_DEBUG) System.out.println(String.format("Getting Integer field '%s'", fieldName));
 				
 				return dr.getInteger(fieldName);
 			}

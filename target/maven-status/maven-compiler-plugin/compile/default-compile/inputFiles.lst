@@ -1,4 +1,5 @@
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\dataman\MtdExecute.java
+D:\p-project\exa-data\xadata\src\main\java\com\exa\data\sql\sqlserver\TSQLDateFormatter.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\config\DMFSmart.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\dmu\MtdEvalString.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\macro\package-info.java
@@ -27,6 +28,7 @@ D:\p-project\exa-data\xadata\src\main\java\com\exa\data\Field.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\StandardDataReaderBase.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\dmu\MtdGetStringParam.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\web\package-info.java
+D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\dmu\MtdComaStringToSQL.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\StandardDRWithDSBase.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\DCEvaluatorSetup.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\dmu\TDMUtils.java
@@ -36,6 +38,7 @@ D:\p-project\exa-data\xadata\src\main\java\com\exa\data\config\DataManFactory.ja
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\config\utils\DMUtils.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\sql\SQLDataReader.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\macro\MCReaderStrValue.java
+D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\dmu\MtdSafeDivider.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\sql\StoredProcedureReader.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\sql\oracle\PLSQLDateFormatter.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\config\DMFLibre.java
@@ -47,6 +50,7 @@ D:\p-project\exa-data\xadata\src\main\java\com\exa\data\config\DMFMap.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\sql\XAFieldManager.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\config\DMFWebService.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\action\ASAssignment.java
+D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\dataman\MtdDrDataInBuffer.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\dataman\MtdDrGetInteger.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\sql\package-info.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\MapDataSource.java
@@ -71,6 +75,7 @@ D:\p-project\exa-data\xadata\src\main\java\com\exa\data\config\DMFSpSql.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\FieldAction.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\config\package-info.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\DataMan.java
+D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\dataman\MtdDrSafeDiv.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\XLiteralDataReader.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\action\ActionSeeker.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\action\Action.java
@@ -78,6 +83,7 @@ D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\dataman\MtdDr
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\web\WSDataReader.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\dmu\MtdListToSQL.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\sql\XAFieldManagerFactory.java
+D:\p-project\exa-data\xadata\src\main\java\com\exa\data\expression\dataman\MtdDrGetXDouble.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\MapReader.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\action\ASThrowError.java
 D:\p-project\exa-data\xadata\src\main\java\com\exa\data\sql\oracle\package-info.java

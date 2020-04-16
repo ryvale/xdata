@@ -14,7 +14,6 @@ import com.exa.data.DataException;
 import com.exa.data.DynamicField;
 
 import com.exa.data.StandardDataReaderBase;
-import com.exa.data.XADataSource;
 import com.exa.data.config.utils.DMUtils;
 
 import com.exa.expression.XPOperand;
@@ -68,6 +67,8 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 	
 	protected int _lineVisited = 0;
 	
+	private boolean dataInBuffer = false;
+	
 	private ResponseManager responseMan = null;
 	
 	public WSDataReader(String name, ObjectValue<XPOperand<?>> config, WSDataSource wsDataSource, DMUtils dmu) {
@@ -81,7 +82,10 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 
 	@Override
 	public boolean next() throws DataException {
-		return responseMan.next();
+		boolean res = dataInBuffer = responseMan.next();
+		
+		if(res) ++_lineVisited;
+		return res;
 	}
 
 	@Override
@@ -229,9 +233,6 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 
 			dmu.executeBeforeConnectionActions();
 			
-			/*for(DataReader<?> dr : dmu.getReaders().values()) {
-				dr.open();
-			}*/
 			responseMan = rf.create(fields, vlPath == null ? null : vlPath.asString());
 			
 			responseMan.manage(rb);
@@ -244,15 +245,11 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 			
 			responseMan.manage(response);
 			
-			//rm.close();
-			
 		} catch (ManagedException | IOException e) {
 			throw new DataException(e);
 		}
-		/*finally {
-			if(response != null) try { response.} catch (Exception e2) { e2.printStackTrace(); }
-		}*/
-		return false;
+		
+		return responseMan.isOpen();
 	}
 
 	@Override
@@ -280,6 +277,13 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 	public WSDataReader cloneDM() throws DataException {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+
+
+	@Override
+	public boolean dataInBuffer() {
+		return dataInBuffer;
 	}
 
 }

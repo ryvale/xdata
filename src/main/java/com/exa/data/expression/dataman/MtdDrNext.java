@@ -11,7 +11,7 @@ import com.exa.expression.eval.ClassesMan;
 import com.exa.expression.eval.XPEvaluator;
 import com.exa.utils.ManagedException;
 
-public class MtdDrNext  extends OMMethod.XPOrtMethod<DataReader<?>, Boolean> {
+public class MtdDrNext extends OMMethod.XPOrtMethod<DataReader<?>, Boolean> {
 
 	public MtdDrNext() {
 		super("next", 1);

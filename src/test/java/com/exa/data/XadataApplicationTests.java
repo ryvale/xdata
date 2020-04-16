@@ -10,6 +10,7 @@ import com.exa.data.config.DMFSpSql;
 import com.exa.data.config.DMFSql;
 import com.exa.data.config.DMFXLiteral;
 import com.exa.data.config.DataManFactory;
+import com.exa.data.config.utils.DMUtils;
 import com.exa.data.expression.DCEvaluatorSetup;
 import com.exa.data.sql.SQLDataReader;
 import com.exa.data.sql.SQLDataWriter;
@@ -30,6 +31,7 @@ public class XadataApplicationTests extends TestCase {
 	static {
 		SQLDataReader.debugOn = true;
 		SQLDataWriter.debugOn = true;
+		DMUtils.FIELD_DEBUG = true;
 	}
 	
 	public XadataApplicationTests( String testName ) {
@@ -560,6 +562,8 @@ public class XadataApplicationTests extends TestCase {
         
         assertTrue("OK".equals(dr.getString("code")));
         assertTrue("test".equals(dr.getString("message")));
+        
+        //assertTrue(new Double(0.0).equals(dr.getDouble("misc")));
         
 		dr.close();
 		

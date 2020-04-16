@@ -5,20 +5,21 @@ import java.util.Vector;
 import com.exa.data.DataReader;
 import com.exa.expression.OMMethod;
 import com.exa.expression.OMMethod.XPOrtMethod;
+
 import com.exa.expression.Type;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.ClassesMan;
 import com.exa.expression.eval.XPEvaluator;
 import com.exa.utils.ManagedException;
 
-public class MtdDrGetDouble extends OMMethod.XPOrtMethod<DataReader<?>, Double> {
+public class MtdDrSafeDiv extends OMMethod.XPOrtMethod<DataReader<?>, Double> {
 
-	public MtdDrGetDouble() {
-		super("getDouble", 1);
+	public MtdDrSafeDiv() {
+		super("safeDiv", 3);
 	}
 
 	@Override
-	public boolean canManage(XPEvaluator arg0, int arg1, int arg2) throws ManagedException {
+	public boolean canManage(XPEvaluator eval, int order, int nbOperands) throws ManagedException {
 		return true;
 	}
 
@@ -34,14 +35,28 @@ public class MtdDrGetDouble extends OMMethod.XPOrtMethod<DataReader<?>, Double> 
 			
 			@Override
 			public Double value(XPEvaluator eval) throws ManagedException {
-				String fieldName = xpFieldName.get(0).asOPString().value(eval);
+				String numFieldName = xpFieldName.get(0).asOPString().value(eval);
+				
+				String denoFieldName = xpFieldName.get(1).asOPString().value(eval);
+				
+				Double defaultValue = xpFieldName.get(2).asOPDouble().value(eval);
+				
+				
 				DataReader<?> dr = xpDR.value(eval);
 				
-				//if(DMUtils.FIELD_DEBUG) System.out.println(String.format("Getting double field '%s'", fieldName));
+				Double num = dr.getDouble(numFieldName);
 				
-				return dr.getDouble(fieldName);
+				if(num == null) return defaultValue;
+				
+				Double deno = dr.getDouble(denoFieldName);
+				
+				if(deno == null || deno == 0.0) return defaultValue;
+				
+				
+				return num / deno;
 			}
 		};
 	}
-
+	
+	
 }

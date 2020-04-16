@@ -135,6 +135,11 @@ public class RMJSONObject extends ResponseManager {
 		builder.addHeader("content-type", "application/json");
 		
 	}
+
+	@Override
+	public boolean isOpen() {
+		return true;
+	}
 	
 
 }

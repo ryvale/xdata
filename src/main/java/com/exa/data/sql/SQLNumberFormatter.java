@@ -11,7 +11,7 @@ public class SQLNumberFormatter extends DataFormatter<Number> {
 
 	@Override
 	public String toSQLFromString(String str, String format) {
-		if(str == null) return "null";
+		if(str == null || "".equals(str.trim())) return "null";
 		return format == null ? str.replaceAll("[,]", ".") : str;
 	}
 

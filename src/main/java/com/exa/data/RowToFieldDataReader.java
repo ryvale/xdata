@@ -39,6 +39,8 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 		}
 	}
 	
+	private boolean dataInBuffer = false;
+	
 	protected DataReader<?> drSource = null;
 	
 	protected Value<?, XPOperand<?>> valueExp;
@@ -51,28 +53,45 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 	
 	protected Map<String, Object> values = new LinkedHashMap<>();
 	
+	private int _lineVisited = 0;
+	
 	public RowToFieldDataReader(String name, ObjectValue<XPOperand<?>> config, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUtils dmu, DMUSetup dmuSetup) {
 		super(name, config, filesRepos, dataSources, defaultDataSource, dmu, dmuSetup);
 	}
 
 	@Override
 	public boolean next() throws DataException {
+		int nbr = drSource.lineVisited();
 		
 		while(drSource.next()) {
 			for(Field field : fields.values()) {
 				try {
-					
+					if(field.getName().startsWith("debug")) System.out.println("Starting whith " + field.getName());
 					if(field.ifExp.asBoolean()) {
+						if(field.getName().startsWith("debug")) System.out.println(String.format("If ok for field '%s'", field.getName()));
+						
 						Object v = field.valueExp.getValue();
-						if(!values.containsKey(field.getName()) || v !=null)
+						
+						if(field.getName().startsWith("debug")) System.out.println(String.format("field '%s' value is '%s'", field.getName(), v == null ? "null" : v));
+						
+						if(!values.containsKey(field.getName()) || v !=null) {
+							if(field.getName().startsWith("debug")) System.out.println(String.format("field '%s' updated with '%s'", field.getName(), v == null ? "null" : v));
 							values.put(field.getName(), v);
+						}
 					}
 				} catch (ManagedException e) {
 					throw new DataException(e);
 				}
 			}
 		}
-		return drSource.lineVisited() > 0;
+		
+		if((drSource.lineVisited() - nbr) > 0) {
+			dataInBuffer = true;
+			++_lineVisited;
+			return true;
+		}
+		dataInBuffer = false;
+		return false;
 	}
 
 	@Override
@@ -289,13 +308,18 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 	}
 
 	@Override
-	public int lineVisited() { return drSource.lineVisited(); }
+	public int lineVisited() { return _lineVisited; }
 
 	@Override
 	public Integer getInteger(String fieldName) throws DataException {
 		Number res = (Number) values.get(fieldName);
 		if(res == null) return null;
 		return res.intValue();
+	}
+
+	@Override
+	public boolean dataInBuffer() {
+		return dataInBuffer;
 	}
 
 }

@@ -45,6 +45,8 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 	private List<Map<String, Value<?, XPOperand<?>>>> rows = new ArrayList<>();
 	private int rowIndex = -1;
 	
+	private boolean dataInBuffer = false;
+	
 	private List<BreakProperty> breakProperties = new ArrayList<>();
 	
 	public XLiteralDataReader(String name, ObjectValue<XPOperand<?>> config, DMUtils dmu) {
@@ -64,7 +66,7 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 					
 					String userMessage = bp.getVlUserMessage() == null ? null : bp.getVlUserMessage().asString();
 					
-					if(errMess == null) return false;
+					if(errMess == null) return dataInBuffer = false;
 					
 					throw new  DataUserException(errMess, userMessage);
 				}
@@ -74,13 +76,14 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 			if(e instanceof DataException) throw (DataException)e;
 			throw new DataException(e);
 		}
-		if(rowIndex + 1 >= rows.size()) return false;
+		if(rowIndex + 1 >= rows.size()) return dataInBuffer = false;
 		++rowIndex;
-		return true;
+		return dataInBuffer = true;
 	}
 
 	@Override
 	public String getString(String fieldName) throws DataException {
+		if(DMUtils.FIELD_DEBUG) System.out.println(String.format("Getting String field '%s' from reader '%s'", fieldName, name));
 		Field field = fields.get(fieldName);
 		if(field == null) return null;
 		
@@ -141,7 +144,11 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 		Value<?, XPOperand<?>> vl = rows.get(rowIndex).get(fieldName);
 		if(vl == null) return null;
 		
-		return vl.asDecimalValue().getValue();
+		try {
+			return vl.asDouble();
+		} catch (ManagedException e) {
+			throw new DataException(e);
+		}
 	}
 
 	@Override
@@ -297,6 +304,11 @@ public class XLiteralDataReader extends StandardDataReaderBase<Field> {
 	@Override
 	public XLiteralDataReader cloneDM() throws DataException {
 		return new XLiteralDataReader(name, config, dmu);
+	}
+
+	@Override
+	public boolean dataInBuffer() {
+		return dataInBuffer;
 	}
 
 }

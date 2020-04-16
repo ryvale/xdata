@@ -68,4 +68,10 @@ public class RMJSONArray extends ResponseManager {
 		return null;
 	}
 
+	@Override
+	public boolean isOpen() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

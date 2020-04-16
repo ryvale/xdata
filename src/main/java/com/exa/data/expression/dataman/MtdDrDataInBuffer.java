@@ -1,8 +1,8 @@
-package com.exa.data.expression.dmu;
+package com.exa.data.expression.dataman;
 
 import java.util.Vector;
 
-import com.exa.data.config.utils.DMUtils;
+import com.exa.data.DataReader;
 import com.exa.expression.OMMethod;
 import com.exa.expression.OMMethod.XPOrtMethod;
 import com.exa.expression.Type;
@@ -11,10 +11,10 @@ import com.exa.expression.eval.ClassesMan;
 import com.exa.expression.eval.XPEvaluator;
 import com.exa.utils.ManagedException;
 
-public class MtdStringToSQL extends OMMethod.XPOrtMethod<DMUtils, String> {
+public class MtdDrDataInBuffer extends OMMethod.XPOrtMethod<DataReader<?>, Boolean> {
 
-	public MtdStringToSQL() {
-		super("stringToSQL", 1);
+	public MtdDrDataInBuffer() {
+		super("dataInBuffer", 1);
 	}
 
 	@Override
@@ -24,21 +24,24 @@ public class MtdStringToSQL extends OMMethod.XPOrtMethod<DMUtils, String> {
 
 	@Override
 	public Type<?> type() {
-		return ClassesMan.T_STRING;
+		return ClassesMan.T_BOOLEAN;
 	}
 
 	@Override
-	protected XPOrtMethod<DMUtils, String>.XPMethodResult createResultOperand(XPOperand<DMUtils> object, Vector<XPOperand<?>> params) {
+	protected XPOrtMethod<DataReader<?>, Boolean>.XPMethodResult createResultOperand(XPOperand<DataReader<?>> object,
+			Vector<XPOperand<?>> params) {
+
 		return new XPMethodResult(object, params) {
 			
 			@Override
-			public String value(XPEvaluator eval) throws ManagedException {
+			public Boolean value(XPEvaluator eval) throws ManagedException {
+				DataReader<?> dm = object.value(eval);
 				
-				String p1 = params.get(0).asOPString().value(eval);
-				
-				return DMUtils.toSQLString(p1, "null");
+				return dm.dataInBuffer();
 			}
 		};
 	}
+
+	
 
 }

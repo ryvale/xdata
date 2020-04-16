@@ -17,6 +17,7 @@ public class LibreDataReader extends StandardDataReaderBase<Field> {
 	
 	private Value<?, ?> vlEOF = null;
 	
+	private boolean dataInBuffer = false;
 	
 	public LibreDataReader(String name, ObjectValue<XPOperand<?>> config, DMUtils dmu) {
 		super(name, dmu);
@@ -28,12 +29,12 @@ public class LibreDataReader extends StandardDataReaderBase<Field> {
 		try {
 			Boolean ores = vlEOF.asBoolean();
 			if(ores == null) throw new DataException("Invalid eof value (null)");
-			boolean res = ores.booleanValue();
-			if(res) return false;
+			
+			if(ores.booleanValue()) return dataInBuffer = false;
 			
 			++_lineVisited;
 			
-			return true;
+			return dataInBuffer = true;
 		} catch (ManagedException e) {
 			throw new DataException(e);
 		}
@@ -70,10 +71,7 @@ public class LibreDataReader extends StandardDataReaderBase<Field> {
 			}
 			
 			dmu.executeBeforeConnectionActions();
-			
-			/*for(DataReader<?> dr : dmu.getReaders().values()) {
-				dr.open();
-			}*/
+	
 			
 			return true;
 		} catch (ManagedException e) {
@@ -84,9 +82,6 @@ public class LibreDataReader extends StandardDataReaderBase<Field> {
 
 	@Override
 	public void close() throws DataException {
-		/*for(DataReader<?> dr : dmu.getReaders().values()) {
-			try { dr.close(); } catch (Exception e) { e.printStackTrace(); }
-		}*/
 		dmu.clean();
 		vlEOF = null;
 		
@@ -98,9 +93,9 @@ public class LibreDataReader extends StandardDataReaderBase<Field> {
 	}
 
 	@Override
-	public StandardDataReaderBase<Field> cloneDM() throws DataException {
-		// TODO Auto-generated method stub
-		return null;
+	public LibreDataReader cloneDM() throws DataException {
+		
+		return new LibreDataReader(name, config, dmu);
 	}
 
 	@Override
@@ -110,8 +105,12 @@ public class LibreDataReader extends StandardDataReaderBase<Field> {
 
 	@Override
 	public Integer getInteger(String fieldName) throws DataException {
-		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public boolean dataInBuffer() {
+		return dataInBuffer;
 	}
 
 }

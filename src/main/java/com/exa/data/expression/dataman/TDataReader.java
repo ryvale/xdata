@@ -30,6 +30,14 @@ public class TDataReader extends TObjectClass<DataReader<?>, DataMan> {
 		omDbl.addOperator(new MtdDrGetDouble());
 		methods.put("getDouble", new Method<>("getDouble", Double.class, omDbl));
 		
+		omDbl = new OMMethod<>("getXDouble", 3, OMOperandType.POST_OPERAND);
+		omDbl.addOperator(new MtdDrGetXDouble());
+		methods.put("getXDouble", new Method<>("getXDouble", Double.class, omDbl));
+		
+		omDbl = new OMMethod<>("safeDiv", 4, OMOperandType.POST_OPERAND);
+		omDbl.addOperator(new MtdDrSafeDiv());
+		methods.put("safeDiv", new Method<>("safeDivj", Double.class, omDbl));
+		
 		OMMethod<Integer> omInt = new OMMethod<>("getInteger", 2, OMOperandType.POST_OPERAND);
 		omInt.addOperator(new MtdDrGetInteger());
 		methods.put("getInteger", new Method<>("getInteger", Integer.class, omInt));
@@ -47,6 +55,8 @@ public class TDataReader extends TObjectClass<DataReader<?>, DataMan> {
 		methods.put("close", new Method<>("close", Boolean.class, omBl));
 		
 		properties.put("lineVisited", new Property<>("lineVisited", Integer.class, object -> object.lineVisited()));
+		
+		properties.put("dataInBuffer", new Property<>("dataInBuffer", Boolean.class, object -> object.dataInBuffer()));
 	}
 
 	@SuppressWarnings("unchecked")

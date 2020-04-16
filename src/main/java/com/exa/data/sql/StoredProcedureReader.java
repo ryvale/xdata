@@ -81,6 +81,8 @@ public class StoredProcedureReader  extends StandardDataReaderBase<DynamicField>
 
 	protected int _lineVisited = 0;
 	
+	private boolean dataInBuffer = false;
+	
 	private Connection connection = null;
 	
 	private CallableStatement spStatement;
@@ -93,10 +95,10 @@ public class StoredProcedureReader  extends StandardDataReaderBase<DynamicField>
 
 	@Override
 	public boolean next() throws DataException {
-		if(_lineVisited > 0) return false;
+		if(_lineVisited > 0) return dataInBuffer = false;
 		++_lineVisited;
 
-		return true;
+		return dataInBuffer = true;
 	}
 
 	@Override
@@ -369,6 +371,11 @@ public class StoredProcedureReader  extends StandardDataReaderBase<DynamicField>
 	@Override
 	public StoredProcedureReader cloneDM() throws DataException {
 		return new StoredProcedureReader(name, config, dmu);
+	}
+
+	@Override
+	public boolean dataInBuffer() {
+		return dataInBuffer;
 	}
 
 	

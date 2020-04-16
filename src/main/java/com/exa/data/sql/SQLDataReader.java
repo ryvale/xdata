@@ -46,7 +46,11 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 	private Boolean dataRead = null;
 	private ObjectValue<XPOperand<?>> config;
 	
+	private Boolean shouldNotOpen = null;
+	
 	private boolean valueFromCache = false;
+	
+	private boolean dataInBuffer = false;
 	
 	private Map<String, Object> cachedValues = new HashMap<>();
 	
@@ -63,9 +67,11 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 	
 	@Override
 	public boolean next() throws DataException {
+		if(shouldNotOpen) return false;
+		
 		try {
 			dataRead = rs.next();
-			if(!dataRead) return false;
+			if(!dataRead) return dataInBuffer = false;
 			++_lineVisited;
 			
 			valueFromCache = false;
@@ -75,7 +81,7 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 				}
 			}
 			valueFromCache = true;
-			return true;
+			return dataInBuffer = true;
 			
 		} catch (SQLException e) {
 			throw new DataException(e);
@@ -133,7 +139,7 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 	public boolean open() throws DataException {
 		
 		try {
-			
+	
 			from = config.getAttributAsString("from");
 			
 			if(from == null) {
@@ -226,6 +232,14 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 			
 			dmu.setShouldCloseConnection(shouldCloseConnection);
 			
+			Value<?, XPOperand<?>> openCondition = config.getAttribut("openCondition");
+			if(openCondition == null) shouldNotOpen = Boolean.FALSE;
+			else {
+				if(!"boolean".equals(openCondition.typeName())) throw new DataException(String.format("'openCondition' should a boolean expression in DataReader '%s'.", name));
+				shouldNotOpen = !openCondition.asBoolean();
+				if(shouldNotOpen) return false;
+			}
+			
 			connection = dmu.getSqlConnection();
 			
 			String sql = getSQL();
@@ -299,6 +313,11 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 		} catch (SQLException e) {
 			throw new DataException(e);
 		}
+	}
+
+	@Override
+	public boolean dataInBuffer() {
+		return dataInBuffer;
 	}
 
 }
