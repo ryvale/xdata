@@ -34,9 +34,13 @@ public class XadataApplicationTests extends TestCase {
 		DMUtils.FIELD_DEBUG = true;
 	}
 	
+	public static final String TEST_SERVER = "192.168.255.128";
+	
 	public XadataApplicationTests( String testName ) {
         super( testName );
     }
+	
+	public void test0() throws ManagedException {}
 	
 	public void testSmart1() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
@@ -47,7 +51,7 @@ public class XadataApplicationTests extends TestCase {
 		SQLServerDataSource ds = new SQLServerDataSource();
 		ds.setUser("sa");  
         ds.setPassword("e@mP0wer");  
-        ds.setServerName("192.168.255.128");  
+        ds.setServerName(TEST_SERVER);  
         ds.setPortNumber(1433);   
         ds.setDatabaseName("EAMPROD");
         
@@ -82,7 +86,7 @@ public class XadataApplicationTests extends TestCase {
 		SQLServerDataSource ds = new SQLServerDataSource();
 		ds.setUser("sa");  
         ds.setPassword("e@mP0wer");  
-        ds.setServerName("192.168.255.128");  
+        ds.setServerName(TEST_SERVER);  
         ds.setPortNumber(1433);
         ds.setDatabaseName("EAMPROD");
         
@@ -123,7 +127,7 @@ public class XadataApplicationTests extends TestCase {
 		SQLServerDataSource ds = new SQLServerDataSource();
 		ds.setUser("sa");  
         ds.setPassword("e@mP0wer");  
-        ds.setServerName("192.168.255.128");  
+        ds.setServerName(TEST_SERVER);  
         ds.setPortNumber(1433);
         ds.setDatabaseName("EAMPROD");
         
@@ -218,7 +222,7 @@ public class XadataApplicationTests extends TestCase {
 		SQLServerDataSource ds = new SQLServerDataSource();
 		ds.setUser("sa");  
         ds.setPassword("e@mP0wer");  
-        ds.setServerName("192.168.255.128");  
+        ds.setServerName(TEST_SERVER);  
         ds.setPortNumber(1433);
         ds.setDatabaseName("EAMPROD");
         
@@ -254,7 +258,7 @@ public class XadataApplicationTests extends TestCase {
 		SQLServerDataSource ds = new SQLServerDataSource();
 		ds.setUser("sa");  
         ds.setPassword("e@mP0wer");  
-        ds.setServerName("192.168.255.128");  
+        ds.setServerName(TEST_SERVER);  
         ds.setPortNumber(1433);
         ds.setDatabaseName("EAMPROD");
         
@@ -301,7 +305,7 @@ public class XadataApplicationTests extends TestCase {
 		dw.close();
 	}
 	
-	public void testDwFromStringSQL() throws ManagedException {
+	/*public void testDwFromStringSQL() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
 		
 		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
@@ -310,7 +314,7 @@ public class XadataApplicationTests extends TestCase {
 		SQLServerDataSource ds = new SQLServerDataSource();
 		ds.setUser("sa");  
         ds.setPassword("e@mP0wer");  
-        ds.setServerName("192.168.255.128");  
+        ds.setServerName(TEST_SERVER);  
         ds.setPortNumber(1433);
         ds.setDatabaseName("EAMPROD");
         
@@ -355,7 +359,7 @@ public class XadataApplicationTests extends TestCase {
         drSource.close();
         
 		dw.close();
-	}
+	}*/
 	
 	public void testStoredProcSQL() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
@@ -366,7 +370,7 @@ public class XadataApplicationTests extends TestCase {
 		SQLServerDataSource ds = new SQLServerDataSource();
 		ds.setUser("sa");  
         ds.setPassword("e@mP0wer");  
-        ds.setServerName("192.168.255.128");  
+        ds.setServerName(TEST_SERVER);  
         ds.setPortNumber(1433);
         ds.setDatabaseName("EAMPROD");
         
@@ -388,7 +392,7 @@ public class XadataApplicationTests extends TestCase {
         dr.close();
 	}
 	
-	/*public void testWS() throws ManagedException {
+/*	public void testWS() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
 		
 		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
@@ -422,8 +426,8 @@ public class XadataApplicationTests extends TestCase {
 		System.out.println(dr.getString("token"));
 		
 		dr.close();
-	}*/
-	
+	}
+*/	
 	public void testMapReader() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
 		
@@ -465,7 +469,7 @@ public class XadataApplicationTests extends TestCase {
 		SQLServerDataSource ds = new SQLServerDataSource();
 		ds.setUser("sa");  
         ds.setPassword("e@mP0wer");  
-        ds.setServerName("192.168.255.128");  
+        ds.setServerName(TEST_SERVER);  
         ds.setPortNumber(1433);
         ds.setDatabaseName("EAMPROD");
         

@@ -22,6 +22,7 @@ entities {
 			{ code "19079", downtime "1.5" },
 			{ code "19079", downtime "1,5" },
 			{ code "19079", downtime null },
+			{ code "19079", downtime "" },
 			{ code "19079" }
 		]
 	}

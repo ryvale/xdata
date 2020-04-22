@@ -19,6 +19,8 @@ public class TSQLDateFormatter extends DataFormatter<Date> {
 
 	@Override
 	public String toSQLFromString(String str, String format) {
+		if(str == null || "".equals(str.trim())) return "null";
+		
 		if(format == null) format = "120";
 		
 		return "CONVERT(datetime, '" + str + "'," + format + ")";
