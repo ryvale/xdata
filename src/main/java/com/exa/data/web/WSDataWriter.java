@@ -254,7 +254,7 @@ public class WSDataWriter extends StandardDataWriterBase<DynamicField> {
 
 	@Override
 	public DataWriter<DynamicField> cloneDM() throws DataException {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 

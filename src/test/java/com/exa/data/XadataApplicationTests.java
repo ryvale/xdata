@@ -42,7 +42,7 @@ public class XadataApplicationTests extends TestCase {
 	
 	public void test0() throws ManagedException {}
 	
-	public void testSmart1() throws ManagedException {
+	/*public void testSmart1() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
 		
 		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
@@ -74,10 +74,10 @@ public class XadataApplicationTests extends TestCase {
         assertFalse(new Boolean(dr.next()));
         
         dr.close();
-	}
+	}*/
 	
 	
-	public void testDMFGeneral() throws ManagedException {
+	/*public void testDMFGeneral() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
 		
 		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
@@ -169,7 +169,7 @@ public class XadataApplicationTests extends TestCase {
 		System.out.println(dr.getString("code2"));
 		
 		dr.close();
-	}
+	}*/
 	
 	/*public void testRealCase() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
@@ -213,7 +213,7 @@ public class XadataApplicationTests extends TestCase {
 		dr.close();
 	}*/
 	
-	public void testSQL() throws ManagedException {
+	/*public void testSQL() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
 		
 		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
@@ -303,7 +303,7 @@ public class XadataApplicationTests extends TestCase {
         drSource.close();
         
 		dw.close();
-	}
+	}*/
 	
 	/*public void testDwFromStringSQL() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
@@ -361,7 +361,7 @@ public class XadataApplicationTests extends TestCase {
 		dw.close();
 	}*/
 	
-	public void testStoredProcSQL() throws ManagedException {
+	/*public void testStoredProcSQL() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
 		
 		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
@@ -391,7 +391,7 @@ public class XadataApplicationTests extends TestCase {
         System.out.println(dr.getString("value"));
         dr.close();
 	}
-	
+	*/
 /*	public void testWS() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
 		
@@ -428,7 +428,7 @@ public class XadataApplicationTests extends TestCase {
 		dr.close();
 	}
 */	
-	public void testMapReader() throws ManagedException {
+/*	public void testMapReader() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
 		
 		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
@@ -571,6 +571,6 @@ public class XadataApplicationTests extends TestCase {
         
 		dr.close();
 		
-	}
+	}*/
 }
  

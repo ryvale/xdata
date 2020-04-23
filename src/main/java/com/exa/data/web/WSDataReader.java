@@ -9,6 +9,7 @@ import java.util.HashSet;
 //import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import com.exa.data.DataException;
 import com.exa.data.DynamicField;
@@ -22,6 +23,7 @@ import com.exa.utils.ManagedException;
 import com.exa.utils.values.ArrayValue;
 import com.exa.utils.values.BooleanValue;
 import com.exa.utils.values.CalculableValue;
+import com.exa.utils.values.IntegerValue;
 import com.exa.utils.values.ObjectValue;
 import com.exa.utils.values.StringValue;
 import com.exa.utils.values.Value;
@@ -64,6 +66,10 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 	
 	private Value<?, XPOperand<?>> vlParamsType;
 	private ObjectValue<XPOperand<?>> ovParams;
+	
+	private Value<?, XPOperand<?>> vlConnectTimeout;
+	private Value<?, XPOperand<?>> vlReadTimeout;
+	private Value<?, XPOperand<?>> vlWriteTimeout;
 	
 	protected int _lineVisited = 0;
 	
@@ -128,6 +134,18 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 			
 			vlResponseType = config.getRequiredAttribut("responseType");
 			if(!"string".equals(vlResponseType.typeName())) throw new DataException(String.format("The property '%s' of the entity %s should be a string", "responseType", name));
+			
+			vlConnectTimeout = config.getAttribut("connectTimeout");
+			if(vlConnectTimeout == null) vlConnectTimeout = new IntegerValue<>(15);
+			else if(!"int".equals(vlConnectTimeout.typeName())) throw new DataException(String.format("The property '%s' of the entity %s should be an int", "connectTimeout", name));
+			
+			vlReadTimeout = config.getAttribut("readTimeout");
+			if(vlReadTimeout == null) vlReadTimeout = new IntegerValue<>(30);
+			else if(!"int".equals(vlReadTimeout.typeName())) throw new DataException(String.format("The property '%s' of the entity %s should be an int", "readTimeout", name));
+			
+			vlWriteTimeout = config.getAttribut("writeTimeout");
+			if(vlWriteTimeout == null) vlWriteTimeout = new IntegerValue<>(30);
+			else if(!"int".equals(vlWriteTimeout.typeName())) throw new DataException(String.format("The property '%s' of the entity %s should be an int", "writeTimeout", name));
 			
 			if(config.containsAttribut("headers")) {
 				avHeaders =  config.getAttributAsArrayValue("headers");
@@ -240,6 +258,9 @@ public class WSDataReader extends StandardDataReaderBase<DynamicField> {
 			Request request = rb.build();
 			
 			OkHttpClient httpClient = new OkHttpClient();
+			httpClient.setConnectTimeout(vlConnectTimeout.asInteger(), TimeUnit.SECONDS);
+			httpClient.setWriteTimeout(vlWriteTimeout.asInteger(), TimeUnit.SECONDS);
+			httpClient.setReadTimeout(vlReadTimeout.asInteger(), TimeUnit.SECONDS);
 			
 			Response response = httpClient.newCall(request).execute();
 			
