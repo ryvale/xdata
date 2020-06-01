@@ -346,7 +346,7 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 			
 			for(String bcaName: mpBCA.keySet()) {
 				Action ac = subDmu.registerOnExecutionStartedAction(bcaName, mpBCA.get(bcaName));
-				if(ac == null) throw new ManagedException(String.format("the action %s in 'beforeExecution' for entity '%s' seem to be invalid", bcaName, name));
+				if(ac == null) throw new ManagedException(String.format("the action %s in 'onExecutionStarted' for entity '%s' seem to be invalid", bcaName, name));
 			}
 		}
 		

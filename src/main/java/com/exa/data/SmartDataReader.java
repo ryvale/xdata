@@ -80,9 +80,17 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		for(DataMan dm : afterMainActions.values()) dm.execute();
 		
 		for(DataMan dm : afterMainActionsReopen.values()) {
-			try { dm.close(); } catch(DataException e) { e.printStackTrace(); }
+			if(dm.isOpen()) try { dm.close(); } catch(DataException e) { e.printStackTrace(); }
 			
 			dm.open();
+			
+			DataReader<?> dr = dm.asDataReader();
+			dr.executeFieldsAction(
+				f -> {
+					if(fields.containsKey(f.getName())) return;
+					fields.put(f.getName(), f);
+				}
+			);
 			dm.execute();
 			//dm.close();
 		}
@@ -125,9 +133,9 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 	public boolean open() throws DataException {
 		Map<String, Value<?, XPOperand<?>>> mpConfig = config.getValue();
 		
+		if(mainReaders.size() == 0)
 		try {
 
-			
 			for(String drName :  mpConfig.keySet()) {
 				if("type".equals(drName) || Computing.PRTY_PARAMS.equals(drName) || "fields".equals(drName)  || "beforeConnection".equals(drName) || "break".equals(drName)  || "onExecutionStarted".equals(drName) || drName.startsWith("_")) continue;
 				
@@ -155,6 +163,13 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 				if(FLW_MAIN.equals(flow)) {
 					
 					mainReaders.put(drName, dr);
+					
+					dr.executeFieldsAction(
+						f -> {
+							if(fields.containsKey(f.getName())) return;
+							fields.put(f.getName(), f);
+						}
+					);
 					continue;
 				}
 				
@@ -165,6 +180,8 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 				
 				if(FLW_AFTER_MAIN_REOPEN.equals(flow)) {
 					afterMainActionsReopen.put(drName, dr);
+					
+					
 					continue;
 				}
 				
@@ -189,6 +206,13 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 			DataReader<?> dr = dm.asDataReader();
 			
 			dr.open();
+			
+			dr.executeFieldsAction(
+				f -> {
+					if(fields.containsKey(f.getName())) return;
+					fields.put(f.getName(), f);
+				}
+			);
 		}
 		
 		return dataInBuffer = true;
@@ -218,7 +242,7 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 			
 			for(String bcaName: mpBCA.keySet()) {
 				Action ac = subDmu.registerOnExecutionStartedAction(bcaName, mpBCA.get(bcaName));
-				if(ac == null) throw new ManagedException(String.format("the action %s in 'beforeExecution' for entity '%s' seem to be invalid", bcaName, name));
+				if(ac == null) throw new ManagedException(String.format("the action %s in 'onExecutionStarted' for entity '%s' seem to be invalid", bcaName, name));
 			}
 		}
 		
@@ -231,9 +255,8 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 
 	@Override
 	public void close() throws DataException {
-		/*for(DataReader<?> dr : dmu.getReaders().values()) {
-			try { dr.close(); } catch(DataException e) { e.printStackTrace();}
-		}*/
+		drIndex = null;
+		_lineVisited = 0;
 		
 		dmu.clean();
 		
@@ -272,6 +295,9 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		for(DataReader<?> dr : mainReaders.values()) {
 			try { dr.close(); } catch(DataException e) { e.printStackTrace();}
 		}
+		
+		
+		
 	}
 
 	@Override

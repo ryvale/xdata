@@ -34,26 +34,40 @@ public class PTWriterJSONRequestBody implements ParamTranslartor {
 			if(sv == null) {
 				CalculableValue<?, XPOperand<?>> cl = vl.asCalculableValue();
 				if(cl == null) {
-					ObjectValue<XPOperand<?>> ov = vl.asRequiredObjectValue();
+					ObjectValue<XPOperand<?>> ov = vl.asObjectValue();
 					
-					paramName = ov.getAttributAsString("name", property);
-					expType = ov.getAttributAsString("expType");
-					
-					if(expType == null || "reader".equals(expType)) {
-						readerField = ov.getAttributAsString("exp", property);
+					if(ov == null) {
+						if(vl.asBoolean() == null)
+							throw new DataException(String.format("The http param '%s' is not correctly set", property));
+						paramName = property;
+						expType = "reader";
+						readerField = property;
 						
 						Field f = reader.getField(readerField);
 						if(f == null) throw new DataException(String.format("The field '%s' is not found in the reader", readerField));
-						type = reader.getField(readerField).getType();
-					}
-					else if("value".equals(expType)) {
-						vl = ov.getRequiredAttribut("exp");
-						type = vl.typeName();
-						readerField = null;
+						
+						type = f.getType();
 					}
 					else {
-						type="string";
-						readerField = null;
+						paramName = ov.getAttributAsString("name", property);
+						expType = ov.getAttributAsString("expType");
+						
+						if(expType == null || "reader".equals(expType)) {
+							readerField = ov.getAttributAsString("exp", property);
+							
+							Field f = reader.getField(readerField);
+							if(f == null) throw new DataException(String.format("The field '%s' is not found in the reader", readerField));
+							type = reader.getField(readerField).getType();
+						}
+						else if("value".equals(expType)) {
+							vl = ov.getRequiredAttribut("exp");
+							type = vl.typeName();
+							readerField = null;
+						}
+						else {
+							type="string";
+							readerField = null;
+						}
 					}
 					
 				}

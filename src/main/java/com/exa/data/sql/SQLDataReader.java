@@ -43,6 +43,7 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 	
 	private Connection connection = null;
 	private ResultSet rs;
+	private Statement sqlStmt;
 	private Boolean dataRead = null;
 	private ObjectValue<XPOperand<?>> config;
 	
@@ -246,8 +247,8 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 			
 			if(debugOn) System.out.println(sql);
 			
-			Statement stmt = connection.createStatement();
-			rs = stmt.executeQuery(sql);
+			sqlStmt = connection.createStatement();
+			rs = sqlStmt.executeQuery(sql);
 			
 			return true;
 		}
@@ -259,10 +260,23 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 	@Override
 	public void close() throws DataException {
 		try {
+			if(rs != null)
+				try {
+					
+					rs.close();
+					
+					if(debugOn) System.out.println(String.format("Result set close for entity reader '%s'", name));
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			rs = null;
 			dmu.releaseSqlConnection();
 			dmu.clean();
 			cachedValues.clear();
 			connection = null;
+			dataInBuffer = false;
+			dataRead = null;
+			
 		} catch (ManagedException e) {
 			e.printStackTrace();
 		}

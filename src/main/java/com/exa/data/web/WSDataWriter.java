@@ -120,7 +120,34 @@ public class WSDataWriter extends StandardDataWriterBase<DynamicField> {
 				
 				vlParamsType  = ovParamsRoot.getAttribut("type");
 				
-				ovParams = ovParamsRoot.getRequiredAttributAsObjectValue("items");
+				ovParams = ovParamsRoot.getAttributAsObjectValue("items");
+				
+				if(ovParams == null) {
+					ovParams = new ObjectValue<>();
+					
+					Value<?, XPOperand<?>> vl = ovParamsRoot.getAttribut("itemsAsSourceFieldsExcept");
+					
+					Set<String> exceptions =  new HashSet<>();
+					
+					
+					if(vl != null) {
+						
+						ArrayValue<XPOperand<?>> avl = vl.asArrayValue();
+						if(avl == null)
+							throw new DataException(String.format("The property 'itemsAsSourceFields' of the entity %s should be an ary of string", name));
+						
+						for(Value<?, XPOperand<?>> ivl : vl.asArrayValue().getValue()) {
+							exceptions.add(ivl.asString());
+						}
+					}
+					drSource.executeFieldsAction(
+						f -> {
+							if(exceptions.contains(f.getName())) return;
+							ovParams.setAttribut(f.getName(), new BooleanValue<>(Boolean.TRUE));
+						}
+					);
+					
+				}
 			}
 			
 			ObjectValue<XPOperand<?>> ovFieldMan = config.getRequiredAttributAsObjectValue("fields");

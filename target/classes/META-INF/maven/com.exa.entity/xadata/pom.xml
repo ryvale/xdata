@@ -5,7 +5,7 @@
 	
 	<groupId>com.exa.entity</groupId>
 	<artifactId>xadata</artifactId>
-	<version>0.9</version>
+	<version>0.9.1</version>
 	<packaging>jar</packaging>
 
 	<name>xadata</name>

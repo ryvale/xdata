@@ -21,7 +21,6 @@ import com.exa.utils.values.ObjectValue;
 import com.exa.utils.values.StringValue;
 import com.exa.utils.values.Value;
 
-
 public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataReader.Field> {
 	public static class Field extends com.exa.data.Field {
 		protected Value<?, XPOperand<?>> valueExp;
@@ -78,6 +77,7 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 							if(field.getName().startsWith("debug")) System.out.println(String.format("field '%s' updated with '%s'", field.getName(), v == null ? "null" : v));
 							values.put(field.getName(), v);
 						}
+						
 					}
 				} catch (ManagedException e) {
 					throw new DataException(e);
@@ -120,23 +120,25 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 			
 			VariableContext variableContext = dmu.getVc();
 			
-			ObjectValue<XPOperand<?>> ovSource = config.getRequiredAttributAsObjectValue("source");
-			
-			String type = ovSource.getRequiredAttributAsString("type");
-			
-			DataManFactory dmf = dmFactories.get(type);
-			
-			if(dmf == null) throw new ManagedException(String.format("the type %s is unknown", type));
-			
-			String ds = ovSource.getAttributAsString("dataSource", dmf.getDefaultDataSource());
-			DMUtils sourceDmu = dmu.newSubDmu(ds);
-			dmuSetup.setup(dmu);
-			
-			drSource = dmf.getDataReader("source", ovSource, sourceDmu);
-			
-			variableContext.addVariable("sourceDr", DataReader.class, drSource);
-			
-			addSourceDRInVC(drSource);
+			if(drSource == null) {
+				ObjectValue<XPOperand<?>> ovSource = config.getRequiredAttributAsObjectValue("source");
+				
+				String type = ovSource.getRequiredAttributAsString("type");
+				
+				DataManFactory dmf = dmFactories.get(type);
+				
+				if(dmf == null) throw new ManagedException(String.format("the type %s is unknown", type));
+				
+				String ds = ovSource.getAttributAsString("dataSource", dmf.getDefaultDataSource());
+				DMUtils sourceDmu = dmu.newSubDmu(ds);
+				dmuSetup.setup(dmu);
+				
+				drSource = dmf.getDataReader("source", ovSource, sourceDmu);
+				
+				variableContext.addVariable("sourceDr", DataReader.class, drSource);
+				
+				addSourceDRInVC(drSource);
+			}
 			
 			ObjectValue<XPOperand<?>> fm = config.getAttributAsObjectValue("fields");
 			
@@ -292,14 +294,16 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 
 	@Override
 	public void close() throws DataException {
-		if(drSource != null) try { drSource.close();} catch(DataException e) { e.printStackTrace();}
-		
+		if(drSource != null) try { 
+			drSource.close(); /*dmu.getVc().releaseVariable("sourceDr");*/ /*drSource = null; */
+		} catch(DataException e) { e.printStackTrace();}
+		_lineVisited = 0; 
 		dmu.clean();
 	}
 
 	@Override
 	public boolean isOpen() {
-		return drSource != null;
+		return drSource != null && drSource.isOpen();
 	}
 
 	@Override
@@ -321,5 +325,7 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 	public boolean dataInBuffer() {
 		return dataInBuffer;
 	}
+	
+	
 
 }
