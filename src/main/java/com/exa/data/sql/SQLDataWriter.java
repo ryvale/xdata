@@ -37,7 +37,7 @@ import com.exa.utils.values.StringValue;
 import com.exa.utils.values.Value;
 
 public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
-	public static final  Logger LOG = LoggerFactory.getLogger(SQLDataWriter.class);
+	private static final  Logger LOG = LoggerFactory.getLogger(SQLDataWriter.class);
 	
 	public static boolean debugOn = false;
 	
@@ -150,7 +150,9 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 
 	@Override
 	public int update(DataReader<?> dr) throws DataException {
-		
+		if(StandardDataWriterBase.debugOn) {
+			LOG.info(String.format("START:update for writer '%s'", name));
+		}
 		try {
 			
 			String updateSQL = getSQL();
@@ -158,14 +160,20 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 			if(updateSQL == null) return 0;
 			
 			if(debugOn) System.out.println(updateSQL);
+			
 			PreparedStatement ps = connection.prepareStatement(updateSQL);
 			int res =  ps.executeUpdate();
 			ps.close();
 			
+			if(StandardDataWriterBase.debugOn) {
+				LOG.info(String.format("OK:update for writer '%s'", name));
+			}
 			return res;
 			
 			
 		} catch (ManagedException|SQLException e) {
+			LOG.info(String.format("FAIL:update for writer '%s' : '%s'", name, e.getMessage()));
+		
 			if(e instanceof DataException) throw (DataException)e;
 			throw new DataException(e);
 		}
@@ -173,27 +181,58 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 	}
 	
 	private String getSQL() throws ManagedException, SQLException {
+		if(StandardDataWriterBase.debugOn) {
+			LOG.info(String.format("START:get sql for writer '%s'", name));
+		}
+		
 		String table = vlTable.asRequiredString();
 		VariableContext variableContext = dmu.getVc();
+		if(StandardDataWriterBase.debugOn) {
+			LOG.info(String.format("DATA: table = '%s' for '%s'", table, name));
+		}
 		
 		boolean insertable = !vlNoInsert.asBoolean() && !preventInsertion;
 		
+		if(StandardDataWriterBase.debugOn) {
+			LOG.info(String.format("DATA: insertable = '%s' for '%s'", insertable, name));
+		}
+		
 		boolean updatable = !vlNoUpdate.asBoolean() && !preventUpdate && lstKey.size() != 0;
+		
+		if(StandardDataWriterBase.debugOn) {
+			LOG.info(String.format("DATA: updatable = '%s' for '%s'", updatable, name));
+		}
 		
 		if(insertable && updatable) {
 			
 			String where = getSQLWhere(table);
+			
+			if(StandardDataWriterBase.debugOn) {
+				LOG.info(String.format("DATA: where = '%s' for '%s'", where, name));
+			}
 			
 			DynamicField field = fields.get(lstKey.get(0).asRequiredString()) ;
 			
 			String recordSeekSql = "SELECT " + field.getVlName().asRequiredString() + " FROM " + table + " WHERE " + where;
 			if(debugOn) System.out.println(recordSeekSql);
 			
+			if(StandardDataWriterBase.debugOn) {
+				LOG.info(String.format("DATA: recordSeekSql = '%s' for '%s'", recordSeekSql, name));
+			}
+			
 			PreparedStatement ps = connection.prepareStatement(recordSeekSql);
 			ResultSet rs = ps.executeQuery();
 			
+			if(StandardDataWriterBase.debugOn) {
+				LOG.info(String.format("EXEC: recordSeekSql query execution OK. for '%s'", name));
+			}
+			
 			String updateSQL;
 			if(rs.next()) {
+				if(StandardDataWriterBase.debugOn) {
+					LOG.info(String.format("STATE: first next return data for '%s'", name));
+				}
+				
 				variableContext.assignOrDeclareVariable("updateMode", String.class, "update");
 				if(mustBreak()) {
 					ps.close();
@@ -206,6 +245,9 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 				updateSQL = getUpdateSQL(table, where);
 			}
 			else {
+				if(StandardDataWriterBase.debugOn) {
+					LOG.info(String.format("STATE: first next doesn't return data for '%s'", name));
+				}
 				variableContext.assignOrDeclareVariable("updateMode", String.class, "insert");
 				if(mustBreak()) {
 					ps.close();
@@ -213,12 +255,16 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 				}
 				if(preventInsertion) {
 					ps.close();
+					LOG.warn(String.format("OK-KO:get sql return because of 'preventInsertion' for writer '%s'", name));
 					return null;
 				}
 				updateSQL = getInsertSQL(table);
 			}
 			ps.close();
 			
+			if(StandardDataWriterBase.debugOn) {
+				LOG.info(String.format("OK:get sql for writer '%s'", name));
+			}
 			return updateSQL;
 		}
 		
@@ -291,20 +337,41 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 	}
 	
 	private boolean mustBreak() throws ManagedException {
+		if(StandardDataWriterBase.debugOn) {
+			LOG.info(String.format("START:mustBreak for writer '%s'", name));
+		}
+		
 		for(BreakProperty bp : breakProperties) {
 			if(bp.getVlCondition().asBoolean()) {
-				if(bp.getVlThrowError() == null) return true;
+				if(bp.getVlThrowError() == null) {
+					if(StandardDataWriterBase.debugOn) {
+						LOG.info(String.format("OK:mustBreak with value '%s' for writer '%s'", true, name));
+					}
+					return true;
+				}
 				
 				String errMess = bp.getVlThrowError().asString();
 				
 				String userMessage = bp.getVlUserMessage() == null ? null : bp.getVlUserMessage().asString();
 				
-				if(errMess == null) return false;
+				if(errMess == null) {
+					if(StandardDataWriterBase.debugOn) {
+						LOG.info(String.format("OK:mustBreak with value '%s' for writer '%s'", false, name));
+					}
+					return false;
+				}
+				
+				if(StandardDataWriterBase.debugOn) {
+					LOG.warn(String.format("OK-KO:mustBreak with message '%s' for writer '%s'", userMessage, name));
+				}
 				
 				throw new  DataUserException(errMess, userMessage);
 			}
 		}
 		
+		if(StandardDataWriterBase.debugOn) {
+			LOG.info(String.format("OK:mustBreak with value '%s' for writer '%s'", false, name));
+		}
 		return false;
 	}
 
@@ -316,21 +383,54 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 
 	
 	public String getInsertSQL(String table) throws ManagedException {
+		if(StandardDataWriterBase.debugOn) {
+			LOG.info(String.format("START:getInsertSQL for writer '%s'", name));
+		}
 		StringBuilder sbFields = new StringBuilder();
 		StringBuilder sbValues = new StringBuilder();
 		
 		String type = vlType.asRequiredString();
 		
 		for(DynamicField field : fields.values()) {
-			if(!field.getVlCondition().asBoolean()) continue;
+			if(!field.getVlCondition().asBoolean()) {
+				if(StandardDataWriterBase.debugOn) {
+					LOG.info(String.format("PROCESS:getInsertSQL skip field '%s' becasuse of condition for writer '%s'", field.getName(),  name));
+				}
+				continue;
+			}
 			
-			sbFields.append(", ").append(field.getVlName().asRequiredString());
+			if(StandardDataWriterBase.debugOn) {
+				LOG.info(String.format("PROCESS:getInsertSQL start manage field '%s' with expression type '%S' in writer '%s'", field.getName(), field.getExpType(),  name));
+			}
+			
+			String fn = field.getVlName().asRequiredString();
+			sbFields.append(", ").append(fn);
+			
+			if(StandardDataWriterBase.debugOn) {
+				LOG.info(String.format("PROCESS:getInsertSQL start managing field '%s' for writer '%s'", field.getName(),  name));
+			}
+			
 			boolean fromString = field.getFrom() == null ? false : ("string".equals(field.getFrom().asString()) ? true : false);
+			
+			if(StandardDataWriterBase.debugOn && fromString) {
+				LOG.info(String.format("DATA:getInsertSQL fromString = '%s' for writer '%s'", fromString,  name));
+			}
 			String fromFormat = field.getFromFormat() == null ? null : field.getFromFormat().asString();
+			if(StandardDataWriterBase.debugOn && (fromFormat != null)) {
+				LOG.info(String.format("DATA:getInsertSQL fromFormat = '%s' for writer '%s'", fromFormat,  name));
+			}
 			if("reader".equals(field.getExpType())) {
 				String ft = field.getType() + "-" + type;
 				DataFormatter<?> dataf = formatters.get(ft);
-				if(dataf == null) throw new ManagedException(String.format("No formatter provide for type '%s' for the field", ft, field.getName()));
+				
+				if(dataf == null) {
+					LOG.warn(String.format("KO:getInsertSQL no data formatter of type '%s' provided  in writer '%s'", ft, name));
+					throw new ManagedException(String.format("No formatter provide for type '%s' for the field", ft, field.getName()));
+				}
+				
+				if(StandardDataWriterBase.debugOn) {
+					LOG.info(String.format("PROCESS:getInsertSQL adding field value '%s' for writer '%s'", field.getName(),  name));
+				}
 				
 				sbValues.append(", ").append(fromString ? dataf.toSQLFromString(drSource.getString(field.getVlExp().asRequiredString()), fromFormat) : dataf.toSQLFormObject(drSource.getObject(field.getVlExp().asRequiredString())));
 				continue;
@@ -339,6 +439,13 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 			if("value".equals(field.getExpType())) {
 				String ft = field.getType() + "-" + type;
 				DataFormatter<?> dataf = formatters.get(ft);
+				
+				if(dataf == null) {
+					LOG.warn(String.format("KO:getInsertSQL no data formatter of type '%s' provided  in writer '%s'", ft, name));
+					throw new ManagedException(String.format("No formatter provide for type '%s' for the field", ft, field.getName()));
+				}
+				
+				
 				sbValues.append(", ").append(fromString ? dataf.toSQLFromString(field.getVlExp().asString(), fromFormat) : dataf.toSQLFormObject(field.getVlExp().getValue()));
 				continue;
 			}
@@ -349,9 +456,13 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 				continue;
 			}
 			
+			LOG.warn(String.format("KO:getInsertSQL The expresssion type '%s' for field '%s' is not managed in this context in writer '%s'", field.getExpType(), field.getName(), name));
 			throw new ManagedException(String.format("The expresssion type '%s' for field '%s' is not managed in this context", field.getExpType(), field.getName()));
 		}
 		
+		if(StandardDataWriterBase.debugOn) {
+			LOG.info(String.format("OK:getInsertSQL for writer '%s'", name));
+		}
 		return "INSERT INTO " + table + "(" + sbFields.substring(2)  + ") VALUES(" + sbValues.substring(2) + ")";
 	}
 	
@@ -503,9 +614,13 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 								expType = ov.getAttributAsString("expType");
 								
 								from = ov.getAttribut("from");
+								if(from != null)
+									if(!"string".equals(from.typeName())) throw new DataException(String.format("Bad attribute type 'from' for field '%s' in data man '%s'. The value should be string", fname, name));
+								fromFormat = ov.getAttribut("fromFormat");
+								if(fromFormat != null)
+									if(!"string".equals(fromFormat.typeName())) throw new DataException(String.format("Bad attribute type 'fromFormat' for field '%s' in data man '%s'. The value should be string", fname, name));
 								
 								if(from == null) {
-									fromFormat = ov.getAttribut("fromFormat");
 									//For ascendant compatibility
 									Value<?, XPOperand<?>> fromString = ov.getAttribut("fromString");
 									if(fromString != null) {
@@ -513,11 +628,10 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 										
 										if(fromString.asRequiredBoolean()) from = new StringValue<>("string");
 									}
+									
+									if(fromFormat != null) from = new StringValue<>("string");
+									
 								}
-								
-								
-								
-								//if(from == null) from = new BooleanValue<>(Boolean.FALSE);
 										
 								if(type == null) {
 									if(expType == null) {

@@ -1,6 +1,5 @@
 package com.exa.data;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -21,7 +20,7 @@ import com.exa.utils.values.StringValue;
 import com.exa.utils.values.Value;
 
 public class MapReader extends StandardDataReaderBase<DynamicField> {
-	public static final DateFormat DF_STD = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	public static final String DFSTR_STD = "yyyy-MM-dd HH:mm:ss";
 	
 	protected final static Set<String> expTypes = new HashSet<>();
 	
@@ -123,17 +122,42 @@ public class MapReader extends StandardDataReaderBase<DynamicField> {
 		
 		if(!"date".equals(field.getType()) && !"datetime".equals(field.getType())) throw new DataException(String.format("the field %s is not a date in a data reader %s", fieldName, name));
 
-		Object v = data.get(fieldName);
-		if(v == null) return null;
+		Object v;
+		String expType = field.getExpType();
 		
-		if("from-string".equals(field.getExpType())) {
-			try {
-				return DF_STD.parse((String)v);
-			} catch (ParseException e) {
-				throw new DataException(e);
+		try {
+			if("map".equals(expType)) {
+				v = data.get(field.getVlExp().asString());
 			}
+			else if("value".equals(expType)) {
+				v = field.getVlExp().asString();
+			}
+			else {
+				v = data.get(fieldName);
+			}
+			if(v == null) return null;
+			
+			if("from-string".equals(field.getExpType()) || field.getFrom() != null /*&& ("string".equals(field.getFrom().asString()))*/) {
+				String from = field.getFrom().asRequiredString();
+				
+				if("adjusted-string".equals(from) || "string".equals(from)) {
+					
+					if("adjusted-string".equals(from)) 
+						v=v.toString().substring(0, 19).replace('T', ' ');
+					
+				
+					String format = field.getFromFormat() == null ? DFSTR_STD : field.getFromFormat().asString();
+					return new SimpleDateFormat(format).parse((String)v);
+				}
+				else {
+					String format = field.getFromFormat() == null ? DFSTR_STD : field.getFromFormat().asString();
+					return new SimpleDateFormat(format).parse((String)v);
+				}
+			}
+			
+		} catch (ParseException|ManagedException e) {
+			throw new DataException(e);
 		}
-		
 		
 		return (Date)v;
 	}
@@ -178,7 +202,7 @@ public class MapReader extends StandardDataReaderBase<DynamicField> {
 					
 					Value<?, XPOperand<?>> vlField = mpFields.get(fname);
 					
-					Value<?, XPOperand<?>> vlExp, vlCondition;
+					Value<?, XPOperand<?>> vlExp, vlCondition, vlFrom = null, vlFromFormat = null;
 					String type, expType;
 					BooleanValue<?> blField = vlField.asBooleanValue();
 					if(blField == null) {
@@ -190,6 +214,21 @@ public class MapReader extends StandardDataReaderBase<DynamicField> {
 							type = ov.getAttributAsString("type", "string");
 							expType = ov.getAttributAsString("expType", "map");
 							vlCondition = ov.getAttribut("condition");
+							vlFrom = ov.getAttribut("from");
+							vlFromFormat = ov.getAttribut("fromFromat");
+							
+							if(vlExp == null) vlExp = new StringValue<>(fname);
+							
+							if(vlFrom != null) {
+								if(!"string".equals(vlFrom.typeName()))
+									throw new ManagedException(String.format("String expression expected as value of 'from' propertu for the entity %s", name));
+							}
+							
+							if(vlFromFormat != null) {
+								if(!"string".equals(vlFrom.typeName()))
+									throw new ManagedException(String.format("String expression expected as value of 'fromFormat' propertu for the entity %s", name));
+							}
+							
 							if(vlCondition == null) vlCondition = new BooleanValue<XPOperand<?>>(Boolean.TRUE);
 							else {
 								CalculableValue<?, XPOperand<?>> clCondition = vlCondition.asCalculableValue();
@@ -224,15 +263,18 @@ public class MapReader extends StandardDataReaderBase<DynamicField> {
 					field.setVlExp(vlExp);
 					field.setVlCondition(vlCondition);
 					
-					fields.put(fname, field);				}
+					field.setFrom(vlFrom);
+					
+					field.setFromFormat(vlFromFormat);
+					
+					fields.put(fname, field);				
+				}
 		 	}
 		 	else {
 		 		
 		 	}
 		 	dmu.executeBeforeConnectionActions();
-		 	/*for(DataReader<?> dr : dmu.getReaders().values()) {
-				dr.open();
-			}*/
+		 	
 		} catch (ManagedException e) {
 			throw new DataException(e);
 		}

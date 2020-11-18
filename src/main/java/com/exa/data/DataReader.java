@@ -3,6 +3,8 @@ package com.exa.data;
 import java.util.Date;
 
 public interface DataReader<_FIELD extends Field> extends DataMan {
+	public static boolean debugOn = false;
+	
 	_FIELD getField(String name);
 	
 	void executeFieldsAction(FieldAction<_FIELD> fa) throws DataException;

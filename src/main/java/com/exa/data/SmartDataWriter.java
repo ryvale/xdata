@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exa.data.MapReader.MapGetter;
 import com.exa.data.action.Action;
 import com.exa.data.config.DataManFactory;
@@ -28,6 +31,8 @@ import com.exa.utils.values.ObjectValue;
 import com.exa.utils.values.Value;
 
 public class SmartDataWriter extends StandardDWWithDSBase<Field> {
+	
+	public static final Logger LOG = LoggerFactory.getLogger(SmartDataWriter.class);
 	
 	protected static final String FLW_MAIN = "main";
 	
@@ -53,6 +58,9 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 
 	@Override
 	public int update(DataReader<?> dr) throws DataException {
+		if(debugOn) {
+			LOG.info(String.format("START:update for writer '%s'", name));
+		}
 		try {
 			if(mustBreak()) return 0;
 			for(DataWriter<?> dw :  mainDataWriters.values()) {	dw.open();	}
@@ -83,8 +91,12 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 			}
 			
 			for(DataWriter<?> dw :  mainDataWriters.values()) {	dw.close();	}
+			if(debugOn) {
+				LOG.info(String.format("OK:update for writer '%s'", name));
+			}
 		}
 		catch(ManagedException e) {
+			LOG.info(String.format("FAIL:update for writer '%s' : '%s'", name, e.getMessage()));
 			if(e instanceof DataException) throw (DataException)e;
 			throw new DataException(e);
 		}
@@ -115,6 +127,9 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 
 	@Override
 	public boolean open() throws DataException {
+		if(debugOn) {
+			LOG.info(String.format("START:open writer '%s'", name));
+		}
 		
 		Map<String, Value<?, XPOperand<?>>> mpConfig = config.getValue();
 		
@@ -188,7 +203,12 @@ public class SmartDataWriter extends StandardDWWithDSBase<Field> {
 			
 			opened = true;
 			
+			if(debugOn) {
+				LOG.info(String.format("OK:open writer '%s'", name));
+			}
+			
 		} catch (ManagedException e) {
+			LOG.warn(String.format("FAIL:open writer '%s' : %s'", name, e.getMessage()));
 			if(e instanceof DataException) throw (DataException)e;
 			throw new DataException(e);
 		}
