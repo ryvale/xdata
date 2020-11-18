@@ -3,7 +3,6 @@ package com.exa.data.expression.dataman;
 import java.util.Vector;
 
 import com.exa.data.DataReader;
-import com.exa.data.config.utils.DMUtils;
 import com.exa.expression.OMMethod;
 import com.exa.expression.Type;
 import com.exa.expression.XPOperand;

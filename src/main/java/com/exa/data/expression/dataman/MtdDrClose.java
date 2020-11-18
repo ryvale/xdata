@@ -6,7 +6,6 @@ import com.exa.data.DataMan;
 import com.exa.data.DataReader;
 import com.exa.expression.OMMethod;
 import com.exa.expression.OMMethod.XPOrtMethod;
-import com.exa.expression.OMMethod.XPOrtMethod.XPMethodResult;
 import com.exa.expression.Type;
 import com.exa.expression.XPOperand;
 import com.exa.expression.eval.ClassesMan;

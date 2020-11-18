@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.Vector;
 
 import com.exa.data.DataReader;
-import com.exa.data.config.utils.DMUtils;
 import com.exa.expression.OMMethod;
 import com.exa.expression.OMMethod.XPOrtMethod;
 import com.exa.expression.Type;
