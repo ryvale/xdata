@@ -467,24 +467,48 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 	}
 	
 	public String getUpdateSQL(String table, String where) throws ManagedException {
+		if(StandardDataWriterBase.debugOn) {
+			LOG.info(String.format("START:getUpdateSQL for writer '%s'", name));
+		}
 		
 		StringBuilder sbFields = new StringBuilder();
 		
 		String type = vlType.asRequiredString();
 		
 		for(DynamicField field : fields.values()) {
-			if(!field.getVlCondition().asBoolean()) continue;
+			if(StandardDataWriterBase.debugOn) {
+				LOG.info(String.format("INFO: processing field '%s' as '%s' manager type with field type '%s' .", field.getName(), field.getExpType(), type));
+			}
+			if(!field.getVlCondition().asBoolean()) {
+				if(StandardDataWriterBase.debugOn) {
+					LOG.info(String.format("SKIP: field '%s' because condition is false", field.getName()));
+				}
+				continue;
+			}
 			
 			boolean fromString = field.getFrom() == null ? false : ("string".equals(field.getFrom().asString()) ? true : false);
+			if(StandardDataWriterBase.debugOn) {
+				LOG.info(String.format("INFO: formString  is '%s'", fromString));
+			}
 			String fromFormat = field.getFromFormat() == null ? null : field.getFromFormat().asString();
-			
+			if(StandardDataWriterBase.debugOn) {
+				LOG.info(String.format("INFO: fromFormat  is '%s'", fromFormat));
+			}
 			if("reader".equals(field.getExpType())) {
 				String ft = field.getType() + "-" + type;
 				DataFormatter<?> dataf = formatters.get(ft);
-				if(dataf == null) throw new ManagedException(String.format("No formatter provide for type '%s' for the field", ft, field.getName()));
+				if(dataf == null) {
+					if(StandardDataWriterBase.debugOn) {
+						LOG.info(String.format("FAIL:getUpdateSQL for writer '%s' : No formatter provide for type '%s' of the field '%s'", name, ft, field.getName()));
+					}
+					throw new ManagedException(String.format("No formatter provide for type '%s' of the field '%s'", ft, field.getName()));
+				}
 				
 				sbFields.append(", ").
 					append(field.getVlName().asRequiredString()).append(" = ").append(fromString ?  dataf.toSQLFromString(drSource.getString(field.getVlExp().asRequiredString()), fromFormat) : dataf.toSQLFormObject(drSource.getObject(field.getVlExp().asRequiredString())));
+				if(StandardDataWriterBase.debugOn) {
+					LOG.info(String.format("INFO: SUCCESSFUL: field '%s' processed as '%s' type.", field.getName(), field.getExpType()));
+				}
 				continue;
 			}
 			
@@ -494,6 +518,9 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 				
 				sbFields.append(", ").
 					append(field.getVlName().asRequiredString()).append(" = ").append(fromString ? dataf.toSQLFromString(field.getVlExp().asString(), fromFormat) : dataf.toSQLFormObject(field.getVlExp().getValue()));
+				if(StandardDataWriterBase.debugOn) {
+					LOG.info(String.format("INFO: SUCCESSFUL: field '%s' processed as '%s' type.", field.getName(), field.getExpType()));
+				}
 				continue;
 			}
 			
@@ -501,16 +528,30 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 				
 				sbFields.append(", ").
 					append(field.getVlName().asRequiredString()).append(" = ").append(field.getVlExp().asRequiredString());
+				
+				if(StandardDataWriterBase.debugOn) {
+					LOG.info(String.format("INFO: SUCCESSFUL: field '%s' processed as '%s' type.", field.getName(), field.getExpType()));
+				}
 				continue;
 			}
 			
 			if("entire-sql".equals(field.getExpType())) {
 				
 				sbFields.append(", ").append(field.getVlExp().asRequiredString());
+				if(StandardDataWriterBase.debugOn) {
+					LOG.info(String.format("INFO: SUCCESSFUL: field '%s' processed as '%s' type.", field.getName(), field.getExpType()));
+				}
 				continue;
+			}
+			
+			if(StandardDataWriterBase.debugOn) {
+				LOG.info(String.format("INFO: NOT_MANAGED: field '%s' processed as '%s' type.", field.getName(), field.getExpType()));
 			}
 		}
 		
+		if(StandardDataWriterBase.debugOn) {
+			LOG.info(String.format("OK:getUpdateSQL for writer '%s'", name));
+		}
 		return "UPDATE " + table + " SET " + sbFields.substring(2)  + " WHERE "  + where;
 	}
 
