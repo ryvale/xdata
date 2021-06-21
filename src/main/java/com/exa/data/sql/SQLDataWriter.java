@@ -432,7 +432,22 @@ public class SQLDataWriter extends StandardDataWriterBase<DynamicField> {
 					LOG.info(String.format("PROCESS:getInsertSQL adding field value '%s' for writer '%s'", field.getName(),  name));
 				}
 				
-				sbValues.append(", ").append(fromString ? dataf.toSQLFromString(drSource.getString(field.getVlExp().asRequiredString()), fromFormat) : dataf.toSQLFormObject(drSource.getObject(field.getVlExp().asRequiredString())));
+				
+				if(fromString) {
+					String s = drSource.getString(field.getVlExp().asRequiredString());
+					if(StandardDataWriterBase.debugOn) {
+						LOG.info(String.format("PROCESS:getInsertSQL adding field value '%s'='%s' for writer '%s'", field.getName(), s==null ? "null" : s,  name));
+					}
+					sbValues.append(", ").append(dataf.toSQLFromString(s, fromFormat));
+				}
+				else {
+					Object o = drSource.getObject(field.getVlExp().asRequiredString());
+					if(StandardDataWriterBase.debugOn) {
+						LOG.info(String.format("PROCESS:getInsertSQL adding field value '%s'='%s' for writer '%s'", field.getName(), o==null ? "null": o.toString(),  name));
+					}
+					sbValues.append(", ").append(dataf.toSQLFormObject(o));
+				}
+				//sbValues.append(", ").append(fromString ? dataf.toSQLFromString(drSource.getString(field.getVlExp().asRequiredString()), fromFormat) : dataf.toSQLFormObject(drSource.getObject(field.getVlExp().asRequiredString())));
 				continue;
 			}
 			

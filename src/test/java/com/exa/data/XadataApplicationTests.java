@@ -428,7 +428,7 @@ public class XadataApplicationTests extends TestCase {
 		dr.close();
 	}
 */	
-/*	public void testMapReader() throws ManagedException {
+	public void testMapReader() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
 		
 		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
@@ -436,6 +436,7 @@ public class XadataApplicationTests extends TestCase {
 		Map<String, Object> mp = new HashMap<>();
 		mp.put("f1", "a");
 		mp.put("f2", "b");
+		mp.put("f3", "2021-05-29 17:24:21");
 		
         Map<String, XADataSource> dataSources = new HashMap<>();
         dataSources.put("default", new MapDataSource(() -> mp));
@@ -457,10 +458,14 @@ public class XadataApplicationTests extends TestCase {
 		
 		assertTrue("b".equals(dr.getString("f2")));
 		
+		System.out.println(dr.getObject("f3"));
+		
+		//assertTrue("b".equals(dr.getDate("f2")));
+		
 		dr.close();
 	}
 	
-	public void testMacroSP() throws ManagedException {
+	/*public void testMacroSP() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
 		
 		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));

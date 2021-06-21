@@ -61,6 +61,7 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 	@Override
 	public boolean next() throws DataException {
 		int nbr = drSource.lineVisited();
+		values.clear();
 		
 		while(drSource.next()) {
 			for(Field field : fields.values()) {
