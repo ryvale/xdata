@@ -69,8 +69,10 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 				currentMainReader.close();
 				currentMainReader = drIndex.next();
 				currentMainReader.open();
+				continue;
 			}
-			else currentMainReader.close();
+			
+			currentMainReader.close();
 			return dataInBuffer = false;
 		}
 		
