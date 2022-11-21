@@ -21,6 +21,8 @@ import com.exa.utils.values.Value;
 
 public class SmartDataReader extends StandardDRWithDSBase<Field> {
 	
+	//private static final Logger LOG = LoggerFactory.getLogger(StandardDRWithDSBase.class);
+	
 	protected static final String FLW_MAIN = "main";
 	
 	protected static final String FLW_AFTER_MAIN = "after-main-next";
@@ -48,6 +50,12 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 	
 	public SmartDataReader(String name, ObjectValue<XPOperand<?>> config, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUtils dmu, DMUSetup dmuSetup, MapGetter mapGetter) {
 		super(name, config, filesRepos, dataSources, defaultDataSource, dmu, dmuSetup);
+		
+		//DEBUG
+		/*LOG.info(String.format("Smart Data reader : %s", name));
+		for(String k : config.getValue().keySet()) {
+			LOG.info(String.format("Inner Data reader : %s", k));
+		}*/
 	}
 	
 	public void addMainDataReader(String name, DataReader<?> dataReader) throws DataException {
@@ -66,8 +74,13 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		
 		while(!currentMainReader.next()) {
 			if(drIndex.hasNext()) {
+				
 				currentMainReader.close();
 				currentMainReader = drIndex.next();
+				
+				//DEBUG
+				//LOG.info(String.format("NEXT inner Smart Data reader"));
+				
 				currentMainReader.open();
 				continue;
 			}
@@ -137,7 +150,7 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		
 		if(mainReaders.size() == 0)
 		try {
-
+			
 			for(String drName :  mpConfig.keySet()) {
 				if("type".equals(drName) || Computing.PRTY_PARAMS.equals(drName) || "fields".equals(drName)  || "beforeConnection".equals(drName) || "break".equals(drName)  || "onExecutionStarted".equals(drName) || drName.startsWith("_")) continue;
 				
