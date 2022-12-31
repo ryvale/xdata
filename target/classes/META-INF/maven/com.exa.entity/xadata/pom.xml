@@ -5,7 +5,7 @@
 	
 	<groupId>com.exa.entity</groupId>
 	<artifactId>xadata</artifactId>
-	<version>0.9.3</version>
+	<version>0.10</version>
 	<packaging>jar</packaging>
 
 	<name>xadata</name>
@@ -49,7 +49,7 @@
 		<dependency>
 			<groupId>com.exa.lang</groupId>
 			<artifactId>xalight</artifactId>
-			<version>1.0</version>
+			<version>1.1</version>
 		</dependency>
 		
 		<dependency>

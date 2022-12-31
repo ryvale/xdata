@@ -36,7 +36,7 @@ public class TDataReader extends TObjectClass<DataReader<?>, DataMan> {
 		
 		omDbl = new OMMethod<>("safeDiv", 4, OMOperandType.POST_OPERAND);
 		omDbl.addOperator(new MtdDrSafeDiv());
-		methods.put("safeDiv", new Method<>("safeDivj", Double.class, omDbl));
+		methods.put("safeDiv", new Method<>("safeDiv", Double.class, omDbl));
 		
 		OMMethod<Integer> omInt = new OMMethod<>("getInteger", 2, OMOperandType.POST_OPERAND);
 		omInt.addOperator(new MtdDrGetInteger());

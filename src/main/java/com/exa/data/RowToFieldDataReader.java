@@ -221,14 +221,17 @@ public class RowToFieldDataReader extends StandardDRWithDSBase<RowToFieldDataRea
 			
 			Value<?, XPOperand<?>> vl=mp.get(propertyName);
 			
-			ObjectValue<XPOperand<?>> vov = vl.asObjectValue();
-			if(vov != null) {
-				addSourceDRInVC(vov, thisDr, sourceDr);
+			CalculableValue<?, XPOperand<?>> cl = vl.asCalculableValue();
+			
+			if(cl == null) {
+				ObjectValue<XPOperand<?>> vov = vl.asObjectValue();
+				if(vov != null) {
+					addSourceDRInVC(vov, thisDr, sourceDr);
+					continue;
+				}
+				
 				continue;
 			}
-			
-			CalculableValue<?, XPOperand<?>> cl = vl.asCalculableValue();
-			if(cl == null) continue;
 			
 			XALCalculabeValue<?> xalCL = (XALCalculabeValue<?>) cl;
 			VariableContext vc = xalCL.getVariableContext();
