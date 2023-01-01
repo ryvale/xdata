@@ -119,17 +119,29 @@ public abstract class StandardDataReaderBase<_FIELD extends Field> implements Da
 		for(String propertyName : mp.keySet()) {
 			Value<?, XPOperand<?>> vl=mp.get(propertyName);
 			
-			ObjectValue<XPOperand<?>> vov = vl.asObjectValue();
-			if(vov != null) {
-				updateVariableContext(vov, evaluator, vc, parentVC);
-				continue;
+			
+			@SuppressWarnings("rawtypes")
+			CalculableValue cl = vl.asCalculableValue();
+			
+			if(cl != null) {
+				XALCalculabeValue<?> xalCL = (XALCalculabeValue<?>) cl;
+				if(xalCL.getVariableContext() == parentVC) xalCL.setVariableContext(vc);
+				//continue;
+			}
+			else {
+				ObjectValue<XPOperand<?>> vov = vl.asObjectValue();
+				if(vov != null) {
+					updateVariableContext(vov, evaluator, vc, parentVC);
+					continue;
+				}
 			}
 			
-			CalculableValue<?, XPOperand<?>> cl = vl.asCalculableValue();
+
+			/*CalculableValue<?, XPOperand<?>> cl = vl.asCalculableValue();
 			if(cl == null) continue;
 			
 			XALCalculabeValue<?> xalCL = (XALCalculabeValue<?>) cl;
-			if(xalCL.getVariableContext() == parentVC) xalCL.setVariableContext(vc);
+			if(xalCL.getVariableContext() == parentVC) xalCL.setVariableContext(vc);*/
 			
 			Set<VariableContext> vcs = evaluator.getRegisteredVariableContexts(Computing.VCC_CALLS);
 			
