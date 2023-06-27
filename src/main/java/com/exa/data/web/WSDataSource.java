@@ -5,7 +5,7 @@ import com.exa.data.XADataSource;
 import com.exa.data.config.utils.DataUserException;
 import com.exa.data.sql.XASQLDataSource;
 
-import com.squareup.okhttp.Request;
+import okhttp3.Request;
 
 public class WSDataSource implements XADataSource {
 	

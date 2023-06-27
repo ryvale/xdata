@@ -12,9 +12,9 @@ import com.exa.utils.values.CalculableValue;
 import com.exa.utils.values.ObjectValue;
 import com.exa.utils.values.StringValue;
 import com.exa.utils.values.Value;
-import com.squareup.okhttp.Request.Builder;
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.RequestBody;
+import okhttp3.Request.Builder;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 
 public class PTWriterJSONRequestBody implements ParamTranslartor {
 

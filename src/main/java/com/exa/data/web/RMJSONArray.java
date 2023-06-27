@@ -7,8 +7,8 @@ import org.json.JSONArray;
 
 import com.exa.data.DynamicField;
 import com.exa.utils.ManagedException;
-import com.squareup.okhttp.Request.Builder;
-import com.squareup.okhttp.Response;
+import okhttp3.Request.Builder;
+import okhttp3.Response;
 
 public class RMJSONArray extends ResponseManager {
 	

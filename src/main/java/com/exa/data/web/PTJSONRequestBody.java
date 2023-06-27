@@ -9,9 +9,12 @@ import com.exa.expression.XPOperand;
 import com.exa.utils.ManagedException;
 import com.exa.utils.values.ObjectValue;
 import com.exa.utils.values.Value;
-import com.squareup.okhttp.MediaType;
+import okhttp3.RequestBody;
+import okhttp3.MediaType;
+import okhttp3.Request.Builder;
+/*import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Request.Builder;
+import com.squareup.okhttp.Request.Builder;*/
 
 class PTJSONRequestBody implements ParamTranslartor {
 

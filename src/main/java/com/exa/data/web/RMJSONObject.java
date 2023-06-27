@@ -11,8 +11,8 @@ import com.exa.data.DataException;
 import com.exa.data.DynamicField;
 import com.exa.data.config.utils.DataUserException;
 import com.exa.utils.ManagedException;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class RMJSONObject extends ResponseManager {
 	

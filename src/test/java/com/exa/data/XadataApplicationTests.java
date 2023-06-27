@@ -23,6 +23,12 @@ import com.exa.utils.ManagedException;
 import com.exa.utils.io.FilesRepositories;
 import com.exa.utils.io.OSFileRepoPart;
 import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import java.io.IOException;
 
 import junit.framework.TestCase;
 

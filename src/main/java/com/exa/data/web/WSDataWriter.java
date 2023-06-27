@@ -24,10 +24,10 @@ import com.exa.utils.values.IntegerValue;
 import com.exa.utils.values.ObjectValue;
 import com.exa.utils.values.StringValue;
 import com.exa.utils.values.Value;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class WSDataWriter extends StandardDataWriterBase<DynamicField> {
 	public static  boolean debugOn = false;
@@ -244,13 +244,14 @@ public class WSDataWriter extends StandardDataWriterBase<DynamicField> {
 			
 			Request request = rb.build();
 			
-			OkHttpClient httpClient = new OkHttpClient();
-			httpClient.setConnectTimeout(vlConnectTimeout.asInteger(), TimeUnit.SECONDS);
-			httpClient.setWriteTimeout(vlWriteTimeout.asInteger(), TimeUnit.SECONDS);
-			httpClient.setReadTimeout(vlReadTimeout.asInteger(), TimeUnit.SECONDS);
+			OkHttpClient httpClient = new OkHttpClient.Builder()
+					.connectTimeout(vlConnectTimeout.asInteger(), TimeUnit.SECONDS)
+					.readTimeout(vlReadTimeout.asInteger(), TimeUnit.SECONDS)
+					.writeTimeout(vlWriteTimeout.asInteger(), TimeUnit.SECONDS)
+					.build();
 			
 			if(debugOn)  {
-				System.out.println("url :" + request.urlString());
+				System.out.println("url :" + request.url());
 				System.out.println("headers :" + request.headers());
 			}
 			

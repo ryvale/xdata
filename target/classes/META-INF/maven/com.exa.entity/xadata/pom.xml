@@ -5,7 +5,7 @@
 	
 	<groupId>com.exa.entity</groupId>
 	<artifactId>xadata</artifactId>
-	<version>0.10</version>
+	<version>0.11</version>
 	<packaging>jar</packaging>
 
 	<name>xadata</name>
@@ -33,13 +33,24 @@
 			<scope>test</scope>
 		</dependency>
 		
+		
+		
 		<!-- https://mvnrepository.com/artifact/com.squareup.okhttp/okhttp -->
+		<!-- 
 		<dependency>
 		    <groupId>com.squareup.okhttp</groupId>
 		    <artifactId>okhttp</artifactId>
 		    <version>2.7.5</version>
 		</dependency>
+		 -->
+		 
 		
+	    <dependency>
+	        <groupId>com.squareup.okhttp3</groupId>
+	        <artifactId>okhttp</artifactId>
+	    </dependency>
+
+
 		<dependency>
 			<groupId>com.exa.utils</groupId>
 			<artifactId>xautils</artifactId>
