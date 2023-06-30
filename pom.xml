@@ -5,7 +5,7 @@
 	
 	<groupId>com.exa.entity</groupId>
 	<artifactId>xadata</artifactId>
-	<version>0.11</version>
+	<version>0.12</version>
 	<packaging>jar</packaging>
 
 	<name>xadata</name>
@@ -88,7 +88,7 @@
 		<dependency>
 		    <groupId>org.json</groupId>
 		    <artifactId>json</artifactId>
-		    <version>20180813</version>
+		    <version>20230227</version>
 		</dependency>
 		
 		
