@@ -1,16 +1,8 @@
 package com.exa.data;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import com.exa.data.config.DMFLibre;
-import com.exa.data.config.DMFMap;
-import com.exa.data.config.DMFRowToField;
-import com.exa.data.config.DMFSpSql;
-import com.exa.data.config.DMFSql;
-import com.exa.data.config.DMFWebService;
-import com.exa.data.config.DMFXLiteral;
-import com.exa.data.config.DataManFactory;
+
 import com.exa.data.config.DataManFactory.DMUSetup;
 import com.exa.data.config.utils.DMUtils;
 
@@ -19,8 +11,6 @@ import com.exa.utils.io.FilesRepositories;
 import com.exa.utils.values.ObjectValue;
 
 public abstract class StandardDRWithDSBase<_FIELD extends Field> extends StandardDataReaderBase<_FIELD> {
-	
-	protected Map<String, DataManFactory> dmFactories = new HashMap<>();
 	
 	protected ObjectValue<XPOperand<?>> config;
 	
@@ -33,7 +23,7 @@ public abstract class StandardDRWithDSBase<_FIELD extends Field> extends Standar
 	protected DMUSetup dmuSetup;
 	
 	public StandardDRWithDSBase(String name, ObjectValue<XPOperand<?>> config, FilesRepositories filesRepos, Map<String, XADataSource> dataSources, String defaultDataSource, DMUtils dmu, DMUSetup dmuSetup) {
-		super(name, dmu);
+		super(name, dmu, true, filesRepos, dataSources, defaultDataSource, dmuSetup);
 		
 		this.config = config;
 		
@@ -42,7 +32,7 @@ public abstract class StandardDRWithDSBase<_FIELD extends Field> extends Standar
 		this.defaultDataSource = defaultDataSource;
 		this.dmuSetup = dmuSetup;
 		
-		dmFactories.put(DataManFactory.DMFN_LIBRE, new DMFLibre(filesRepos, dataSources, defaultDataSource, dmuSetup));
+		/*dmFactories.put(DataManFactory.DMFN_LIBRE, new DMFLibre(filesRepos, dataSources, defaultDataSource, dmuSetup));
 		
 		dmFactories.put(DataManFactory.DMFN_XLITERAL, new DMFXLiteral(filesRepos, dataSources, defaultDataSource, dmuSetup));
 		
@@ -66,7 +56,7 @@ public abstract class StandardDRWithDSBase<_FIELD extends Field> extends Standar
 		dmFactories.put("sql-oracle", dmf);
 		dmFactories.put("oracle", dmf);
 		
-		for(DataManFactory dmFactory : dmFactories.values()) { dmFactory.initialize(); }
+		for(DataManFactory dmFactory : dmFactories.values()) { dmFactory.initialize(); }*/
 	}
 
 

@@ -434,6 +434,18 @@ public class XadataApplicationTests extends TestCase {
 		dr.close();
 	}
 */	
+	
+	public void testSubDataReader() throws ManagedException {
+		FilesRepositories filesRepo = new FilesRepositories();
+		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
+		
+		Map<String, XADataSource> dataSources = new HashMap<>();
+		DataManFactory dmfGen = new DMFGeneral("smart", filesRepo, dataSources, "default", s -> {});//new DMFSmart(filesRepo, dataSources, "default");
+	    dmfGen.initialize();
+	    
+	    XALParser parser = new XALParser();
+	}
+	
 	public void testMapReader() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
 		

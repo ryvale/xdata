@@ -50,6 +50,15 @@ entities {
 			eof => this.lineVisited == 1
 		}
 		
+		_subDataReaders {
+			
+			subEntity0 {
+				type 'x-literal'
+				
+				rows [{ code '1' }]
+			}
+		}
+		
 	}
 	
 	entity2(dateField, start, end) {

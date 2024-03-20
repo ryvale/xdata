@@ -25,7 +25,7 @@ public interface DataReader<_FIELD extends Field> extends DataMan {
 	@Override
 	DataReader<_FIELD> cloneDM() throws DataException;
 	
-	DataReader<?> getSubDataReader(String name);
+	DataMan getSubDataMan(String name);
 	
 	int lineVisited();
 	
