@@ -30,7 +30,7 @@ import com.exa.utils.values.Value;
 public abstract class StandardDataReaderBase<_FIELD extends Field> implements DataReader<_FIELD> {
 	protected Map<String, _FIELD> fields = new LinkedHashMap<>();
 	
-	protected Map<String, DataMan> subDataMan = new LinkedHashMap<>();
+	protected Map<String, DataMan> subDataManagers = new LinkedHashMap<>();
 	
 	protected DataReader<?> parent;
 	
@@ -121,7 +121,7 @@ public abstract class StandardDataReaderBase<_FIELD extends Field> implements Da
 	
 	@Override
 	public DataMan getSubDataMan(String name) {
-		return subDataMan.get(name);
+		return subDataManagers.get(name);
 	}
 
 	@Override

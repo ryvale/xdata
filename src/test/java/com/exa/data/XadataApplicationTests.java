@@ -440,10 +440,52 @@ public class XadataApplicationTests extends TestCase {
 		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
 		
 		Map<String, XADataSource> dataSources = new HashMap<>();
-		DataManFactory dmfGen = new DMFGeneral("smart", filesRepo, dataSources, "default", s -> {});//new DMFSmart(filesRepo, dataSources, "default");
+		DataManFactory dmfGen = new DMFGeneral("smart", filesRepo, dataSources, "default", s -> {});
 	    dmfGen.initialize();
 	    
 	    XALParser parser = new XALParser();
+	    
+	    DCEvaluatorSetup evSetup = new DCEvaluatorSetup() {
+
+			@Override
+			public void setup(XPEvaluator evaluator) throws ManagedException {
+				OMMethod<String> omStr = new OMMethod<>("executeFlow", 2, OMOperandType.POST_OPERAND);
+				omStr.addOperator(new MtdExecuteFlow());
+				
+				T_DMU.register(omStr, String.class);
+				super.setup(evaluator);
+			}
+			
+			
+		};
+	    
+	    DataReader<?> dr = dmfGen.getDataReader(parser, "default:/sub-data-reader", evSetup);
+	    
+	    assertTrue(dr != null);
+	    
+	    
+	    dr.open();
+	    
+	    dr.next();
+	    
+	    assertTrue(dr.getString("code").equals("1"));
+	    
+	    DataMan dm = dr.getSubDataMan("subEntity1");
+	    assertTrue(dm != null);
+	    
+	    DataReader<?> subDr = dm.asDataReader();
+	    assertTrue(subDr != null);
+	    
+	    //subDr.open();
+	    
+	    subDr.next();
+	    
+	    assertTrue(subDr.getString("code").equals("s1"));
+	    
+	    //subDr.close();
+	    
+	    dr.close();
+        
 	}
 	
 	public void testMapReader() throws ManagedException {

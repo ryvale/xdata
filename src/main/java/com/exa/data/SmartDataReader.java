@@ -110,7 +110,7 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		}
 		
 		
-		for(DataMan dm : subDataMan.values()) {
+		for(DataMan dm : subDataManagers.values()) {
 			if(dm.isOpen()) try { dm.close(); } catch(DataException e) { e.printStackTrace(); }
 			
 			dm.open();
@@ -169,12 +169,12 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		ObjectValue<XPOperand<?>> subDrConfigs = vl.asObjectValue();
 		if(subDrConfigs == null) throw new ManagedException(String.format("The _subDataReaders should be object value in dr '%s'", name));
 		
-		Map<String, Value<?, XPOperand<?>>> mpConfig = config.getValue();
+		Map<String, Value<?, XPOperand<?>>> mpConfig = subDrConfigs.getValue();
 		
 		for(String drName :  mpConfig.keySet()) {
 			if("type".equals(drName) || Computing.PRTY_PARAMS.equals(drName) || drName.startsWith("_")) continue;
 			
-			ObjectValue<XPOperand<?>> ovDRConfig = config.getAttributAsObjectValue(drName);
+			ObjectValue<XPOperand<?>> ovDRConfig = subDrConfigs.getAttributAsObjectValue(drName);
 			
 			String type = ovDRConfig.getRequiredAttributAsString("type");
 			
@@ -192,7 +192,7 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 			vc.addVariable("this", DataReader.class, dr);
 			vc.addVariable("parentDr", DataReader.class, this);
 			
-			subDataMan.put(drName, dr);
+			subDataManagers.put(drName, dr);
 		}
 	}
 
@@ -339,6 +339,12 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 		_lineVisited = 0;
 		
 		dmu.clean();
+		
+		for(DataMan dm : subDataManagers.values()) {
+			try { 
+				dm.close(); 
+			} catch(DataException e) { e.printStackTrace();}
+		}
 		
 		for(DataMan dm : afterMainActions.values()) {
 			DataReader<?> dr = dm.asDataReader();
