@@ -138,6 +138,7 @@ public class SQLDataReader extends StandardDataReaderBase<Field> {
 
 	@Override
 	public boolean open() throws DataException {
+		if(debugOn) LOG.info(String.format("Opening '%s' Data Reader", name));
 		
 		try {
 	

@@ -6,6 +6,9 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exa.data.MapReader.MapGetter;
 import com.exa.data.action.Action;
 import com.exa.data.config.DataManFactory;
@@ -21,7 +24,7 @@ import com.exa.utils.values.Value;
 
 public class SmartDataReader extends StandardDRWithDSBase<Field> {
 	
-	//private static final Logger LOG = LoggerFactory.getLogger(StandardDRWithDSBase.class);
+	private static final Logger LOG = LoggerFactory.getLogger(StandardDRWithDSBase.class);
 	
 	protected static final String FLW_MAIN = "main";
 	
@@ -115,16 +118,8 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 			
 			dm.open();
 			
-			/*DataReader<?> dr = dm.asDataReader();
 			
-			
-			dr.executeFieldsAction(
-				f -> {
-					if(fields.containsKey(f.getName())) return;
-					fields.put(f.getName(), f);
-				}
-			);*/
-			dm.execute();
+			//dm.execute();
 			
 		}
 		
@@ -164,7 +159,10 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 	
 	private void __getSubDataReaders() throws ManagedException {
 		Value<?, XPOperand<?>> vl = config.getAttribut("_subDataReaders");
-		if(vl == null) return;
+		if(vl == null) {
+			if(debugOn) LOG.info(String.format("No '_subDataReaders' found in '%s'", name));
+			return;
+		}
 		
 		ObjectValue<XPOperand<?>> subDrConfigs = vl.asObjectValue();
 		if(subDrConfigs == null) throw new ManagedException(String.format("The _subDataReaders should be object value in dr '%s'", name));
@@ -193,11 +191,16 @@ public class SmartDataReader extends StandardDRWithDSBase<Field> {
 			vc.addVariable("parentDr", DataReader.class, this);
 			
 			subDataManagers.put(drName, dr);
+			
+			if(debugOn) LOG.info(String.format("sub data reader '%s' added in '%'", drName, name));
 		}
 	}
 
 	@Override
 	public boolean open() throws DataException {
+		
+		if(debugOn) LOG.info(String.format("Opening '%s' Data Reader", name));
+		
 		Map<String, Value<?, XPOperand<?>>> mpConfig = config.getValue();
 		
 		if(mainReaders.size() == 0)

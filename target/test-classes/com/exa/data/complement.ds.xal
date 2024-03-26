@@ -1,0 +1,23 @@
+references {}
+
+entities {
+
+    entity1 {
+
+        type 'smart'
+
+        main {
+            type 'x-literal'
+                    
+            rows [{ code '1' }]
+
+        }
+
+        complement {
+            type 'libre'
+
+            eof => parentDr.lineVisited >= 5
+        }
+    }
+
+}

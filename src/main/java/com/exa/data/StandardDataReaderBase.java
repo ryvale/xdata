@@ -9,6 +9,7 @@ import java.util.Set;
 import com.exa.data.config.DMFLibre;
 import com.exa.data.config.DMFMap;
 import com.exa.data.config.DMFRowToField;
+import com.exa.data.config.DMFSmart;
 import com.exa.data.config.DMFSpSql;
 import com.exa.data.config.DMFSql;
 import com.exa.data.config.DMFWebService;
@@ -63,6 +64,8 @@ public abstract class StandardDataReaderBase<_FIELD extends Field> implements Da
 		dmFactories.put(DataManFactory.DMFN_LIBRE, new DMFLibre(filesRepos, dataSources, defaultDataSource, dmuSetup));
 		
 		dmFactories.put(DataManFactory.DMFN_XLITERAL, new DMFXLiteral(filesRepos, dataSources, defaultDataSource, dmuSetup));
+		
+		dmFactories.put(DataManFactory.DMFN_SMART, new DMFSmart(filesRepos, dataSources, defaultDataSource, dmuSetup));
 		
 		dmFactories.put(DataManFactory.DMFN_ROW_TO_FIELD, new DMFRowToField(filesRepos, dataSources, defaultDataSource, dmuSetup));
 		

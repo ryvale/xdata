@@ -488,6 +488,50 @@ public class XadataApplicationTests extends TestCase {
         
 	}
 	
+	
+	public void testComplement() throws ManagedException {
+		FilesRepositories filesRepo = new FilesRepositories();
+		filesRepo.addRepoPart("default", new OSFileRepoPart("./src/test/java/com/exa/data"));
+		
+		Map<String, XADataSource> dataSources = new HashMap<>();
+		DataManFactory dmfGen = new DMFGeneral("smart", filesRepo, dataSources, "default", s -> {});
+	    dmfGen.initialize();
+	    
+	    XALParser parser = new XALParser();
+	    
+	    DCEvaluatorSetup evSetup = new DCEvaluatorSetup() {
+
+			@Override
+			public void setup(XPEvaluator evaluator) throws ManagedException {
+				OMMethod<String> omStr = new OMMethod<>("executeFlow", 2, OMOperandType.POST_OPERAND);
+				omStr.addOperator(new MtdExecuteFlow());
+				
+				T_DMU.register(omStr, String.class);
+				super.setup(evaluator);
+			}
+			
+			
+		};
+	    
+	    DataReader<?> dr = dmfGen.getDataReader(parser, "default:/complement", evSetup);
+	    
+	    assertTrue(dr != null);
+	    
+	    dr.open();
+	    
+	    dr.next();
+	    
+	    assertTrue("1".equals(dr.getString("code")));
+	    
+	    for(int i=1; i<5; i++) {
+	    	dr.next();
+	    }
+	    
+	    assertFalse(dr.next());
+	   
+	    dr.close();
+	}
+	
 	public void testMapReader() throws ManagedException {
 		FilesRepositories filesRepo = new FilesRepositories();
 		
