@@ -109,6 +109,7 @@ public abstract class DataManFactory {
 		
 		Computing computing = parser.getExecutedComputeObjectFormFile(drConfigFileName, evSetup, uiv);
 		
+		/*
 		XPEvaluator evaluator = computing.getXPEvaluator();
 		
 		ObjectValue<XPOperand<?>> ovRoot = computing.getResult();
@@ -159,6 +160,123 @@ public abstract class DataManFactory {
 		vc.addVariable("dmu", DMUtils.class, dmu);
 		
 		return dr;
+		*/
+		
+		DataReader<?> res = getDataReader(computing, drName, parts.length>1 ? parts[1] : null);
+		
+		return res;
+	}
+	
+	public Computing getRootComputing(XALParser parser, String drName, DCEvaluatorSetup evSetup) throws ManagedException {
+		
+		String parts[] = drName.split("[#]");
+		
+		String drConfigFileName = filesRepos.getName(parts[0] +".ds.xal");
+		
+		Computing computing = parser.getExecutedComputeObjectFormFile(drConfigFileName, evSetup, uiv);
+		
+		return computing;
+	}
+	
+	
+	public DataReader<?> getDataReader(Computing rootComputing, String drName, String entity) throws ManagedException {
+		//Computing computing = parser.getExecutedComputeObjectFormFile(drConfigFileName, evSetup, uiv);
+		
+		XPEvaluator evaluator = rootComputing.getXPEvaluator();
+		
+		ObjectValue<XPOperand<?>> ovRoot = rootComputing.getResult();
+		
+		ObjectValue<XPOperand<?>> ovEntities = ovRoot.getAttributAsObjectValue("entities");
+		
+		String name;
+		if(entity != null) {
+			name = entity;
+		}
+		else {
+			Map<String, Value<?, XPOperand<?>>> mapEntities = ovEntities.getValue();
+			if(mapEntities.size() == 0) throw new ManagedException(String.format("No entity found while seeking %s", drName));
+			Iterator<String> it = mapEntities.keySet().iterator();
+			name = null;
+			while(it.hasNext()) {
+				String curent = it.next();
+				if(Computing.PRTY_PARAMS.equals(curent)) continue;
+				name = curent;
+				break;
+			}
+			if(name == null) throw new ManagedException(String.format("No entity found while seeking %s", drName));
+		}
+		
+		VariableContext vc = new MapVariableContext(evaluator.getCurrentVariableContext());
+		
+		Map<String, ObjectValue<XPOperand<?>>> libOV = XALParser.getDefaultObjectLib(ovRoot);
+		
+		rootComputing.calculateInit();
+		
+		ObjectValue<XPOperand<?>> ovEntity = ovEntities.getAttributAsObjectValue(name);
+		if(ovEntity == null) 
+			ovEntity = rootComputing.object("entities." + name, vc);
+		else {
+
+			ovEntity =  rootComputing.object(ovEntity.clone(), vc, libOV);
+			
+		}
+		
+		String ds = ovEntity.getAttributAsString(name + ".dataSource");
+		DMUtils dmu = new DMUtils(dmuDmf, rootComputing, vc, dmuSetup, ds);
+		dmuSetup.setup(dmu);
+		
+		DataReader<?> dr = getDataReader(name, ovEntity, libOV, dmu);
+		
+		vc.addVariable("rootDr", DataReader.class, dr);
+		
+		vc.addVariable("dmu", DMUtils.class, dmu);
+		
+		return dr;
+	}
+	
+	public DataWriter<?> getDataWriter(Computing rooComputing, String drName, String entity, DCEvaluatorSetup evSetup, DataReader<?> drSource, boolean preventInsertion, boolean preventUpdate) throws ManagedException {
+		XPEvaluator evaluator = rooComputing.getXPEvaluator();
+		
+		ObjectValue<XPOperand<?>> ovRoot = rooComputing.getResult();
+		
+		
+		ObjectValue<XPOperand<?>> ovEntities = ovRoot.getAttributAsObjectValue("entities");
+		
+		rooComputing.calculateInit();
+		
+		String name;
+		if(entity != null) {
+			name = entity;
+		}
+		else {
+			Map<String, Value<?, XPOperand<?>>> mapEntities = ovEntities.getValue();
+			if(mapEntities.size() == 0) throw new ManagedException(String.format("No entity found while seeking %s", drName));
+			Iterator<String> it = mapEntities.keySet().iterator();
+			name = null;
+			while(it.hasNext()) {
+				String curent = it.next();
+				if(Computing.PRTY_PARAMS.equals(curent)) continue;
+				name = curent;
+				break;
+			}
+			if(name == null) throw new ManagedException(String.format("No entity found while seeking %s", drName));
+		}
+		
+		String ds = ovEntities.getPathAttributAsString(name + ".dataSource");
+		
+		VariableContext vc = new MapVariableContext(evaluator.getCurrentVariableContext());
+		DMUtils dmu = new DMUtils(dmuDmf, rooComputing, vc, dmuSetup, ds);
+		dmuSetup.setup(dmu);
+		
+		DataWriter<?> dm = getDataWriter(ovEntities, name, evaluator, vc, drSource, XALParser.getDefaultObjectLib(ovRoot), dmu, preventInsertion, preventUpdate);
+		
+		vc.addVariable("sourceDr", DataReader.class, drSource);
+		
+		vc.addVariable("rootDw", DataWriter.class, dm);
+		
+		vc.addVariable("dmu", DMUtils.class, dmu);
+		
+		return dm;
 	}
 	
 	public DataWriter<?> getDataWriter(XALParser parser, String drName, DCEvaluatorSetup evSetup, DataReader<?> drSource, boolean preventInsertion, boolean preventUpdate) throws ManagedException {

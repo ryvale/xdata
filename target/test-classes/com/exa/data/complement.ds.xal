@@ -20,4 +20,23 @@ entities {
         }
     }
 
+    entity2 {
+
+        type 'smart'
+
+        main {
+            type 'x-literal'
+                    
+            rows [{ code '2' }]
+
+        }
+
+        complement {
+            type 'libre'
+
+            eof => parentDr.lineVisited >= 5
+        }
+    }
+
+
 }
